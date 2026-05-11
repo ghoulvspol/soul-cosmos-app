@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soul Cosmos — Discover Your Multi-Dimensional Self</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 星空背景 -->
+  <canvas id="starfield"></canvas>
+
+  <!-- 导航 -->
+  <nav id="nav">
+    <div class="nav-logo">✦ Soul Cosmos</div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How It Works</a>
+      <a href="#pricing">Pricing</a>
+      <button class="btn-nav" onclick="scrollToSection('try')">Try Free</button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <div class="hero-badge">✦ The World's First East-Meets-West Personality AI</div>
+      <h1 class="hero-title">
+        Discover Your<br>
+        <span class="gradient-text">Multi-Dimensional</span><br>
+        Soul Profile
+      </h1>
+      <p class="hero-desc">
+        We fuse Western Astrology, Eastern Zi Wei Dou Shu, MBTI, Palm Reading,
+        Blood Type theory, and Social Psychology into one unified portrait of who you truly are.
+      </p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="scrollToSection('try')">
+          ✦ Generate My Soul Profile — Free
+        </button>
+        <button class="btn-ghost" onclick="scrollToSection('features')">
+          Learn More ↓
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num">6</span><span class="stat-label">Wisdom Systems</span></div>
+        <div class="stat"><span class="stat-num">AI</span><span class="stat-label">Fusion Engine</span></div>
+        <div class="stat"><span class="stat-num">∞</span><span class="stat-label">Unique Profiles</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="orbit-system">
+        <div class="orbit orbit-1"><div class="planet planet-1">♈</div></div>
+        <div class="orbit orbit-2"><div class="planet planet-2">☯</div></div>
+        <div class="orbit orbit-3"><div class="planet planet-3">🧠</div></div>
+        <div class="core-sphere">
+          <span>YOU</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="section-header">
+      <h2>Six Dimensions of Self</h2>
+      <p>Most apps give you one lens. We give you the full spectrum.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🌌</div>
+        <h3>Western Astrology</h3>
+        <p>Sun, Moon, Rising signs. Planetary aspects. House placements. The classic natal chart, deeply interpreted.</p>
+        <div class="feature-tag">Co-Star level depth</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">☯</div>
+        <h3>Zi Wei Dou Shu</h3>
+        <p>The Emperor's Astrology — 1,400 years of Chinese star mapping. Your life palace, career palace, and 14 main stars.</p>
+        <div class="feature-tag">Eastern wisdom</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>MBTI Integration</h3>
+        <p>Your cognitive function stack fused with your astrological profile. Not two separate reports — one unified insight.</p>
+        <div class="feature-tag">Psychology + Stars</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🖐️</div>
+        <h3>AI Palm & Face Reading</h3>
+        <p>Upload a photo. Our CV model reads your palm lines and facial structure. Ancient art meets modern AI.</p>
+        <div class="feature-tag">AI-powered</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🩸</div>
+        <h3>Blood Type Personality</h3>
+        <p>Japanese and Korean personality theory based on blood type. A surprisingly accurate behavioral predictor.</p>
+        <div class="feature-tag">East Asian science</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧬</div>
+        <h3>Social Psychology</h3>
+        <p>Big Five traits, attachment style, love language. Scientific frameworks fused with mystical ones.</p>
+        <div class="feature-tag">Evidence-based</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-it-works" id="how">
+    <div class="section-header">
+      <h2>How It Works</h2>
+      <p>From input to insight in 60 seconds.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Enter Your Birth Info</h3>
+        <p>Date, time, and location of birth. That's all we need to calculate your natal chart and Zi Wei chart.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Take the MBTI Test</h3>
+        <p>60 questions, 5 minutes. Or import your existing MBTI type if you already know it.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>AI Fuses Everything</h3>
+        <p>Our AI doesn't just list each system — it synthesizes them into one coherent, deeply personal portrait.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>Meet Your Soul</h3>
+        <p>Receive your Soul Profile: keywords, core traits, shadow side, life theme, and daily personalized insights.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Try It Section -->
+  <section class="try-section" id="try">
+    <div class="section-header">
+      <h2>Generate Your Soul Profile</h2>
+      <p>Free. No signup required. Takes 2 minutes.</p>
+    </div>
+
+    <div class="try-container">
+      <!-- Step 1: Birth Info -->
+      <div id="step1" class="try-step active">
+        <h3>✦ When and where were you born?</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Birth Date</label>
+            <input type="date" id="birthDate" value="1995-06-15">
+          </div>
+          <div class="form-group">
+            <label>Birth Time</label>
+            <input type="time" id="birthTime" value="14:30">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Birth City</label>
+          <select id="birthCity">
+            <option value="new_york">New York, USA</option>
+            <option value="los_angeles">Los Angeles, USA</option>
+            <option value="london">London, UK</option>
+            <option value="tokyo">Tokyo, Japan</option>
+            <option value="shanghai">Shanghai, China</option>
+            <option value="seoul">Seoul, Korea</option>
+            <option value="sydney">Sydney, Australia</option>
+            <option value="toronto">Toronto, Canada</option>
+          </select>
+        </div>
+        <button class="btn-primary" onclick="nextStep(2)">Continue →</button>
+      </div>
+
+      <!-- Step 2: MBTI -->
+      <div id="step2" class="try-step">
+        <h3>✦ What's your MBTI type?</h3>
+        <p class="step-desc">Select your type, or answer 5 quick questions below.</p>
+        <div class="mbti-grid" id="mbtiGrid">
+          <button class="mbti-btn" data-type="INTJ">INTJ<br><small>Architect</small></button>
+          <button class="mbti-btn" data-type="INTP">INTP<br><small>Logician</small></button>
+          <button class="mbti-btn" data-type="ENTJ">ENTJ<br><small>Commander</small></button>
+          <button class="mbti-btn" data-type="ENTP">ENTP<br><small>Debater</small></button>
+          <button class="mbti-btn" data-type="INFJ">INFJ<br><small>Advocate</small></button>
+          <button class="mbti-btn" data-type="INFP">INFP<br><small>Mediator</small></button>
+          <button class="mbti-btn" data-type="ENFJ">ENFJ<br><small>Protagonist</small></button>
+          <button class="mbti-btn" data-type="ENFP">ENFP<br><small>Campaigner</small></button>
+          <button class="mbti-btn" data-type="ISTJ">ISTJ<br><small>Logistician</small></button>
+          <button class="mbti-btn" data-type="ISFJ">ISFJ<br><small>Defender</small></button>
+          <button class="mbti-btn" data-type="ESTJ">ESTJ<br><small>Executive</small></button>
+          <button class="mbti-btn" data-type="ESFJ">ESFJ<br><small>Consul</small></button>
+          <button class="mbti-btn" data-type="ISTP">ISTP<br><small>Virtuoso</small></button>
+          <button class="mbti-btn" data-type="ISFP">ISFP<br><small>Adventurer</small></button>
+          <button class="mbti-btn" data-type="ESTP">ESTP<br><small>Entrepreneur</small></button>
+          <button class="mbti-btn" data-type="ESFP">ESFP<br><small>Entertainer</small></button>
+        </div>
+        <div class="step-actions">
+          <button class="btn-ghost" onclick="prevStep(1)">← Back</button>
+          <button class="btn-primary" id="mbtiNextBtn" onclick="generateProfile()" disabled>
+            Select your type to continue
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Result -->
+      <div id="step3" class="try-step">
+        <div id="loadingState" class="loading">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">Fusing 6 dimensions of your soul...</p>
+          <div class="loading-progress">
+            <div class="loading-bar" id="loadingBar"></div>
+          </div>
+          <div class="loading-steps" id="loadingSteps">
+            <div class="ls-item">Calculating natal chart...</div>
+            <div class="ls-item">Analyzing MBTI functions...</div>
+            <div class="ls-item">Mapping Zi Wei stars...</div>
+            <div class="ls-item">Fusing with AI...</div>
+            <div class="ls-item">Generating soul portrait...</div>
+          </div>
+        </div>
+
+        <div id="resultState" class="hidden">
+          <div class="result-card">
+            <div class="result-header">
+              <div class="result-badge">YOUR SOUL PROFILE</div>
+              <h2 class="result-keywords" id="resultKeywords"></h2>
+              <p class="result-portrait" id="resultPortrait"></p>
+            </div>
+
+            <div class="result-zodiac" id="resultZodiac"></div>
+
+            <div class="result-section">
+              <h3>✦ Core Traits</h3>
+              <div id="resultTraits" class="traits-list"></div>
+            </div>
+
+            <div class="result-section">
+              <h3>◐ Shadow Side</h3>
+              <div id="resultShadows" class="shadows-list"></div>
+            </div>
+
+            <div class="result-section">
+              <h3>✧ Life Theme</h3>
+              <p id="resultTheme" class="life-theme"></p>
+            </div>
+
+            <div class="result-section">
+              <h3>☀ Today's Insight</h3>
+              <p id="resultDaily" class="daily-insight"></p>
+            </div>
+
+            <div class="result-cta">
+              <button class="btn-primary" onclick="scrollToSection('pricing')">
+                Unlock Full Analysis — $9.99/mo
+              </button>
+              <p class="cta-sub">Or share your free profile with friends</p>
+              <button class="btn-ghost" onclick="shareProfile()">
+                ✦ Share Soul Profile
+              </button>
+            </div>
+          </div>
+
+          <button class="btn-ghost" style="margin-top:24px" onclick="resetProfile()">
+            ← Start Over
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="pricing" id="pricing">
+    <div class="section-header">
+      <h2>Choose Your Depth</h2>
+      <p>Start free. Go deeper when you're ready.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Free</div>
+        <div class="price-amount">$0</div>
+        <div class="price-period">forever</div>
+        <ul class="price-features">
+          <li>✦ Basic Soul Profile (3 keywords)</li>
+          <li>✦ One-sentence portrait</li>
+          <li>✦ 1 daily insight</li>
+          <li>✦ Share with friends</li>
+        </ul>
+        <button class="btn-outline" onclick="scrollToSection('try')">Get Started</button>
+      </div>
+      <div class="price-card price-card-featured">
+        <div class="price-badge">Most Popular</div>
+        <div class="price-name">Premium</div>
+        <div class="price-amount">$9.99</div>
+        <div class="price-period">/month</div>
+        <ul class="price-features">
+          <li>✦ Full 6-dimension analysis</li>
+          <li>✦ Unlimited compatibility reports</li>
+          <li>✦ Daily personalized insights</li>
+          <li>✦ Deep natal chart reading</li>
+          <li>✦ AI palm & face reading (v2)</li>
+          <li>✦ Zi Wei Dou Shu analysis (v2)</li>
+          <li>✦ Priority AI responses</li>
+        </ul>
+        <button class="btn-primary">Start 7-Day Free Trial</button>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Annual</div>
+        <div class="price-amount">$59.99</div>
+        <div class="price-period">/year (save 50%)</div>
+        <ul class="price-features">
+          <li>✦ Everything in Premium</li>
+          <li>✦ Yearly soul evolution report</li>
+          <li>✦ Exclusive content</li>
+          <li>✦ Early access to new features</li>
+        </ul>
+        <button class="btn-outline">Start 7-Day Free Trial</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-logo">✦ Soul Cosmos</div>
+      <p>The world's first East-meets-West personality AI.</p>
+      <div class="footer-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Contact</a>
+      </div>
+      <p class="footer-copy">© 2026 Soul Cosmos. Built with ❤️ and stardust.</p>
+    </div>
+  </footer>
+
+  <script src="js/astrology.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

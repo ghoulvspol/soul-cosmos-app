@@ -1,0 +1,275 @@
+/* ========== Base Reset ========== */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',sans-serif;
+  background:#0a0a1a;
+  color:#e2e8f0;
+  overflow-x:hidden;
+  line-height:1.6;
+}
+h1,h2,h3{font-family:'Playfair Display',serif;font-weight:600}
+
+/* ========== Starfield Canvas ========== */
+#starfield{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* ========== Nav ========== */
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 40px;
+  background:rgba(10,10,26,0.8);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.nav-logo{font-family:'Playfair Display',serif;font-size:20px;color:#d4a574;font-weight:700}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{color:#94a3b8;text-decoration:none;font-size:14px;transition:color .2s}
+.nav-links a:hover{color:#e2e8f0}
+.btn-nav{
+  padding:8px 20px;background:linear-gradient(135deg,#8b5cf6,#6366f1);
+  border:none;border-radius:8px;color:white;font-size:13px;font-weight:600;cursor:pointer;
+}
+
+/* ========== Hero ========== */
+.hero{
+  position:relative;z-index:1;
+  display:flex;align-items:center;justify-content:space-between;
+  min-height:100vh;padding:100px 60px 60px;
+  max-width:1200px;margin:0 auto;
+}
+.hero-content{flex:1;max-width:600px}
+.hero-badge{
+  display:inline-block;padding:6px 16px;
+  background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);
+  border-radius:20px;font-size:12px;color:#a78bfa;margin-bottom:24px;
+}
+.hero-title{
+  font-size:clamp(36px,5vw,56px);line-height:1.15;
+  color:#f8fafc;margin-bottom:20px;
+}
+.gradient-text{
+  background:linear-gradient(135deg,#d4a574,#f59e0b,#8b5cf6);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-desc{font-size:16px;color:#94a3b8;line-height:1.7;margin-bottom:32px}
+.hero-actions{display:flex;gap:12px;margin-bottom:40px;flex-wrap:wrap}
+.btn-primary{
+  padding:14px 32px;
+  background:linear-gradient(135deg,#d4a574,#b8860b);
+  border:none;border-radius:12px;color:#0a0a1a;
+  font-size:15px;font-weight:600;cursor:pointer;
+  transition:all .3s;box-shadow:0 4px 20px rgba(212,165,116,0.3);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(212,165,116,0.4)}
+.btn-ghost{
+  padding:14px 24px;background:transparent;
+  border:1px solid rgba(255,255,255,0.2);border-radius:12px;
+  color:#e2e8f0;font-size:14px;cursor:pointer;transition:all .2s;
+}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.05)}
+.btn-outline{
+  padding:14px 32px;background:transparent;
+  border:1px solid rgba(212,165,116,0.4);border-radius:12px;
+  color:#d4a574;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;
+}
+.btn-outline:hover{border-color:#d4a574;background:rgba(212,165,116,0.1)}
+
+.hero-stats{display:flex;gap:32px}
+.stat{text-align:center}
+.stat-num{display:block;font-size:28px;font-weight:700;color:#d4a574;font-family:'Playfair Display',serif}
+.stat-label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+
+/* Orbit Visual */
+.hero-visual{flex:0 0 400px;display:flex;align-items:center;justify-content:center}
+.orbit-system{position:relative;width:350px;height:350px}
+.orbit{
+  position:absolute;border:1px solid rgba(139,92,246,0.15);
+  border-radius:50%;animation:spin linear infinite;
+}
+.orbit-1{width:200px;height:200px;top:75px;left:75px;animation-duration:12s}
+.orbit-2{width:280px;height:280px;top:35px;left:35px;animation-duration:20s;animation-direction:reverse}
+.orbit-3{width:350px;height:350px;top:0;left:0;animation-duration:30s}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.planet{
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  font-size:14px;background:rgba(139,92,246,0.2);border-radius:50%;
+}
+.core-sphere{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:80px;height:80px;
+  background:radial-gradient(circle,#d4a574,#8b5cf6);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#0a0a1a;
+  box-shadow:0 0 60px rgba(139,92,246,0.4);
+}
+
+/* ========== Sections ========== */
+section{position:relative;z-index:1}
+.section-header{text-align:center;margin-bottom:48px}
+.section-header h2{font-size:36px;color:#f8fafc;margin-bottom:8px}
+.section-header p{font-size:16px;color:#94a3b8}
+
+/* ========== Features ========== */
+.features{padding:100px 40px;max-width:1100px;margin:0 auto}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feature-card{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+  border-radius:20px;padding:28px;transition:all .3s;
+}
+.feature-card:hover{background:rgba(255,255,255,0.06);transform:translateY(-4px)}
+.feature-icon{font-size:32px;margin-bottom:12px}
+.feature-card h3{font-size:18px;color:#f8fafc;margin-bottom:8px;font-family:'Inter',sans-serif;font-weight:600}
+.feature-card p{font-size:13px;color:#94a3b8;line-height:1.6}
+.feature-tag{
+  display:inline-block;margin-top:12px;padding:3px 10px;
+  background:rgba(139,92,246,0.1);border-radius:8px;
+  font-size:11px;color:#a78bfa;
+}
+
+/* ========== How It Works ========== */
+.how-it-works{padding:100px 40px;max-width:900px;margin:0 auto}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.step{text-align:center}
+.step-num{
+  font-family:'Playfair Display',serif;font-size:36px;font-weight:700;
+  color:rgba(139,92,246,0.3);margin-bottom:8px;
+}
+.step h3{font-size:16px;color:#f8fafc;margin-bottom:6px;font-family:'Inter',sans-serif;font-weight:600}
+.step p{font-size:13px;color:#64748b;line-height:1.5}
+
+/* ========== Try Section ========== */
+.try-section{padding:100px 40px;max-width:600px;margin:0 auto}
+.try-container{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+  border-radius:24px;padding:40px;
+}
+.try-step{display:none}
+.try-step.active{display:block;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.try-step h3{font-size:22px;color:#f8fafc;margin-bottom:8px}
+.step-desc{font-size:14px;color:#94a3b8;margin-bottom:20px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.form-group input,.form-group select{
+  width:100%;padding:12px 16px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px;color:#e2e8f0;font-size:14px;outline:none;
+}
+.form-group input:focus,.form-group select:focus{border-color:#8b5cf6}
+.step-actions{display:flex;gap:12px;margin-top:24px;justify-content:space-between}
+
+/* MBTI Grid */
+.mbti-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.mbti-btn{
+  padding:12px 8px;background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.1);border-radius:10px;
+  color:#e2e8f0;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;
+}
+.mbti-btn small{font-weight:400;font-size:10px;color:#64748b}
+.mbti-btn:hover{border-color:#8b5cf6;background:rgba(139,92,246,0.1)}
+.mbti-btn.selected{border-color:#d4a574;background:rgba(212,165,116,0.15);color:#d4a574}
+
+/* Loading */
+.loading{text-align:center;padding:40px 0}
+.loading-spinner{
+  width:40px;height:40px;margin:0 auto 16px;
+  border:3px solid rgba(139,92,246,0.2);border-top-color:#8b5cf6;
+  border-radius:50%;animation:spin 1s linear infinite;
+}
+.loading-text{font-size:14px;color:#94a3b8;margin-bottom:20px}
+.loading-progress{width:100%;height:4px;background:rgba(255,255,255,0.05);border-radius:2px;margin-bottom:24px}
+.loading-bar{height:100%;background:linear-gradient(90deg,#8b5cf6,#d4a574);border-radius:2px;width:0%;transition:width .5s}
+.loading-steps{text-align:left;max-width:250px;margin:0 auto}
+.ls-item{font-size:12px;color:#64748b;padding:4px 0;opacity:0.3;transition:opacity .3s}
+.ls-item.active{opacity:1;color:#a78bfa}
+
+/* Result */
+.result-card{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+  border-radius:24px;padding:40px;text-align:center;
+}
+.result-badge{
+  font-size:11px;color:#d4a574;letter-spacing:3px;text-transform:uppercase;
+  margin-bottom:16px;
+}
+.result-keywords{
+  font-size:32px;color:#f8fafc;margin-bottom:12px;
+  font-family:'Playfair Display',serif;
+}
+.result-portrait{font-size:16px;color:#94a3b8;line-height:1.7;margin-bottom:24px;font-style:italic}
+.result-zodiac{
+  display:flex;justify-content:center;gap:16px;margin-bottom:32px;flex-wrap:wrap;
+}
+.zodiac-tag{
+  padding:6px 14px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);
+  border-radius:20px;font-size:12px;color:#a78bfa;
+}
+.result-section{text-align:left;margin-bottom:24px}
+.result-section h3{font-size:16px;color:#d4a574;margin-bottom:12px;font-family:'Inter',sans-serif;font-weight:600}
+.traits-list,.shadows-list{display:flex;flex-direction:column;gap:10px}
+.trait-item,.shadow-item{
+  padding:12px 16px;background:rgba(255,255,255,0.03);border-radius:12px;
+  font-size:13px;color:#cbd5e1;line-height:1.5;
+}
+.trait-item strong,.shadow-item strong{color:#f8fafc}
+.life-theme,.daily-insight{
+  font-size:15px;color:#cbd5e1;line-height:1.7;
+  padding:16px;background:rgba(255,255,255,0.02);border-radius:12px;
+  border-left:3px solid #8b5cf6;
+}
+.result-cta{margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06)}
+.cta-sub{font-size:13px;color:#64748b;margin:12px 0}
+.hidden{display:none!important}
+
+/* ========== Pricing ========== */
+.pricing{padding:100px 40px;max-width:1000px;margin:0 auto}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+.price-card{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+  border-radius:20px;padding:32px;text-align:center;position:relative;
+}
+.price-card-featured{
+  border-color:#d4a574;background:rgba(212,165,116,0.05);
+  transform:scale(1.05);
+}
+.price-badge{
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  padding:4px 16px;background:linear-gradient(135deg,#d4a574,#b8860b);
+  border-radius:20px;font-size:11px;font-weight:600;color:#0a0a1a;
+}
+.price-name{font-size:14px;color:#94a3b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:2px}
+.price-amount{font-size:42px;font-weight:700;color:#f8fafc;font-family:'Playfair Display',serif}
+.price-period{font-size:13px;color:#64748b;margin-bottom:24px}
+.price-features{list-style:none;text-align:left;margin-bottom:24px}
+.price-features li{font-size:13px;color:#cbd5e1;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.price-card .btn-primary,.price-card .btn-outline{width:100%}
+
+/* ========== Footer ========== */
+.footer{
+  position:relative;z-index:1;
+  padding:60px 40px;text-align:center;
+  border-top:1px solid rgba(255,255,255,0.05);
+}
+.footer-logo{font-family:'Playfair Display',serif;font-size:20px;color:#d4a574;margin-bottom:8px}
+.footer p{font-size:13px;color:#64748b;margin-bottom:16px}
+.footer-links{display:flex;justify-content:center;gap:24px;margin-bottom:16px}
+.footer-links a{color:#94a3b8;text-decoration:none;font-size:13px}
+.footer-copy{font-size:11px;color:#475569}
+
+/* ========== Responsive ========== */
+@media(max-width:768px){
+  .hero{flex-direction:column;padding:100px 24px 60px;text-align:center}
+  .hero-visual{display:none}
+  .hero-actions{justify-content:center}
+  .hero-stats{justify-content:center}
+  .features-grid{grid-template-columns:1fr}
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .mbti-grid{grid-template-columns:repeat(4,1fr)}
+  .pricing-grid{grid-template-columns:1fr}
+  .price-card-featured{transform:none}
+  #nav{padding:12px 20px}
+  .nav-links a{display:none}
+  .form-row{grid-template-columns:1fr}
+}
