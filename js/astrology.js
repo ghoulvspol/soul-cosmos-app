@@ -30,15 +30,35 @@ const Astrology = {
 
   /**
    * 计算太阳星座（基于出生日期）
+   * 每个星座的起始日期（按时间顺序排列）
    */
   getSunSign(month, day) {
-    const dates = [
-      [1, 20], [2, 19], [3, 21], [4, 20], [5, 21], [6, 21],
-      [7, 23], [8, 23], [9, 23], [10, 23], [11, 22], [12, 22]
+    // [起始月, 起始日, 星座索引] 按日历顺序排列
+    const boundaries = [
+      [1, 20, 10],   // 水瓶座 1/20
+      [2, 19, 11],   // 双鱼座 2/19
+      [3, 21, 0],    // 白羊座 3/21
+      [4, 20, 1],    // 金牛座 4/20
+      [5, 21, 2],    // 双子座 5/21
+      [6, 22, 3],    // 巨蟹座 6/22
+      [7, 23, 4],    // 狮子座 7/23
+      [8, 23, 5],    // 处女座 8/23
+      [9, 23, 6],    // 天秤座 9/23
+      [10, 24, 7],   // 天蝎座 10/24
+      [11, 22, 8],   // 射手座 11/22
+      [12, 22, 9],   // 摩羯座 12/22
     ];
-    let index = month - 1;
-    if (day >= dates[month - 1][1]) index = month % 12;
-    return this.SIGNS[index];
+
+    // 从后往前找最后一个 <= 生日的边界
+    let signIndex = 9; // 默认摩羯座（1/1-1/19）
+    for (let i = boundaries.length - 1; i >= 0; i--) {
+      const [bm, bd, si] = boundaries[i];
+      if (month > bm || (month === bm && day >= bd)) {
+        signIndex = si;
+        break;
+      }
+    }
+    return this.SIGNS[signIndex];
   },
 
   /**
