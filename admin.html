@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soul Cosmos · AI 管理后台</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#0f0f1a;color:#e2e8f0;min-height:100vh}
+    .container{max-width:960px;margin:0 auto;padding:20px}
+    .header{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:24px}
+    .header h1{font-size:20px;color:#a78bfa;display:flex;align-items:center;gap:8px}
+    .header h1 span{font-size:24px}
+    .status-badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+    .status-ok{background:rgba(52,211,153,0.15);color:#34d399}
+    .status-err{background:rgba(255,69,58,0.15);color:#f87171}
+    .tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:0}
+    .tab{padding:10px 16px;font-size:13px;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+    .tab:hover{color:#e2e8f0}
+    .tab.active{color:#a78bfa;border-bottom-color:#a78bfa}
+    .panel{display:none;animation:fadeIn .3s ease}
+    .panel.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:20px;margin-bottom:16px}
+    .card-title{font-size:14px;font-weight:600;color:#a78bfa;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+    .form-group{margin-bottom:14px}
+    .form-group label{display:block;font-size:12px;color:#94a3b8;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
+    .form-group input,.form-group select,.form-group textarea{
+      width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+      border-radius:8px;color:#e2e8f0;font-size:13px;outline:none;font-family:inherit;
+    }
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#a78bfa}
+    .form-group textarea{min-height:120px;resize:vertical;line-height:1.6}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .btn{padding:10px 20px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+    .btn-primary{background:linear-gradient(135deg,#a78bfa,#6366f1);color:white}
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(167,139,250,0.3)}
+    .btn-danger{background:rgba(255,69,58,0.15);color:#f87171;border:1px solid rgba(255,69,58,0.2)}
+    .btn-danger:hover{background:rgba(255,69,58,0.25)}
+    .btn-sm{padding:6px 14px;font-size:12px}
+    .btn-row{display:flex;gap:8px;margin-top:16px}
+    .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+    .stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;text-align:center}
+    .stat-value{font-size:24px;font-weight:700;color:#a78bfa}
+    .stat-label{font-size:11px;color:#64748b;margin-top:2px}
+    .toggle{position:relative;display:inline-block;width:44px;height:24px}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.1);border-radius:12px;transition:.3s}
+    .toggle-slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s}
+    .toggle input:checked+.toggle-slider{background:#a78bfa}
+    .toggle input:checked+.toggle-slider:before{transform:translateX(20px)}
+    .model-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;cursor:pointer;transition:all .2s;margin-bottom:8px}
+    .model-card:hover{border-color:rgba(167,139,250,0.3);background:rgba(167,139,246,0.05)}
+    .model-card.selected{border-color:#a78bfa;background:rgba(167,139,250,0.1)}
+    .model-radio{width:16px;height:16px;border:2px solid rgba(255,255,255,0.2);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+    .model-card.selected .model-radio{border-color:#a78bfa}
+    .model-card.selected .model-radio::after{content:'';width:8px;height:8px;background:#a78bfa;border-radius:50%}
+    .model-name{font-size:14px;font-weight:600;color:#e2e8f0}
+    .model-desc{font-size:11px;color:#64748b;margin-top:2px}
+    .model-badge{margin-left:auto;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600}
+    .badge-fast{background:rgba(52,211,153,0.15);color:#34d399}
+    .badge-strong{background:rgba(167,139,250,0.15);color:#a78bfa}
+    .badge-cheap{background:rgba(251,191,36,0.15);color:#fbbf24}
+    .toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:1000;animation:slideIn .3s ease}
+    .toast-ok{background:rgba(52,211,153,0.9);color:white}
+    .toast-err{background:rgba(255,69,58,0.9);color:white}
+    @keyframes slideIn{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
+    .log-entry{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px;font-family:monospace;display:flex;gap:8px}
+    .log-time{color:#64748b;flex-shrink:0}
+    .log-ok{color:#34d399}
+    .log-err{color:#f87171}
+    .log-info{color:#94a3b8}
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1><span>✦</span> Soul Cosmos 管理后台</h1>
+    <div>
+      <span class="status-badge status-ok" id="statusBadge">● 已连接</span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('ai')">🤖 AI 配置</div>
+    <div class="tab" onclick="switchTab('features')">⚡ 功能开关</div>
+    <div class="tab" onclick="switchTab('prompts')">📝 Prompt 模板</div>
+    <div class="tab" onclick="switchTab('stats')">📊 数据统计</div>
+    <div class="tab" onclick="switchTab('logs')">📋 运行日志</div>
+  </div>
+
+  <!-- Panel: AI 配置 -->
+  <div class="panel active" id="panel-ai">
+    <div class="card">
+      <div class="card-title">🤖 AI 模型选择</div>
+      <div id="modelList">
+        <div class="model-card selected" onclick="selectModel(this,'xiaomi/mimo-v2.5-pro')">
+          <div class="model-radio"></div>
+          <div>
+            <div class="model-name">MiMo v2.5 Pro</div>
+            <div class="model-desc">小米最强模型，1T参数，推理能力强</div>
+          </div>
+          <div class="model-badge badge-strong">推荐</div>
+        </div>
+        <div class="model-card" onclick="selectModel(this,'xiaomi/mimo-v2-flash')">
+          <div class="model-radio"></div>
+          <div>
+            <div class="model-name">MiMo v2 Flash</div>
+            <div class="model-desc">轻量快速版，响应速度快3-5倍</div>
+          </div>
+          <div class="model-badge badge-fast">快速</div>
+        </div>
+        <div class="model-card" onclick="selectModel(this,'xiaomi/mimo-v2-pro')">
+          <div class="model-radio"></div>
+          <div>
+            <div class="model-name">MiMo v2 Pro</div>
+            <div class="model-desc">上一代旗舰，性价比高</div>
+          </div>
+          <div class="model-badge badge-cheap">经济</div>
+        </div>
+        <div class="model-card" onclick="selectModel(this,'xiaomi/mimo-v2.5')">
+          <div class="model-radio"></div>
+          <div>
+            <div class="model-name">MiMo v2.5</div>
+            <div class="model-desc">v2.5标准版，平衡速度和质量</div>
+          </div>
+          <div class="model-badge badge-fast">均衡</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔑 API 配置</div>
+      <div class="form-group">
+        <label>Mify API Key</label>
+        <input type="password" id="apiKey" placeholder="sk-..." value="">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Max Tokens</label>
+          <input type="number" id="maxTokens" value="2500">
+        </div>
+        <div class="form-group">
+          <label>Temperature</label>
+          <input type="number" id="temperature" value="0.8" step="0.1" min="0" max="2">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="testConnection()">🔗 测试连接</button>
+        <button class="btn btn-primary" onclick="saveAIConfig()">💾 保存配置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel: 功能开关 -->
+  <div class="panel" id="panel-features">
+    <div class="card">
+      <div class="card-title">⚡ 核心功能</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:14px;font-weight:600">Demo 模式</div><div style="font-size:11px;color:#64748b">无后端时使用本地 mock 数据</div></div>
+          <label class="toggle"><input type="checkbox" id="featDemo" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:14px;font-weight:600">付费模式</div><div style="font-size:11px;color:#64748b">显示付费徽章，隐藏免费限制</div></div>
+          <label class="toggle"><input type="checkbox" id="featPremium" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:14px;font-weight:600">推理过程展示</div><div style="font-size:11px;color:#64748b">显示 AI 的多步推理链</div></div>
+          <label class="toggle"><input type="checkbox" id="featReasoning" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:14px;font-weight:600">八字排盘</div><div style="font-size:11px;color:#64748b">调用 Python 八字引擎</div></div>
+          <label class="toggle"><input type="checkbox" id="featBazi" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:14px;font-weight:600">关系圈分析</div><div style="font-size:11px;color:#64748b">多人关系洞察功能</div></div>
+          <label class="toggle"><input type="checkbox" id="featCircle" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:14px;font-weight:600">风水分析</div><div style="font-size:11px;color:#64748b">住宅/办公室风水布局</div></div>
+          <label class="toggle"><input type="checkbox" id="featFengshui" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:14px;font-weight:600">面相手相</div><div style="font-size:11px;color:#64748b">AI 照片分析功能</div></div>
+          <label class="toggle"><input type="checkbox" id="featPhoto" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:14px;font-weight:600">场景建议</div><div style="font-size:11px;color:#64748b">每周职场/感情/成长建议</div></div>
+          <label class="toggle"><input type="checkbox" id="featScenes" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:14px;font-weight:600">反馈系统</div><div style="font-size:11px;color:#64748b">准/不准/收藏反馈收集</div></div>
+          <label class="toggle"><input type="checkbox" id="featFeedback" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><div style="font-size:14px;font-weight:600">中英文切换</div><div style="font-size:11px;color:#64748b">支持中英文界面和AI输出</div></div>
+          <label class="toggle"><input type="checkbox" id="featI18n" checked><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveFeatures()">💾 保存开关状态</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel: Prompt 模板 -->
+  <div class="panel" id="panel-prompts">
+    <div class="card">
+      <div class="card-title">📝 灵魂画像 Prompt</div>
+      <div class="form-group">
+        <label>System Prompt</label>
+        <textarea id="promptSystem" rows="6">You are SOUL COSMOS — a master personality analyst who synthesizes insights from Western Astrology, Eastern Zi Wei Dou Shu, BaZi, I Ching, MBTI, and Social Psychology. ALL OUTPUT MUST BE IN the requested language. Respond with valid JSON only.</textarea>
+      </div>
+      <div class="form-group">
+        <label>用户 Prompt 模板（变量：{natalChart}, {mbti}, {ziwei}, {iching}, {bazi}, {gender}, {lang}）</label>
+        <textarea id="promptUser" rows="8">Generate a soul profile for this person:
+
+GENDER: {gender}
+WESTERN NATAL CHART: {natalChart}
+MBTI TYPE: {mbti}
+BAZI: {bazi}
+ZI WEI DOU SHU: {ziwei}
+I CHING: {iching}
+
+Fuse ALL systems into ONE coherent description. Make the person feel "this is SO me."</textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="savePrompts()">💾 保存 Prompt</button>
+        <button class="btn btn-danger btn-sm" onclick="resetPrompts()">🔄 恢复默认</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📅 每日洞察 Prompt</div>
+      <div class="form-group">
+        <textarea id="promptDaily" rows="4">Write a daily insight for this person based on their soul profile. Style: punchy, personal, 2-3 sentences. Reference their specific astrological placements. ALL OUTPUT IN {lang}.</textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveDailyPrompt()">💾 保存</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👥 关系分析 Prompt</div>
+      <div class="form-group">
+        <textarea id="promptCompat" rows="4">Analyze compatibility between two people based on their natal charts and MBTI types. Give score (0-100), strengths, challenges, and practical advice. ALL OUTPUT IN {lang}.</textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveCompatPrompt()">💾 保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel: 数据统计 -->
+  <div class="panel" id="panel-stats">
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-label">总生成次数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statToday">0</div>
+        <div class="stat-label">今日生成</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statFeedback">0</div>
+        <div class="stat-label">反馈总数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statAccuracy">--</div>
+        <div class="stat-label">准确率</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 反馈分析</div>
+      <div id="feedbackChart" style="padding:20px;text-align:center;color:#64748b">
+        加载中...
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔧 数据管理</div>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-sm" onclick="exportData()">📥 导出数据</button>
+        <button class="btn btn-danger btn-sm" onclick="clearData()">🗑️ 清除所有数据</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel: 运行日志 -->
+  <div class="panel" id="panel-logs">
+    <div class="card">
+      <div class="card-title">📋 最近日志</div>
+      <div id="logList" style="max-height:400px;overflow-y:auto">
+        <div class="log-entry"><span class="log-time">--:--</span><span class="log-info">等待日志...</span></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-sm" onclick="refreshLogs()">🔄 刷新</button>
+        <button class="btn btn-danger btn-sm" onclick="clearLogs()">🗑️ 清除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+let currentModel = 'xiaomi/mimo-v2.5-pro';
+let logs = [];
+
+// ========== Tab 切换 ==========
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+
+  if (name === 'stats') loadStats();
+  if (name === 'logs') refreshLogs();
+}
+
+// ========== Toast 提示 ==========
+function toast(msg, type = 'ok') {
+  const el = document.createElement('div');
+  el.className = 'toast toast-' + type;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ========== AI 配置 ==========
+function selectModel(el, model) {
+  document.querySelectorAll('.model-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  currentModel = model;
+}
+
+async function testConnection() {
+  try {
+    const res = await fetch(API + '/api/health');
+    const data = await res.json();
+    if (data.status === 'ok') {
+      toast('✅ 连接成功！模型: ' + data.model);
+      document.getElementById('statusBadge').className = 'status-badge status-ok';
+      document.getElementById('statusBadge').textContent = '● 已连接';
+    }
+  } catch {
+    toast('❌ 连接失败，请检查服务是否启动', 'err');
+    document.getElementById('statusBadge').className = 'status-badge status-err';
+    document.getElementById('statusBadge').textContent = '● 未连接';
+  }
+}
+
+function saveAIConfig() {
+  const config = {
+    model: currentModel,
+    maxTokens: parseInt(document.getElementById('maxTokens').value),
+    temperature: parseFloat(document.getElementById('temperature').value),
+  };
+  localStorage.setItem('admin_ai_config', JSON.stringify(config));
+  toast('✅ AI 配置已保存');
+  addLog('AI config saved: ' + config.model);
+}
+
+// ========== 功能开关 ==========
+function saveFeatures() {
+  const features = {};
+  ['Demo', 'Premium', 'Reasoning', 'Bazi', 'Circle', 'Fengshui', 'Photo', 'Scenes', 'Feedback', 'I18n'].forEach(f => {
+    features[f.toLowerCase()] = document.getElementById('feat' + f).checked;
+  });
+  localStorage.setItem('admin_features', JSON.stringify(features));
+  toast('✅ 功能开关已保存');
+  addLog('Features saved: ' + Object.entries(features).filter(([k,v]) => v).map(([k]) => k).join(', '));
+}
+
+function loadFeatures() {
+  try {
+    const f = JSON.parse(localStorage.getItem('admin_features') || '{}');
+    ['Demo', 'Premium', 'Reasoning', 'Bazi', 'Circle', 'Fengshui', 'Photo', 'Scenes', 'Feedback', 'I18n'].forEach(key => {
+      const el = document.getElementById('feat' + key);
+      if (el && f[key.toLowerCase()] !== undefined) el.checked = f[key.toLowerCase()];
+    });
+  } catch {}
+}
+
+// ========== Prompt 管理 ==========
+function savePrompts() {
+  const prompts = {
+    system: document.getElementById('promptSystem').value,
+    user: document.getElementById('promptUser').value,
+  };
+  localStorage.setItem('admin_prompts', JSON.stringify(prompts));
+  toast('✅ Prompt 已保存');
+  addLog('Prompts saved');
+}
+
+function saveDailyPrompt() {
+  localStorage.setItem('admin_prompt_daily', document.getElementById('promptDaily').value);
+  toast('✅ 每日 Prompt 已保存');
+}
+
+function saveCompatPrompt() {
+  localStorage.setItem('admin_prompt_compat', document.getElementById('promptCompat').value);
+  toast('✅ 关系 Prompt 已保存');
+}
+
+function resetPrompts() {
+  if (confirm('确定恢复默认 Prompt？')) {
+    localStorage.removeItem('admin_prompts');
+    localStorage.removeItem('admin_prompt_daily');
+    localStorage.removeItem('admin_prompt_compat');
+    location.reload();
+  }
+}
+
+// ========== 数据统计 ==========
+function loadStats() {
+  // 从 localStorage 读取反馈数据
+  try {
+    const mem = JSON.parse(localStorage.getItem('soul_memory') || '{}');
+    const feedback = mem.feedback || [];
+    const total = feedback.length;
+    const accurate = feedback.filter(f => f.rating === 'accurate').length;
+    const inaccurate = feedback.filter(f => f.rating === 'inaccurate').length;
+    const saved = feedback.filter(f => f.rating === 'saved').length;
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statFeedback').textContent = total;
+    document.getElementById('statAccuracy').textContent = total > 0 ? Math.round(accurate / total * 100) + '%' : '--';
+
+    // 今日
+    const today = new Date().toISOString().slice(0, 10);
+    const todayCount = feedback.filter(f => new Date(f.timestamp).toISOString().slice(0, 10) === today).length;
+    document.getElementById('statToday').textContent = todayCount;
+
+    // 反馈图表
+    const chart = document.getElementById('feedbackChart');
+    if (total === 0) {
+      chart.innerHTML = '<div style="padding:20px;color:#64748b">暂无反馈数据。用户生成灵魂画像后可提交反馈。</div>';
+    } else {
+      const pctA = Math.round(accurate / total * 100);
+      const pctI = Math.round(inaccurate / total * 100);
+      const pctS = Math.round(saved / total * 100);
+      chart.innerHTML = `
+        <div style="display:flex;gap:16px;justify-content:center;margin-bottom:16px">
+          <div style="text-align:center"><div style="font-size:28px;font-weight:700;color:#34d399">${pctA}%</div><div style="font-size:11px;color:#64748b">👍 准确</div></div>
+          <div style="text-align:center"><div style="font-size:28px;font-weight:700;color:#f87171">${pctI}%</div><div style="font-size:11px;color:#64748b">👎 不准确</div></div>
+          <div style="text-align:center"><div style="font-size:28px;font-weight:700;color:#fbbf24">${pctS}%</div><div style="font-size:11px;color:#64748b">⭐ 收藏</div></div>
+        </div>
+        <div style="height:8px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;display:flex">
+          <div style="height:100%;background:#34d399;width:${pctA}%"></div>
+          <div style="height:100%;background:#f87171;width:${pctI}%"></div>
+          <div style="height:100%;background:#fbbf24;width:${pctS}%"></div>
+        </div>
+      `;
+    }
+  } catch {
+    document.getElementById('feedbackChart').innerHTML = '<div style="color:#f87171">数据读取失败</div>';
+  }
+}
+
+function exportData() {
+  const data = {
+    memory: localStorage.getItem('soul_memory'),
+    features: localStorage.getItem('admin_features'),
+    config: localStorage.getItem('admin_ai_config'),
+    prompts: localStorage.getItem('admin_prompts'),
+    circle: localStorage.getItem('soul_circle'),
+    lang: localStorage.getItem('soul_lang'),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'soul-cosmos-data-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  toast('✅ 数据已导出');
+}
+
+function clearData() {
+  if (confirm('确定清除所有数据？此操作不可撤销。')) {
+    localStorage.removeItem('soul_memory');
+    localStorage.removeItem('soul_circle');
+    toast('✅ 用户数据已清除');
+    addLog('User data cleared');
+    loadStats();
+  }
+}
+
+// ========== 日志 ==========
+function addLog(msg, type = 'info') {
+  const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  logs.unshift({ time, msg, type });
+  if (logs.length > 100) logs.pop();
+  renderLogs();
+}
+
+function renderLogs() {
+  const el = document.getElementById('logList');
+  if (!logs.length) {
+    el.innerHTML = '<div class="log-entry"><span class="log-time">--:--</span><span class="log-info">暂无日志</span></div>';
+    return;
+  }
+  el.innerHTML = logs.map(l =>
+    `<div class="log-entry"><span class="log-time">${l.time}</span><span class="log-${l.type}">${l.msg}</span></div>`
+  ).join('');
+}
+
+function refreshLogs() {
+  addLog('Dashboard refreshed', 'ok');
+}
+
+function clearLogs() {
+  logs = [];
+  renderLogs();
+}
+
+// ========== 初始化 ==========
+(function init() {
+  // 加载保存的配置
+  try {
+    const cfg = JSON.parse(localStorage.getItem('admin_ai_config') || '{}');
+    if (cfg.model) {
+      currentModel = cfg.model;
+      document.querySelectorAll('.model-card').forEach(c => {
+        c.classList.toggle('selected', c.onclick?.toString().includes(cfg.model));
+      });
+    }
+    if (cfg.maxTokens) document.getElementById('maxTokens').value = cfg.maxTokens;
+    if (cfg.temperature) document.getElementById('temperature').value = cfg.temperature;
+  } catch {}
+
+  loadFeatures();
+
+  // 加载 Prompt
+  try {
+    const p = JSON.parse(localStorage.getItem('admin_prompts') || '{}');
+    if (p.system) document.getElementById('promptSystem').value = p.system;
+    if (p.user) document.getElementById('promptUser').value = p.user;
+  } catch {}
+  try {
+    const d = localStorage.getItem('admin_prompt_daily');
+    if (d) document.getElementById('promptDaily').value = d;
+  } catch {}
+  try {
+    const c = localStorage.getItem('admin_prompt_compat');
+    if (c) document.getElementById('promptCompat').value = c;
+  } catch {}
+
+  // 检测连接
+  testConnection();
+  addLog('Admin dashboard loaded', 'ok');
+})();
+</script>
+</body>
+</html>

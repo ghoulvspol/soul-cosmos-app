@@ -788,6 +788,13 @@ app.get('/api/health', (req, res) => {
 });
 
 /**
+ * 管理后台页面
+ */
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'admin.html'));
+});
+
+/**
  * 默认路由 → index.html
  */
 app.get('*', (req, res) => {
