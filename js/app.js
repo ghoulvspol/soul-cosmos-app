@@ -151,7 +151,7 @@ const I18N = {
     'feat.tag.blood': 'East Asian science', 'feat.tag.psych': 'Evidence-based', 'feat.tag.iching': 'Ancient wisdom',
     // Try section
     'try.title': 'Generate Your Soul Profile', 'try.subtitle': 'Free. No signup required. Takes 2 minutes.',
-    'try.step1': '✦ When and where were you born?', 'try.birth': 'Birth Date', 'try.time': 'Birth Time', 'try.city': 'Birth City',
+    'try.step1': '✦ When and where were you born?', 'try.birth': 'Birth Date', 'try.time': 'Birth Time', 'try.city': 'Birth City', 'try.gender': 'Gender',
     'try.step2': '✦ What\'s your MBTI type?', 'try.mbti.desc': 'Select your type, or answer 5 quick questions below.',
     'try.generating': 'Fusing 7 dimensions of your soul...',
     'try.unlock': 'Unlock Full Analysis — $9.99/mo', 'try.share': '✦ Share Soul Profile', 'try.premium': '✦ PREMIUM MEMBER — Full Access',
@@ -236,7 +236,7 @@ const I18N = {
     'feat.tag.blood': '东亚科学', 'feat.tag.psych': '科学验证', 'feat.tag.iching': '古老智慧',
     // Try section
     'try.title': '生成你的灵魂画像', 'try.subtitle': '免费。无需注册。2分钟搞定。',
-    'try.step1': '✦ 你的出生日期和地点？', 'try.birth': '出生日期', 'try.time': '出生时间', 'try.city': '出生城市',
+    'try.step1': '✦ 你的出生日期和地点？', 'try.birth': '出生日期', 'try.time': '出生时间', 'try.city': '出生城市', 'try.gender': '性别',
     'try.step2': '✦ 你的 MBTI 类型？', 'try.mbti.desc': '选择你的类型，或回答5个快速问题。',
     'try.generating': '正在融合你灵魂的7个维度...',
     'try.unlock': '解锁完整分析 — $9.99/月', 'try.share': '✦ 分享灵魂画像', 'try.premium': '✦ 尊享会员 — 完整权限',
@@ -427,10 +427,11 @@ function getUserProfile() {
   const birthDate = document.getElementById('birthDate')?.value || '1995-06-15';
   const birthTime = document.getElementById('birthTime')?.value || '12:00';
   const birthCity = getBirthCity();
+  const gender = document.getElementById('birthGender')?.value || 'unknown';
   const chart = Astrology.getNatalChart(birthDate, birthTime, birthCity);
   return {
     sun: chart.sun.name, moon: chart.moon.name, rising: chart.rising.name,
-    element: chart.dominantElement, mbti: selectedMBTI || 'Unknown',
+    element: chart.dominantElement, mbti: selectedMBTI || 'Unknown', gender,
   };
 }
 
@@ -623,7 +624,7 @@ function generateProfile() {
     fetch(CONFIG.apiBase + '/api/generate-profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ natalChart, mbtiType: selectedMBTI, ziweiChart, iching: ichingInfo, lang: currentLang }),
+      body: JSON.stringify({ natalChart, mbtiType: selectedMBTI, ziweiChart, iching: ichingInfo, lang: currentLang, gender: document.getElementById('birthGender')?.value || 'unknown' }),
     })
       .then(res => res.json())
       .then(data => {
@@ -718,6 +719,59 @@ function renderResult(profile, natalChart, ziweiChart, model) {
     // 每日洞察
     document.getElementById('resultDaily').textContent =
       profile.dailyInsight || '';
+
+    // === 扩展信息（更丰富的结果） ===
+    const extraEl = document.getElementById('resultExtra');
+    if (extraEl) {
+      const isZh = currentLang === 'zh';
+      let extraHTML = '';
+
+      // 职业指引
+      if (profile.careerGuidance) {
+        extraHTML += `
+          <div class="result-section">
+            <h3>💼 ${isZh ? '职业指引' : 'Career Guidance'}</h3>
+            <p class="life-theme">${profile.careerGuidance}</p>
+          </div>`;
+      }
+
+      // 感情风格
+      if (profile.relationshipStyle) {
+        extraHTML += `
+          <div class="result-section">
+            <h3>💕 ${isZh ? '感情风格' : 'Relationship Style'}</h3>
+            <p class="life-theme">${profile.relationshipStyle}</p>
+          </div>`;
+      }
+
+      // 幸运元素
+      if (profile.luckyElements) {
+        const le = profile.luckyElements;
+        const colors = (le.colors || []).join(', ');
+        const numbers = (le.numbers || []).join(', ');
+        extraHTML += `
+          <div class="result-section">
+            <h3>🍀 ${isZh ? '幸运元素' : 'Lucky Elements'}</h3>
+            <div class="traits-list">
+              ${colors ? `<div class="trait-item"><strong>${isZh ? '幸运色' : 'Colors'}:</strong> ${colors}</div>` : ''}
+              ${numbers ? `<div class="trait-item"><strong>${isZh ? '幸运数字' : 'Numbers'}:</strong> ${numbers}</div>` : ''}
+              ${le.direction ? `<div class="trait-item"><strong>${isZh ? '吉方位' : 'Direction'}:</strong> ${le.direction}</div>` : ''}
+              ${le.day ? `<div class="trait-item"><strong>${isZh ? '吉日' : 'Luckiest Day'}:</strong> ${le.day}</div>` : ''}
+            </div>
+          </div>`;
+      }
+
+      // 配对建议
+      if (profile.compatibilityTip) {
+        extraHTML += `
+          <div class="result-section">
+            <h3>💘 ${isZh ? '配对建议' : 'Compatibility Tip'}</h3>
+            <p class="life-theme">${profile.compatibilityTip}</p>
+          </div>`;
+      }
+
+      extraEl.innerHTML = extraHTML;
+    }
 
     // 测试环境：展示付费模式
     if (CONFIG.isPremium) {

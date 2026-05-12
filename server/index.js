@@ -118,8 +118,9 @@ function extractManually(text) {
  */
 app.post('/api/generate-profile', async (req, res) => {
   try {
-    const { natalChart, mbtiType, ziweiChart, iching, lang } = req.body;
+    const { natalChart, mbtiType, ziweiChart, iching, lang, gender } = req.body;
     const outputLang = lang === 'zh' ? 'Chinese (中文)' : 'English';
+    const genderHint = gender === 'male' ? 'Male' : gender === 'female' ? 'Female' : gender === 'nonbinary' ? 'Non-binary' : 'Not specified';
 
     if (!natalChart || !mbtiType) {
       return res.status(400).json({ error: 'Missing natalChart or mbtiType' });
@@ -142,18 +143,29 @@ You MUST respond with valid JSON in this exact format:
   "soulKeywords": ["word1", "word2", "word3", "word4"],
   "oneSentencePortrait": "A deeply personal, specific sentence about this person",
   "coreTraits": [
-    {"trait": "Trait Name", "description": "2-3 sentence explanation with specific astrological references"}
+    {"trait": "Trait Name", "description": "2-3 sentence explanation with specific references"}
   ],
   "shadows": [
     {"challenge": "Challenge Name", "description": "Honest but compassionate description"}
   ],
   "lifeTheme": "The overarching narrative of this person's life journey, 2-3 sentences",
-  "dailyInsight": "A personalized daily insight for today, 1-2 sentences, punchy and specific"
+  "dailyInsight": "A personalized daily insight for today, 1-2 sentences",
+  "careerGuidance": "Career strengths and ideal work environment, 2-3 sentences",
+  "relationshipStyle": "How this person behaves in love and friendships, 2-3 sentences",
+  "luckyElements": {
+    "colors": ["color1", "color2"],
+    "numbers": ["number1", "number2"],
+    "direction": "best direction",
+    "day": "luckiest day of week"
+  },
+  "compatibilityTip": "One sentence about what kind of partner/friend suits this person best"
 }
 
 IMPORTANT: Output ONLY the JSON object. No markdown, no explanation, no code blocks.`;
 
     const userPrompt = `Generate a soul profile for this person:
+
+GENDER: ${genderHint}
 
 WESTERN NATAL CHART:
 - Sun: ${natalChart.sun.name} (${natalChart.sun.element}, ${natalChart.sun.quality})
@@ -215,6 +227,18 @@ Create a deeply personal, specific soul portrait. Fuse ALL systems (Astrology + 
         profile = extractManually(rawResponse);
       }
     }
+
+    // 补全缺失字段的默认值
+    const isZh = lang === 'zh';
+    profile.careerGuidance = profile.careerGuidance || (isZh ? '你的星盘显示你适合需要创造力和洞察力的工作。在团队中，你更倾向于深度思考而非表面执行。' : 'Your chart suggests you thrive in roles requiring creativity and insight. In teams, you prefer deep thinking over surface-level execution.');
+    profile.relationshipStyle = profile.relationshipStyle || (isZh ? '你在关系中追求深度连接而非表面社交。你倾向于用行动而非言语表达爱意。' : 'You seek deep connections over surface-level socializing. You tend to express love through actions rather than words.');
+    profile.luckyElements = profile.luckyElements || {
+      colors: isZh ? ['深蓝', '紫色'] : ['Deep Blue', 'Purple'],
+      numbers: isZh ? ['7', '3'] : ['7', '3'],
+      direction: isZh ? '北方' : 'North',
+      day: isZh ? '周二' : 'Tuesday',
+    };
+    profile.compatibilityTip = profile.compatibilityTip || (isZh ? '你最适合与能理解你内心深度、同时给你足够空间的人相处。' : 'You are best matched with someone who understands your inner depth while giving you enough personal space.');
 
     res.json({ success: true, profile, model: MIFY_MODEL });
   } catch (err) {
