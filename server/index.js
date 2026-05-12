@@ -209,18 +209,7 @@ WESTERN NATAL CHART:
 
 MBTI TYPE: ${mbtiType}
 
-${bazi ? `BAZI (八字命理) - FOUR PILLARS:
-- Year Pillar: ${bazi.yearPillar} (${bazi.pillars[0].tianGanWuXing}${bazi.pillars[0].diZhiWuXing})
-- Month Pillar: ${bazi.monthPillar} (${bazi.pillars[1].tianGanWuXing}${bazi.pillars[1].diZhiWuXing})
-- Day Pillar: ${bazi.dayPillar} (${bazi.pillars[2].tianGanWuXing}${bazi.pillars[2].diZhiWuXing})
-- Hour Pillar: ${bazi.hourPillar} (${bazi.pillars[3].tianGanWuXing}${bazi.pillars[3].diZhiWuXing})
-- Day Master (日主): ${bazi.riZhu} (${bazi.riZhuWuXing}, ${bazi.riZhuYinYang}) — ${bazi.riZhuTrait}
-- Pattern (格局): ${bazi.geJu}
-- Five Elements: Wood ${bazi.wuXing.count['木']} / Fire ${bazi.wuXing.count['火']} / Earth ${bazi.wuXing.count['土']} / Metal ${bazi.wuXing.count['金']} / Water ${bazi.wuXing.count['水']}
-- Dominant: ${bazi.wuXing.dominant} | Weakest: ${bazi.wuXing.weakest}${bazi.wuXing.lack ? ' | Lacking: ' + bazi.wuXing.lack : ''}
-- Lunar: ${bazi.lunar.yearChinese}年${bazi.lunar.monthChinese}月${bazi.lunar.dayChinese}日
-- Ten Gods (十神): Year=${bazi.pillars[0].shiShen}, Month=${bazi.pillars[1].shiShen}, Hour=${bazi.pillars[3].shiShen}
-` : ''}
+${bazi ? `BAZI (八字命理): ${bazi.fourPillars} | 日主: ${bazi.riZhu}(${bazi.riZhuWuXing},${bazi.riZhuYinYang}) | 格局: ${bazi.geJu} | 主导: ${bazi.wuXing.dominant} | 缺: ${bazi.wuXing.lack || '无'} | 特质: ${bazi.riZhuTrait}` : ''}
 
 ZI WEI DOU SHU (紫微斗数):
 - Main Star: ${ziweiChart.mainStar}
@@ -236,20 +225,20 @@ ${iching ? `I CHING (易经) HEXAGRAM:
 - Keywords: ${iching.keywords?.join(', ') || ''}
 - Personality: ${iching.personality || ''}` : ''}
 
-Create a deeply personal, specific soul portrait. Fuse ALL systems (Astrology + Zi Wei + I Ching + MBTI) into ONE coherent description — do NOT list each system separately. Make the person feel "this is SO me."`;
+Create a deeply personal, specific soul portrait. Fuse ALL systems into ONE coherent description — do NOT list each system separately. Make the person feel "this is SO me."`;
 
     const rawResponse = await callMify([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
-    ], 2000);
+    ], 2500);
 
     // 解析 JSON（健壮版）
     let profile;
     try {
       // 清理响应：去掉 markdown 代码块、BOM、控制字符
       let cleaned = rawResponse
-        .replace(/```json\s*/gi, '')
-        .replace(/```\s*/g, '')
+        .replace(/^```[\w]*\s*/gim, '')  // 去掉开头的 ```json
+        .replace(/```\s*$/gim, '')       // 去掉结尾的 ```
         .replace(/^\s*[\uFEFF\u200B]+/g, '')
         .trim();
 
@@ -257,21 +246,53 @@ Create a deeply personal, specific soul portrait. Fuse ALL systems (Astrology + 
       profile = JSON.parse(cleaned);
     } catch (e1) {
       try {
-        // 尝试提取第一个 JSON 对象
+        // 尝试提取第一个 JSON 对象（贪婪匹配到最后一个 }）
         const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-          // 修复常见问题：尾部逗号、单引号
           let fixed = jsonMatch[0]
             .replace(/,\s*([\]}])/g, '$1')  // 去尾逗号
-            .replace(/'/g, '"');  // 单引号→双引号（谨慎）
+            .replace(/'/g, '"');  // 单引号→双引号
           profile = JSON.parse(fixed);
         } else {
           throw new Error('No JSON found');
         }
       } catch (e2) {
-        // 最后兜底：手动提取关键字段
-        console.warn('JSON parse failed, extracting manually. Raw:', rawResponse.slice(0, 500));
-        profile = extractManually(rawResponse);
+        try {
+          // 尝试截取到 reasoningSteps 结束后的位置
+          const startIdx = rawResponse.indexOf('{');
+          if (startIdx >= 0) {
+            let partial = rawResponse.slice(startIdx);
+            // 尝试逐字符找到有效的 JSON 结尾
+            let depth = 0; let endIdx = 0;
+            for (let i = 0; i < partial.length; i++) {
+              if (partial[i] === '{') depth++;
+              if (partial[i] === '}') { depth--; if (depth === 0) { endIdx = i + 1; break; } }
+            }
+            if (endIdx > 0) {
+              profile = JSON.parse(partial.slice(0, endIdx));
+            } else {
+              // 截断了——在最后一个完整字段后闭合
+              let truncated = partial;
+              // 移除未完成的字段
+              truncated = truncated.replace(/,\s*"[^"]*":\s*"[^"]*$/, '');
+              truncated = truncated.replace(/,\s*"[^"]*":\s*\[[^\]]*$/, '');
+              truncated = truncated.replace(/,\s*"[^"]*":\s*\{[^}]*$/, '');
+              // 补齐缺失的括号
+              const openBrace = (truncated.match(/\{/g) || []).length;
+              const closeBrace = (truncated.match(/\}/g) || []).length;
+              const openBracket = (truncated.match(/\[/g) || []).length;
+              const closeBracket = (truncated.match(/\]/g) || []).length;
+              for (let i = 0; i < openBracket - closeBracket; i++) truncated += ']';
+              for (let i = 0; i < openBrace - closeBrace; i++) truncated += '}';
+              profile = JSON.parse(truncated);
+            }
+          } else {
+            throw new Error('No JSON start found');
+          }
+        } catch (e3) {
+          console.warn('All JSON parse attempts failed. Raw:', rawResponse.slice(0, 500));
+          profile = extractManually(rawResponse);
+        }
       }
     }
 
@@ -289,6 +310,39 @@ Create a deeply personal, specific soul portrait. Fuse ALL systems (Astrology + 
     }
     // 附加八字数据到响应
     profile.bazi = bazi;
+
+    // 补全核心字段（AI可能返回空值）
+    if (!profile.soulKeywords || !profile.soulKeywords.length) {
+      const wx = bazi?.riZhuWuXing || natalChart.sun.element;
+      const wxMap = { '木': 'Growth', '火': 'Passion', '土': 'Stability', '金': 'Precision', '水': 'Wisdom' };
+      const wxMapZh = { '木': '生长', '火': '热情', '土': '稳重', '金': '精准', '水': '智慧' };
+      profile.soulKeywords = isZh
+        ? [natalChart.sun.name + '之魂', wxMapZh[wx] || '深邃', ziweiChart.mainStar + '之力', mbtiType + '思维']
+        : [natalChart.sun.name + ' Soul', wxMap[wx] || 'Depth', ziweiChart.mainStar + ' Power', mbtiType + ' Mind'];
+    }
+    if (!profile.oneSentencePortrait) {
+      profile.oneSentencePortrait = isZh
+        ? `你是${natalChart.sun.name}太阳${natalChart.moon.name}月亮${natalChart.rising.name}上升的灵魂，${bazi?.riZhuTrait || ''}，${mbtiType}型人格赋予你独特的思维方式。`
+        : `You are a ${natalChart.sun.name} Sun with ${natalChart.moon.name} Moon and ${natalChart.rising.name} Rising — ${bazi?.riZhuTrait || 'a complex soul'} with the ${mbtiType} mind.`;
+    }
+    if (!profile.coreTraits || !profile.coreTraits.length) {
+      profile.coreTraits = [
+        { trait: isZh ? '核心驱动力' : 'Core Drive', description: isZh ? `${natalChart.sun.name}太阳赋予${natalChart.sun.element}元素的生命能量。` : `Your ${natalChart.sun.name} sun grants ${natalChart.sun.element} life force.` },
+        { trait: isZh ? '情感模式' : 'Emotional Pattern', description: isZh ? `${natalChart.moon.name}月亮带来${natalChart.moon.element}元素的情感深度。` : `Your ${natalChart.moon.name} moon brings ${natalChart.moon.element} emotional depth.` },
+      ];
+    }
+    if (!profile.shadows || !profile.shadows.length) {
+      profile.shadows = [
+        { challenge: isZh ? '内在张力' : 'Inner Tension', description: isZh ? `${natalChart.moon.name}月亮的情感需求与${natalChart.rising.name}上升的外在表现之间存在张力。` : `Tension between your ${natalChart.moon.name} moon needs and ${natalChart.rising.name} rising exterior.` },
+      ];
+    }
+    if (!profile.lifeTheme) {
+      profile.lifeTheme = isZh ? `你的人生是一场${natalChart.sun.element}元素驱动的自我探索之旅。` : `Your life is a ${natalChart.sun.element}-driven journey of self-discovery.`;
+    }
+    if (!profile.dailyInsight) {
+      profile.dailyInsight = isZh ? `今天，关注你的${natalChart.moon.name}月亮能量，它正在引导你。` : `Today, listen to your ${natalChart.moon.name} moon energy — it is guiding you.`;
+    }
+
     profile.careerGuidance = profile.careerGuidance || (isZh ? '你的星盘显示你适合需要创造力和洞察力的工作。在团队中，你更倾向于深度思考而非表面执行。' : 'Your chart suggests you thrive in roles requiring creativity and insight. In teams, you prefer deep thinking over surface-level execution.');
     profile.relationshipStyle = profile.relationshipStyle || (isZh ? '你在关系中追求深度连接而非表面社交。你倾向于用行动而非言语表达爱意。' : 'You seek deep connections over surface-level socializing. You tend to express love through actions rather than words.');
     profile.luckyElements = profile.luckyElements || {
