@@ -358,6 +358,12 @@ Create a deeply personal, specific soul portrait. Fuse ALL systems into ONE cohe
     };
     profile.compatibilityTip = profile.compatibilityTip || (isZh ? '你最适合与能理解你内心深度、同时给你足够空间的人相处。' : 'You are best matched with someone who understands your inner depth while giving you enough personal space.');
 
+    // 最终安全检查：确保 profile 是有效对象
+    if (typeof profile !== 'object' || profile === null || Array.isArray(profile)) {
+      console.error('Profile is not a valid object, using extractManually');
+      profile = extractManually(rawResponse || '');
+    }
+
     res.json({ success: true, profile, model: MIFY_MODEL });
   } catch (err) {
     console.error('Generate profile error:', err.message);

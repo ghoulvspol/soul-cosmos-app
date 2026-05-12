@@ -649,7 +649,18 @@ function generateProfile() {
       .then(res => res.json())
       .then(data => {
         if (data.error) throw new Error(data.error);
-        renderResult(data.profile, natalChart, ziweiChart, data.model);
+        let profile = data.profile;
+        // 保护：如果 profile 是字符串（JSON解析失败），尝试重新解析
+        if (typeof profile === 'string') {
+          try { profile = JSON.parse(profile); } catch { profile = null; }
+        }
+        if (!profile || typeof profile !== 'object' || !profile.soulKeywords) {
+          console.warn('Profile invalid, using fallback');
+          profile = ProfileEngine.generate(natalChart, selectedMBTI, ziweiChart);
+          renderResult(profile, natalChart, ziweiChart, 'local-fallback');
+        } else {
+          renderResult(profile, natalChart, ziweiChart, data.model);
+        }
       })
       .catch(err => {
         console.error('AI Error:', err);
