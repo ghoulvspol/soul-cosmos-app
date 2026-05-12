@@ -257,13 +257,18 @@
 
             <div class="result-zodiac" id="resultZodiac"></div>
 
-            <!-- 推理过程透明化 -->
+            <!-- 推理过程（动态渐显 + 汇聚总结） -->
             <div class="reasoning-section" id="resultReasoning" style="display:none">
-              <button class="reasoning-toggle" onclick="toggleReasoning(this)">
-                <span class="reasoning-toggle-icon">▸</span>
-                <span class="reasoning-toggle-text" data-i18n="result.reasoning">✦ View Reasoning Process</span>
-              </button>
-              <div class="reasoning-chain"></div>
+              <div class="reasoning-header">
+                <span class="reasoning-header-icon">✦</span>
+                <span class="reasoning-header-text">推理过程 · Reasoning Process</span>
+              </div>
+              <div class="reasoning-chain" id="reasoningChain"></div>
+              <div class="reasoning-convergence" id="reasoningConvergence" style="display:none">
+                <div class="convergence-icon">🎯</div>
+                <div class="convergence-title">多维交叉验证 · Cross-Validation</div>
+                <div class="convergence-text" id="convergenceText"></div>
+              </div>
             </div>
 
             <div class="result-section">

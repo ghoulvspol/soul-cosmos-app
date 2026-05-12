@@ -731,25 +731,46 @@ function renderResult(profile, natalChart, ziweiChart, model) {
       baziTag,
     ].filter(Boolean).map(t => `<span class="zodiac-tag">${t}</span>`).join('');
 
-    // 推理过程透明化
+    // 推理过程（动态渐显 + 汇聚总结）
     const reasoningEl = document.getElementById('resultReasoning');
     if (reasoningEl && profile.reasoningSteps?.length) {
-      const isZh = currentLang === 'zh';
+      const chainEl = document.getElementById('reasoningChain');
+      const convEl = document.getElementById('reasoningConvergence');
+      const convText = document.getElementById('convergenceText');
+
+      // 逐条渲染，带延迟动画
       const stepsHTML = profile.reasoningSteps.map((step, i) => {
-        const connector = i < profile.reasoningSteps.length - 1 ? '<div class="step-connector"></div>' : '';
+        const delay = (i * 0.35).toFixed(1);
         return `
-          <div class="reasoning-step">
-            <div class="step-icon">${step.icon || '✦'}</div>
-            <div class="step-content">
-              <div class="step-system">${step.system || ''}</div>
-              ${step.input ? `<div class="step-input">${step.input}</div>` : ''}
-              <div class="step-reasoning">${step.reasoning || ''}</div>
-              ${step.conclusion ? `<div class="step-conclusion">→ ${step.conclusion}</div>` : ''}
-            </div>
-          </div>
-          ${connector}`;
+          <div class="reasoning-step" style="animation-delay:${delay}s">
+            <div class="step-system">${step.icon || '✦'} ${step.system || ''}</div>
+            ${step.input ? `<div class="step-input">${step.input}</div>` : ''}
+            <div class="step-reasoning">${step.reasoning || ''}</div>
+            ${step.conclusion ? `<div class="step-conclusion">→ ${step.conclusion}</div>` : ''}
+          </div>`;
       }).join('');
-      reasoningEl.querySelector('.reasoning-chain').innerHTML = stepsHTML;
+      chainEl.innerHTML = stepsHTML;
+
+      // 汇聚总结：所有体系指向同一结论
+      const isZh = currentLang === 'zh';
+      const keywords = profile.soulKeywords?.join(' · ') || '';
+      const lastConclusion = profile.reasoningSteps[profile.reasoningSteps.length - 1]?.conclusion || '';
+      const convergenceDelay = (profile.reasoningSteps.length * 0.35 + 0.5).toFixed(1);
+
+      if (convEl && convText) {
+        const sources = profile.reasoningSteps
+          .filter(s => s.system && s.system !== (isZh ? '融合' : 'Fusion'))
+          .map(s => s.system);
+        const sourceStr = sources.join(' + ');
+
+        convText.innerHTML = isZh
+          ? `<span style="color:#a78bfa">${sourceStr}</span> 四大体系独立推演，<strong>殊途同归</strong>，共同指向：<br><span style="font-size:18px;font-weight:700;color:#f8fafc;margin-top:8px;display:inline-block">${keywords}</span><br><span style="font-size:12px;color:#94a3b8;margin-top:4px;display:block">${lastConclusion}</span>`
+          : `<span style="color:#a78bfa">${sourceStr}</span> — four systems, independently analyzed, <strong>converge on one truth</strong>:<br><span style="font-size:18px;font-weight:700;color:#f8fafc;margin-top:8px;display:inline-block">${keywords}</span><br><span style="font-size:12px;color:#94a3b8;margin-top:4px;display:block">${lastConclusion}</span>`;
+
+        convEl.style.animationDelay = convergenceDelay + 's';
+        convEl.style.display = 'block';
+      }
+
       reasoningEl.style.display = 'block';
     }
 
