@@ -170,16 +170,23 @@
         </div>
         <div class="form-group">
           <label>Birth City</label>
-          <select id="birthCity">
+          <select id="birthCity" onchange="toggleCustomCity(this)">
             <option value="new_york">New York, USA</option>
             <option value="los_angeles">Los Angeles, USA</option>
             <option value="london">London, UK</option>
             <option value="tokyo">Tokyo, Japan</option>
             <option value="shanghai">Shanghai, China</option>
+            <option value="beijing">Beijing, China</option>
+            <option value="guangzhou">Guangzhou, China</option>
+            <option value="shenzhen">Shenzhen, China</option>
+            <option value="chengdu">Chengdu, China</option>
+            <option value="hangzhou">Hangzhou, China</option>
             <option value="seoul">Seoul, Korea</option>
             <option value="sydney">Sydney, Australia</option>
             <option value="toronto">Toronto, Canada</option>
+            <option value="custom">✏️ Other (type below)</option>
           </select>
+          <input type="text" id="birthCityCustom" placeholder="e.g. Wuhan, China / 巴黎" style="display:none;margin-top:8px;width:100%;padding:12px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#e2e8f0;font-size:14px;outline:none">
         </div>
         <button class="btn-primary" onclick="nextStep(2)">Continue →</button>
       </div>

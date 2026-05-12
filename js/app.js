@@ -307,6 +307,25 @@ function toggleLang() {
   }
 }
 
+// ========== 出生城市自定义输入 ==========
+function toggleCustomCity(select) {
+  const customInput = document.getElementById('birthCityCustom');
+  if (select.value === 'custom') {
+    customInput.style.display = 'block';
+    customInput.focus();
+  } else {
+    customInput.style.display = 'none';
+  }
+}
+
+function getBirthCity() {
+  const select = document.getElementById('birthCity');
+  if (select.value === 'custom') {
+    return document.getElementById('birthCityCustom')?.value?.trim() || 'new_york';
+  }
+  return select.value;
+}
+
 // ========== 反馈提交 ==========
 function submitFeedback(type, el) {
   const portrait = document.getElementById('resultPortrait')?.textContent || '';
@@ -387,22 +406,27 @@ function analyzePhoto(type) {
     .then(r => r.json())
     .then(data => {
       const r = data.analysis || {};
+      const isZh = currentLang === 'zh';
+      const titleFace = isZh ? '🖐️ 面相分析' : '🖐️ Face Reading Analysis';
+      const titlePalm = isZh ? '🖐️ 手相分析' : '🖐️ Palm Reading Analysis';
+      const adviceLabel = isZh ? '🎯 建议：' : '🎯 Advice:';
+      const failMsg = isZh ? '分析失败，请重试。' : 'Analysis failed. Please try again.';
       contentEl.innerHTML = `
-        <h3>${type === 'face' ? '🖐️ Face Reading' : '🖐️ Palm Reading'} Analysis</h3>
+        <h3>${type === 'face' ? titleFace : titlePalm}</h3>
         <p>${r.summary || ''}</p>
         ${r.traits?.map(t => `<div class="fengshui-tip">✦ <strong>${t.name}:</strong> ${t.description}</div>`).join('') || ''}
-        ${r.advice ? `<div class="scene-card-advice"><strong>🎯 Advice:</strong> ${r.advice}</div>` : ''}
+        ${r.advice ? `<div class="scene-card-advice"><strong>${adviceLabel}</strong> ${r.advice}</div>` : ''}
       `;
     })
     .catch(() => {
-      contentEl.innerHTML = '<div style="color:#f28b82;text-align:center;padding:20px">Analysis failed.</div>';
+      contentEl.innerHTML = '<div style="color:#f28b82;text-align:center;padding:20px">' + failMsg + '</div>';
     });
 }
 
 function getUserProfile() {
   const birthDate = document.getElementById('birthDate')?.value || '1995-06-15';
   const birthTime = document.getElementById('birthTime')?.value || '12:00';
-  const birthCity = document.getElementById('birthCity')?.value || 'new_york';
+  const birthCity = getBirthCity();
   const chart = Astrology.getNatalChart(birthDate, birthTime, birthCity);
   return {
     sun: chart.sun.name, moon: chart.moon.name, rising: chart.rising.name,
@@ -564,7 +588,7 @@ function generateProfile() {
 
   const birthDate = document.getElementById('birthDate').value;
   const birthTime = document.getElementById('birthTime').value;
-  const birthCity = document.getElementById('birthCity').value;
+  const birthCity = getBirthCity();
 
   // 本地计算星盘、紫微、易经
   const natalChart = Astrology.getNatalChart(birthDate, birthTime, birthCity);
@@ -741,6 +765,7 @@ function shareProfile() {
 document.addEventListener('DOMContentLoaded', () => {
   initStarfield();
   loadCircle();
+  initPhotoUpload();
   applyLang();
 });
 
@@ -829,7 +854,7 @@ function analyzeRelationship(personId) {
 
   const birthDate = document.getElementById('birthDate').value || '1995-06-15';
   const birthTime = document.getElementById('birthTime').value || '12:00';
-  const birthCity = document.getElementById('birthCity').value || 'new_york';
+  const birthCity = getBirthCity() || 'new_york';
   const myChart = Astrology.getNatalChart(birthDate, birthTime, birthCity);
 
   const loading = document.createElement('div');
@@ -880,7 +905,7 @@ function generateWeeklyForecast() {
 
   const birthDate = document.getElementById('birthDate').value || '1995-06-15';
   const birthTime = document.getElementById('birthTime').value || '12:00';
-  const birthCity = document.getElementById('birthCity').value || 'new_york';
+  const birthCity = getBirthCity() || 'new_york';
   const myChart = Astrology.getNatalChart(birthDate, birthTime, birthCity);
 
   fetch(`${CONFIG.apiBase}/api/weekly-forecast`, {
