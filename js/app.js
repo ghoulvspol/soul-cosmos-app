@@ -817,6 +817,40 @@ function renderResult(profile, natalChart, ziweiChart, model) {
       extraEl.innerHTML = extraHTML;
     }
 
+    // === 引导用户探索其他功能 ===
+    const nextStepsEl = document.getElementById('resultNextSteps');
+    if (nextStepsEl) {
+      const isZh = currentLang === 'zh';
+      nextStepsEl.innerHTML = `
+        <div style="margin-top:32px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06)">
+          <h3 style="font-size:16px;color:#a78bfa;margin-bottom:16px;text-align:center">
+            ${isZh ? '🔮 灵魂画像已生成，继续探索更多维度' : '🔮 Your Soul Profile is ready. Explore more dimensions'}
+          </h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="next-step-card" onclick="scrollToSection('circle')">
+              <div style="font-size:24px;margin-bottom:6px">👥</div>
+              <div style="font-size:14px;font-weight:600;color:#f8fafc">${isZh ? '关系圈分析' : 'My Circle'}</div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:2px">${isZh ? '输入老板/同事/伴侣信息，分析相处之道' : 'Add boss, colleagues, partner — get relationship insights'}</div>
+            </div>
+            <div class="next-step-card" onclick="scrollToSection('fengshui')">
+              <div style="font-size:24px;margin-bottom:6px">🏠</div>
+              <div style="font-size:14px;font-weight:600;color:#f8fafc">${isZh ? '风水布局分析' : 'Feng Shui'}</div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:2px">${isZh ? '分析住宅/办公室风水，获取调整建议' : 'Analyze your home/office layout for energy flow'}</div>
+            </div>
+            <div class="next-step-card" onclick="scrollToSection('photos')">
+              <div style="font-size:24px;margin-bottom:6px">🖐️</div>
+              <div style="font-size:14px;font-weight:600;color:#f8fafc">${isZh ? '面相手相分析' : 'Face & Palm Reading'}</div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:2px">${isZh ? '上传照片，AI读取你的面相手相特征' : 'Upload a photo for AI face/palm analysis'}</div>
+            </div>
+            <div class="next-step-card" onclick="scrollToSection('scenes')">
+              <div style="font-size:24px;margin-bottom:6px">📅</div>
+              <div style="font-size:14px;font-weight:600;color:#f8fafc">${isZh ? '本周场景建议' : 'Weekly Scenes'}</div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:2px">${isZh ? '职场、感情、成长的动态建议' : 'Dynamic advice for work, love, and growth'}</div>
+            </div>
+          </div>
+        </div>`;
+    }
+
     // 测试环境：展示付费模式
     if (CONFIG.isPremium) {
       const badge = document.getElementById('premiumBadge');
