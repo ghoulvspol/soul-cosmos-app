@@ -775,7 +775,7 @@ function renderResult(profile, natalChart, ziweiChart, model) {
     document.getElementById('resultDaily').textContent =
       profile.dailyInsight || '';
 
-    // === 扩展信息（更丰富的结果） ===
+    // === 按逻辑分组展示结果 ===
     const extraEl = document.getElementById('resultExtra');
     if (extraEl) {
       const isZh = currentLang === 'zh';
@@ -787,64 +787,101 @@ function renderResult(profile, natalChart, ziweiChart, model) {
         }
       };
 
-      addSection('💕', '姻缘分析', 'Marriage & Romance', profile.marriageFortune);
-      addSection('💼', '事业指引', 'Career Guidance', profile.careerGuidance);
-      addSection('🏥', '健康建议', 'Health Advice', profile.healthAdvice);
-      addSection('📅', '今年运势', 'Annual Fortune', profile.annualFortune);
-      addSection('🔮', '未来命运', 'Future Destiny', profile.futureDestiny);
-      addSection('👶', '子女缘分', 'Children Fortune', profile.childrenFortune);
-      addSection('💘', '感情风格', 'Relationship Style', profile.relationshipStyle);
+      const addGroup = (titleZh, titleEn, content) => {
+        extraHTML += `<div style="margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.06)">
+          <div style="font-size:11px;color:#a78bfa;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">${isZh ? titleZh : titleEn}</div>
+          ${content}
+        </div>`;
+      };
 
-      // 幸运元素
+      // ━━━ 第一组：人生轨迹（终身不变的判断）━━━
+      let group1 = '';
+      if (profile.lifePhases) {
+        const lp = profile.lifePhases;
+        group1 += `<div class="result-section">
+          <h3>🕐 ${isZh ? '人生三阶段' : 'Life Phases'}</h3>
+          <div class="traits-list">
+            ${lp.early ? `<div class="trait-item"><strong>${isZh ? '早年（0-30）' : 'Early (0-30)'}</strong> — ${lp.early}</div>` : ''}
+            ${lp.middle ? `<div class="trait-item"><strong>${isZh ? '中年（30-50）' : 'Mid (30-50)'}</strong> — ${lp.middle}</div>` : ''}
+            ${lp.later ? `<div class="trait-item"><strong>${isZh ? '晚年（50+）' : 'Later (50+)'}</strong> — ${lp.later}</div>` : ''}
+          </div>
+        </div>`;
+      }
+      addSection('🔮', '未来命运', 'Future Destiny', profile.futureDestiny);
+      group1 += extraHTML.split('🔮').pop() ? '' : ''; // reuse
+      if (profile.futureDestiny) {
+        group1 += `<div class="result-section"><h3>🔮 ${isZh ? '未来命运' : 'Future Destiny'}</h3><p class="life-theme">${profile.futureDestiny}</p></div>`;
+      }
+      if (group1) addGroup('人生轨迹 · 终身格局', 'LIFE TRAJECTORY · LIFETIME PATTERN', group1);
+
+      // 重置
+      extraHTML = '';
+
+      // ━━━ 第二组：当下洞察（此时此刻相关）━━━
+      let group2 = '';
+      addSection('📅', '今年运势', 'This Year', profile.annualFortune);
+      group2 += extraHTML;
+      extraHTML = '';
+      addSection('☀', '今日洞察', 'Today\'s Insight', profile.dailyInsight);
+      group2 += extraHTML;
+      extraHTML = '';
+      addSection('🏥', '健康建议', 'Health Advice', profile.healthAdvice);
+      group2 += extraHTML;
+      extraHTML = '';
+      if (group2) addGroup('当下洞察 · 此时此刻', 'PRESENT MOMENT · RIGHT NOW', group2);
+
+      // ━━━ 第三组：关系与事业（与他人的连接）━━━
+      let group3 = '';
+      addSection('💕', '姻缘分析', 'Marriage & Romance', profile.marriageFortune);
+      group3 += extraHTML;
+      extraHTML = '';
+      addSection('💘', '感情风格', 'Relationship Style', profile.relationshipStyle);
+      group3 += extraHTML;
+      extraHTML = '';
+      if (profile.compatibilityTip) {
+        group3 += `<div class="result-section"><h3>💘 ${isZh ? '配对建议' : 'Compatibility Tip'}</h3><p class="life-theme">${profile.compatibilityTip}</p></div>`;
+      }
+      addSection('💼', '事业指引', 'Career Guidance', profile.careerGuidance);
+      group3 += extraHTML;
+      extraHTML = '';
+      addSection('👶', '子女缘分', 'Children Fortune', profile.childrenFortune);
+      group3 += extraHTML;
+      extraHTML = '';
+      if (group3) addGroup('关系与事业 · 与他人的连接', 'RELATIONS & CAREER · CONNECTIONS', group3);
+
+      // ━━━ 第四组：成长指南（可改变的部分）━━━
+      let group4 = '';
+      if (profile.strengthsAndWarnings) {
+        const sw = profile.strengthsAndWarnings;
+        if (sw.strengths?.length) {
+          group4 += `<div class="result-section"><h3>✅ ${isZh ? '天生优势' : 'Natural Strengths'}</h3>`;
+          sw.strengths.forEach(s => { group4 += `<div class="trait-item">✦ ${s}</div>`; });
+          group4 += `</div>`;
+        }
+        if (sw.warnings?.length) {
+          group4 += `<div class="result-section"><h3>⚠️ ${isZh ? '需要注意' : 'Watch Out'}</h3>`;
+          sw.warnings.forEach(w => { group4 += `<div class="shadow-item">⚠️ ${w}</div>`; });
+          group4 += `</div>`;
+        }
+      }
+      if (profile.selfImprovement) {
+        group4 += `<div class="result-section"><h3>🌱 ${isZh ? '自我成长建议' : 'Self Improvement'}</h3><p class="life-theme">${profile.selfImprovement}</p></div>`;
+      }
       if (profile.luckyElements) {
         const le = profile.luckyElements;
         const colors = (le.colors || []).join(', ');
         const numbers = (le.numbers || []).join(', ');
-        extraHTML += `
-          <div class="result-section">
-            <h3>🍀 ${isZh ? '幸运元素' : 'Lucky Elements'}</h3>
-            <div class="traits-list">
-              ${colors ? `<div class="trait-item"><strong>${isZh ? '幸运色' : 'Colors'}:</strong> ${colors}</div>` : ''}
-              ${numbers ? `<div class="trait-item"><strong>${isZh ? '幸运数字' : 'Numbers'}:</strong> ${numbers}</div>` : ''}
-              ${le.direction ? `<div class="trait-item"><strong>${isZh ? '吉方位' : 'Direction'}:</strong> ${le.direction}</div>` : ''}
-              ${le.day ? `<div class="trait-item"><strong>${isZh ? '吉日' : 'Luckiest Day'}:</strong> ${le.day}</div>` : ''}
-            </div>
-          </div>`;
+        group4 += `<div class="result-section">
+          <h3>🍀 ${isZh ? '幸运元素' : 'Lucky Elements'}</h3>
+          <div class="traits-list">
+            ${colors ? `<div class="trait-item"><strong>${isZh ? '幸运色' : 'Colors'}:</strong> ${colors}</div>` : ''}
+            ${numbers ? `<div class="trait-item"><strong>${isZh ? '幸运数字' : 'Numbers'}:</strong> ${numbers}</div>` : ''}
+            ${le.direction ? `<div class="trait-item"><strong>${isZh ? '吉方位' : 'Direction'}:</strong> ${le.direction}</div>` : ''}
+            ${le.day ? `<div class="trait-item"><strong>${isZh ? '吉日' : 'Luckiest Day'}:</strong> ${le.day}</div>` : ''}
+          </div>
+        </div>`;
       }
-
-      addSection('💘', '配对建议', 'Compatibility Tip', profile.compatibilityTip);
-
-      // 人生阶段分析
-      if (profile.lifePhases) {
-        const lp = profile.lifePhases;
-        extraHTML += `
-          <div class="result-section">
-            <h3>🕐 ${isZh ? '人生阶段' : 'Life Phases'}</h3>
-            <div class="traits-list">
-              ${lp.early ? `<div class="trait-item"><strong>${isZh ? '早年（0-30岁）' : 'Early (0-30)'}</strong> — ${lp.early}</div>` : ''}
-              ${lp.middle ? `<div class="trait-item"><strong>${isZh ? '中年（30-50岁）' : 'Mid (30-50)'}</strong> — ${lp.middle}</div>` : ''}
-              ${lp.later ? `<div class="trait-item"><strong>${isZh ? '晚年（50岁+）' : 'Later (50+)'}</strong> — ${lp.later}</div>` : ''}
-            </div>
-          </div>`;
-      }
-
-      // 优势与提醒
-      if (profile.strengthsAndWarnings) {
-        const sw = profile.strengthsAndWarnings;
-        if (sw.strengths?.length) {
-          extraHTML += `<div class="result-section"><h3>✅ ${isZh ? '天生优势' : 'Natural Strengths'}</h3>`;
-          sw.strengths.forEach(s => { extraHTML += `<div class="trait-item">✦ ${s}</div>`; });
-          extraHTML += `</div>`;
-        }
-        if (sw.warnings?.length) {
-          extraHTML += `<div class="result-section"><h3>⚠️ ${isZh ? '需要注意' : 'Warnings'}</h3>`;
-          sw.warnings.forEach(w => { extraHTML += `<div class="shadow-item">⚠️ ${w}</div>`; });
-          extraHTML += `</div>`;
-        }
-      }
-
-      // 自我成长建议
-      addSection('🌱', '自我成长建议', 'Self Improvement', profile.selfImprovement);
+      if (group4) addGroup('成长指南 · 你可以改变的', 'GROWTH GUIDE · WHAT YOU CAN CHANGE', group4);
 
       extraEl.innerHTML = extraHTML;
     }
