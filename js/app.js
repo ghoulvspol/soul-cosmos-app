@@ -205,6 +205,12 @@ const I18N = {
     'common.get.started': 'Get Started', 'common.start.trial': 'Start 7-Day Free Trial',
     'common.analyze.again': '← Analyze Again', 'common.back': '← Back', 'common.select.type': 'Select your type to continue',
     'common.generate': 'Generate Soul Profile →',
+    'result.reasoning': '✦ View Reasoning Process',
+    'result.career': 'Career Guidance', 'result.relationship': 'Relationship Style',
+    'result.lucky': 'Lucky Elements', 'result.compatibility': 'Compatibility Tip',
+    'result.colors': 'Colors', 'result.numbers': 'Numbers', 'result.direction': 'Direction', 'result.day': 'Luckiest Day',
+    'result.accurate': '👍 Accurate', 'result.inaccurate': '👎 Not accurate', 'result.save': '⭐ Save',
+    'result.thanks': '✦ Thanks! Your feedback helps us get better.',
   },
   zh: {
     // Nav
@@ -290,6 +296,12 @@ const I18N = {
     'common.get.started': '立即开始', 'common.start.trial': '开始7天免费试用',
     'common.analyze.again': '← 重新分析', 'common.back': '← 返回', 'common.select.type': '选择你的类型继续',
     'common.generate': '生成灵魂画像 →',
+    'result.reasoning': '✦ 查看推理过程',
+    'result.career': '职业指引', 'result.relationship': '感情风格',
+    'result.lucky': '幸运元素', 'result.compatibility': '配对建议',
+    'result.colors': '幸运色', 'result.numbers': '幸运数字', 'result.direction': '吉方位', 'result.day': '吉日',
+    'result.accurate': '👍 准', 'result.inaccurate': '👎 不准', 'result.save': '⭐ 收藏',
+    'result.thanks': '✦ 感谢反馈！你的反馈帮我们变得更好。',
   },
 };
 
@@ -305,6 +317,14 @@ function toggleLang() {
   if (document.getElementById('resultState')?.classList.contains('hidden') === false) {
     // 结果已显示，不需要重新渲染
   }
+}
+
+// ========== 推理过程展开/收起 ==========
+function toggleReasoning(btn) {
+  const chain = btn.nextElementSibling;
+  const icon = btn.querySelector('.reasoning-toggle-icon');
+  chain.classList.toggle('open');
+  icon.classList.toggle('open');
 }
 
 // ========== 出生城市自定义输入 ==========
@@ -697,6 +717,28 @@ function renderResult(profile, natalChart, ziweiChart, model) {
       `☯ ${ziweiChart.mainStar}`,
       ichingTag,
     ].filter(Boolean).map(t => `<span class="zodiac-tag">${t}</span>`).join('');
+
+    // 推理过程透明化
+    const reasoningEl = document.getElementById('resultReasoning');
+    if (reasoningEl && profile.reasoningSteps?.length) {
+      const isZh = currentLang === 'zh';
+      const stepsHTML = profile.reasoningSteps.map((step, i) => {
+        const connector = i < profile.reasoningSteps.length - 1 ? '<div class="step-connector"></div>' : '';
+        return `
+          <div class="reasoning-step">
+            <div class="step-icon">${step.icon || '✦'}</div>
+            <div class="step-content">
+              <div class="step-system">${step.system || ''}</div>
+              ${step.input ? `<div class="step-input">${step.input}</div>` : ''}
+              <div class="step-reasoning">${step.reasoning || ''}</div>
+              ${step.conclusion ? `<div class="step-conclusion">→ ${step.conclusion}</div>` : ''}
+            </div>
+          </div>
+          ${connector}`;
+      }).join('');
+      reasoningEl.querySelector('.reasoning-chain').innerHTML = stepsHTML;
+      reasoningEl.style.display = 'block';
+    }
 
     // 核心特质
     const traits = profile.coreTraits || profile.traits || [];

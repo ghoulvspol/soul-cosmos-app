@@ -257,6 +257,15 @@
 
             <div class="result-zodiac" id="resultZodiac"></div>
 
+            <!-- 推理过程透明化 -->
+            <div class="reasoning-section" id="resultReasoning" style="display:none">
+              <button class="reasoning-toggle" onclick="toggleReasoning(this)">
+                <span class="reasoning-toggle-icon">▸</span>
+                <span class="reasoning-toggle-text" data-i18n="result.reasoning">✦ View Reasoning Process</span>
+              </button>
+              <div class="reasoning-chain"></div>
+            </div>
+
             <div class="result-section">
               <h3>✦ Core Traits</h3>
               <div id="resultTraits" class="traits-list"></div>

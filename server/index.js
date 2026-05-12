@@ -140,6 +140,13 @@ Your writing style:
 
 You MUST respond with valid JSON in this exact format:
 {
+  "reasoningSteps": [
+    {"system": "Western Astrology", "icon": "🌌", "input": "Sun Scorpio, Moon Pisces, Rising Leo", "reasoning": "Scorpio Sun gives depth and intensity. Pisces Moon adds emotional sensitivity. Leo Rising projects confidence.", "conclusion": "Core archetype: The Hidden Emperor — outwardly commanding, inwardly oceanic"},
+    {"system": "Zi Wei Dou Shu", "icon": "☯", "input": "Main Star: 紫微, Life Palace: 命宫", "reasoning": "紫微 in Life Palace indicates natural authority and leadership destiny.", "conclusion": "Leadership pattern: born to lead, not to follow"},
+    {"system": "I Ching", "icon": "☯️", "input": "Hexagram 1: The Creative", "reasoning": "Pure yang energy — heaven moving with power. Supreme success through perseverance.", "conclusion": "Life energy: unstoppable creative force"},
+    {"system": "MBTI", "icon": "🧠", "input": "INFJ", "reasoning": "Ni-Fe: internal intuition + external feeling. Sees patterns others miss, but needs solitude to recharge.", "conclusion": "Decision style: intuitive depth over analytical breadth"},
+    {"system": "Fusion", "icon": "✦", "input": "All systems combined", "reasoning": "Cross-validating all four systems: Eastern destiny (紫微) + Western psychology (Scorpio INFJ) + Ancient wisdom (乾卦) converges on one archetype.", "conclusion": "Final portrait: The Deep Visionary"}
+  ],
   "soulKeywords": ["word1", "word2", "word3", "word4"],
   "oneSentencePortrait": "A deeply personal, specific sentence about this person",
   "coreTraits": [
@@ -230,6 +237,15 @@ Create a deeply personal, specific soul portrait. Fuse ALL systems (Astrology + 
 
     // 补全缺失字段的默认值
     const isZh = lang === 'zh';
+    if (!profile.reasoningSteps || !profile.reasoningSteps.length) {
+      profile.reasoningSteps = [
+        { system: isZh ? '西方星盘' : 'Western Astrology', icon: '🌌', input: `Sun ${natalChart.sun.name}, Moon ${natalChart.moon.name}, Rising ${natalChart.rising.name}`, reasoning: isZh ? `${natalChart.sun.name}太阳赋予${natalChart.sun.element}元素的核心驱动力。${natalChart.moon.name}月亮带来情感深度。${natalChart.rising.name}上升塑造外在表现。` : `${natalChart.sun.name} Sun provides ${natalChart.sun.element} core drive. ${natalChart.moon.name} Moon adds emotional depth. ${natalChart.rising.name} Rising shapes outer presentation.`, conclusion: isZh ? `核心原型：${natalChart.sun.element}元素主导的${natalChart.sun.name}灵魂` : `Core archetype: ${natalChart.sun.element}-dominated ${natalChart.sun.name} soul` },
+        { system: isZh ? '紫微斗数' : 'Zi Wei Dou Shu', icon: '☯', input: `Main Star: ${ziweiChart.mainStar}`, reasoning: isZh ? `${ziweiChart.mainStar}星落入${ziweiChart.lifePalace}，揭示先天格局与人生主题。` : `${ziweiChart.mainStar} star in ${ziweiChart.lifePalace} reveals innate life pattern and themes.`, conclusion: isZh ? `命理格局：${ziweiChart.mainStar}主导` : `Destiny pattern: ${ziweiChart.mainStar} dominant` },
+        { system: isZh ? '易经' : 'I Ching', icon: '☯️', input: `${iching?.number || 1}. ${iching?.name || '乾'}`, reasoning: isZh ? (iching?.judgment || '元亨利贞。') : (iching?.judgmentEn || 'Sublime success.'), conclusion: isZh ? `生命能量：${iching?.keywords?.join('、') || '创造、领导'}` : `Life energy: ${iching?.keywords?.join(', ') || 'Creative, Leadership'}` },
+        { system: 'MBTI', icon: '🧠', input: mbtiType, reasoning: isZh ? `${mbtiType}型人格的认知功能栈决定了信息处理和决策偏好。` : `The ${mbtiType} cognitive function stack determines information processing and decision preferences.`, conclusion: isZh ? `决策风格：${mbtiType[0] === 'I' ? '内向直觉' : '外向感觉'}主导` : `Decision style: ${mbtiType[0] === 'I' ? 'Introverted intuition' : 'Extraverted sensing'} dominant` },
+        { system: isZh ? '融合' : 'Fusion', icon: '✦', input: isZh ? '所有体系交叉验证' : 'Cross-validation of all systems', reasoning: isZh ? '东方命理（紫微）+ 西方心理学（星盘MBTI）+ 古老智慧（易经）四维交叉验证，得出统一画像。' : 'Eastern destiny (Zi Wei) + Western psychology (Astrology+MBTI) + Ancient wisdom (I Ching) cross-validated into unified portrait.', conclusion: isZh ? `最终画像：${profile.soulKeywords?.join(' · ')}` : `Final portrait: ${profile.soulKeywords?.join(' · ')}` },
+      ];
+    }
     profile.careerGuidance = profile.careerGuidance || (isZh ? '你的星盘显示你适合需要创造力和洞察力的工作。在团队中，你更倾向于深度思考而非表面执行。' : 'Your chart suggests you thrive in roles requiring creativity and insight. In teams, you prefer deep thinking over surface-level execution.');
     profile.relationshipStyle = profile.relationshipStyle || (isZh ? '你在关系中追求深度连接而非表面社交。你倾向于用行动而非言语表达爱意。' : 'You seek deep connections over surface-level socializing. You tend to express love through actions rather than words.');
     profile.luckyElements = profile.luckyElements || {
