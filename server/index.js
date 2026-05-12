@@ -312,17 +312,22 @@ Create a deeply personal, specific soul portrait. Fuse ALL systems into ONE cohe
     profile.bazi = bazi;
 
     // 补全核心字段（AI可能返回空值）
+    const signMapZh = { 'Aries': '白羊', 'Taurus': '金牛', 'Gemini': '双子', 'Cancer': '巨蟹', 'Leo': '狮子', 'Virgo': '处女', 'Libra': '天秤', 'Scorpio': '天蝎', 'Sagittarius': '射手', 'Capricorn': '摩羯', 'Aquarius': '水瓶', 'Pisces': '双鱼' };
+    const sunZh = signMapZh[natalChart.sun.name] || natalChart.sun.name;
+    const moonZh = signMapZh[natalChart.moon.name] || natalChart.moon.name;
+    const risingZh = signMapZh[natalChart.rising.name] || natalChart.rising.name;
+
     if (!profile.soulKeywords || !profile.soulKeywords.length) {
       const wx = bazi?.riZhuWuXing || natalChart.sun.element;
-      const wxMap = { '木': 'Growth', '火': 'Passion', '土': 'Stability', '金': 'Precision', '水': 'Wisdom' };
       const wxMapZh = { '木': '生长', '火': '热情', '土': '稳重', '金': '精准', '水': '智慧' };
+      const wxMapEn = { '木': 'Growth', '火': 'Passion', '土': 'Stability', '金': 'Precision', '水': 'Wisdom' };
       profile.soulKeywords = isZh
-        ? [natalChart.sun.name + '之魂', wxMapZh[wx] || '深邃', ziweiChart.mainStar + '之力', mbtiType + '思维']
-        : [natalChart.sun.name + ' Soul', wxMap[wx] || 'Depth', ziweiChart.mainStar + ' Power', mbtiType + ' Mind'];
+        ? [sunZh + '之魂', wxMapZh[wx] || '深邃', ziweiChart.mainStar + '之力', mbtiType + '思维']
+        : [natalChart.sun.name + ' Soul', wxMapEn[wx] || 'Depth', ziweiChart.mainStar + ' Power', mbtiType + ' Mind'];
     }
     if (!profile.oneSentencePortrait) {
       profile.oneSentencePortrait = isZh
-        ? `你是${natalChart.sun.name}太阳${natalChart.moon.name}月亮${natalChart.rising.name}上升的灵魂，${bazi?.riZhuTrait || ''}，${mbtiType}型人格赋予你独特的思维方式。`
+        ? `你是${sunZh}太阳${moonZh}月亮${risingZh}上升的灵魂，${bazi?.riZhuTrait || ''}，${mbtiType}型人格赋予你独特的思维方式。`
         : `You are a ${natalChart.sun.name} Sun with ${natalChart.moon.name} Moon and ${natalChart.rising.name} Rising — ${bazi?.riZhuTrait || 'a complex soul'} with the ${mbtiType} mind.`;
     }
     if (!profile.coreTraits || !profile.coreTraits.length) {
