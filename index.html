@@ -14,40 +14,43 @@
 
   <!-- 导航 -->
   <nav id="nav">
-    <div class="nav-logo">✦ Soul Cosmos</div>
+    <div class="nav-logo">✦ Soul Cosmos <span id="demoBadge" style="display:none;font-size:10px;color:#ffd700;background:rgba(255,215,0,0.15);padding:2px 8px;border-radius:8px;margin-left:8px">DEMO</span></div>
     <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#how">How It Works</a>
-      <a href="#pricing">Pricing</a>
-      <button class="btn-nav" onclick="scrollToSection('try')">Try Free</button>
+      <a href="#features" data-i18n="nav.features">Features</a>
+      <a href="#circle" data-i18n="nav.circle">My Circle</a>
+      <a href="#photos" style="font-size:12px" data-i18n="nav.face">Face/Palm</a>
+      <a href="#fengshui" data-i18n="nav.fengshui">Feng Shui</a>
+      <a href="#scenes" style="font-size:12px" data-i18n="nav.scenes">Scenes</a>
+      <button class="btn-nav" onclick="scrollToSection('try')" data-i18n="nav.try">Try Free</button>
+      <button class="btn-lang" id="langToggle" onclick="toggleLang()">中/EN</button>
     </div>
   </nav>
 
   <!-- Hero Section -->
   <section class="hero" id="hero">
     <div class="hero-content">
-      <div class="hero-badge">✦ The World's First East-Meets-West Personality AI</div>
+      <div class="hero-badge" data-i18n="hero.badge">✦ The World's First East-Meets-West Personality AI</div>
       <h1 class="hero-title">
-        Discover Your<br>
-        <span class="gradient-text">Multi-Dimensional</span><br>
-        Soul Profile
+        <span data-i18n="hero.title1">Discover Your</span><br>
+        <span class="gradient-text" data-i18n="hero.title2">Multi-Dimensional</span><br>
+        <span data-i18n="hero.title3">Soul Profile</span>
       </h1>
-      <p class="hero-desc">
+      <p class="hero-desc" data-i18n="hero.desc">
         We fuse Western Astrology, Eastern Zi Wei Dou Shu, MBTI, Palm Reading,
         Blood Type theory, and Social Psychology into one unified portrait of who you truly are.
       </p>
       <div class="hero-actions">
-        <button class="btn-primary" onclick="scrollToSection('try')">
+        <button class="btn-primary" onclick="scrollToSection('try')" data-i18n="hero.cta">
           ✦ Generate My Soul Profile — Free
         </button>
-        <button class="btn-ghost" onclick="scrollToSection('features')">
+        <button class="btn-ghost" onclick="scrollToSection('features')" data-i18n="hero.learn">
           Learn More ↓
         </button>
       </div>
       <div class="hero-stats">
-        <div class="stat"><span class="stat-num">6</span><span class="stat-label">Wisdom Systems</span></div>
-        <div class="stat"><span class="stat-num">AI</span><span class="stat-label">Fusion Engine</span></div>
-        <div class="stat"><span class="stat-num">∞</span><span class="stat-label">Unique Profiles</span></div>
+        <div class="stat"><span class="stat-num">7</span><span class="stat-label" data-i18n="hero.stat1">Wisdom Systems</span></div>
+        <div class="stat"><span class="stat-num">AI</span><span class="stat-label" data-i18n="hero.stat2">Fusion Engine</span></div>
+        <div class="stat"><span class="stat-num">∞</span><span class="stat-label" data-i18n="hero.stat3">Unique Profiles</span></div>
       </div>
     </div>
     <div class="hero-visual">
@@ -65,45 +68,51 @@
   <!-- Features Section -->
   <section class="features" id="features">
     <div class="section-header">
-      <h2>Six Dimensions of Self</h2>
-      <p>Most apps give you one lens. We give you the full spectrum.</p>
+      <h2 data-i18n="feat.title">Seven Dimensions of Self</h2>
+      <p data-i18n="feat.subtitle">Most apps give you one lens. We give you the full spectrum.</p>
     </div>
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">🌌</div>
-        <h3>Western Astrology</h3>
-        <p>Sun, Moon, Rising signs. Planetary aspects. House placements. The classic natal chart, deeply interpreted.</p>
-        <div class="feature-tag">Co-Star level depth</div>
+        <h3 data-i18n="feat.astro">Western Astrology</h3>
+        <p data-i18n="feat.astro.desc">Sun, Moon, Rising signs. Planetary aspects. House placements. The classic natal chart, deeply interpreted.</p>
+        <div class="feature-tag" data-i18n="feat.tag.astro">Co-Star level depth</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">☯</div>
-        <h3>Zi Wei Dou Shu</h3>
-        <p>The Emperor's Astrology — 1,400 years of Chinese star mapping. Your life palace, career palace, and 14 main stars.</p>
-        <div class="feature-tag">Eastern wisdom</div>
+        <h3 data-i18n="feat.ziwei">Zi Wei Dou Shu</h3>
+        <p data-i18n="feat.ziwei.desc">The Emperor's Astrology — 1,400 years of Chinese star mapping. Your life palace, career palace, and 14 main stars.</p>
+        <div class="feature-tag" data-i18n="feat.tag.ziwei">Eastern wisdom</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">🧠</div>
-        <h3>MBTI Integration</h3>
-        <p>Your cognitive function stack fused with your astrological profile. Not two separate reports — one unified insight.</p>
-        <div class="feature-tag">Psychology + Stars</div>
+        <h3 data-i18n="feat.mbti">MBTI Integration</h3>
+        <p data-i18n="feat.mbti.desc">Your cognitive function stack fused with your astrological profile. Not two separate reports — one unified insight.</p>
+        <div class="feature-tag" data-i18n="feat.tag.mbti">Psychology + Stars</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">🖐️</div>
-        <h3>AI Palm & Face Reading</h3>
-        <p>Upload a photo. Our CV model reads your palm lines and facial structure. Ancient art meets modern AI.</p>
-        <div class="feature-tag">AI-powered</div>
+        <h3 data-i18n="feat.palm">AI Palm & Face Reading</h3>
+        <p data-i18n="feat.palm.desc">Upload a photo. Our CV model reads your palm lines and facial structure. Ancient art meets modern AI.</p>
+        <div class="feature-tag" data-i18n="feat.tag.palm">AI-powered</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">🩸</div>
-        <h3>Blood Type Personality</h3>
-        <p>Japanese and Korean personality theory based on blood type. A surprisingly accurate behavioral predictor.</p>
-        <div class="feature-tag">East Asian science</div>
+        <h3 data-i18n="feat.blood">Blood Type Personality</h3>
+        <p data-i18n="feat.blood.desc">Japanese and Korean personality theory based on blood type. A surprisingly accurate behavioral predictor.</p>
+        <div class="feature-tag" data-i18n="feat.tag.blood">East Asian science</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">🧬</div>
-        <h3>Social Psychology</h3>
-        <p>Big Five traits, attachment style, love language. Scientific frameworks fused with mystical ones.</p>
-        <div class="feature-tag">Evidence-based</div>
+        <h3 data-i18n="feat.psych">Social Psychology</h3>
+        <p data-i18n="feat.psych.desc">Big Five traits, attachment style, love language. Scientific frameworks fused with mystical ones.</p>
+        <div class="feature-tag" data-i18n="feat.tag.psych">Evidence-based</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">☯️</div>
+        <h3 data-i18n="feat.iching">I Ching (易经)</h3>
+        <p data-i18n="feat.iching.desc">5,000 years of Chinese wisdom. 64 hexagrams revealing your life archetype, inner truth, and path forward.</p>
+        <div class="feature-tag" data-i18n="feat.tag.iching">Ancient wisdom</div>
       </div>
     </div>
   </section>
@@ -111,29 +120,29 @@
   <!-- How It Works -->
   <section class="how-it-works" id="how">
     <div class="section-header">
-      <h2>How It Works</h2>
-      <p>From input to insight in 60 seconds.</p>
+      <h2 data-i18n="how.title">How It Works</h2>
+      <p data-i18n="how.subtitle">From input to insight in 60 seconds.</p>
     </div>
     <div class="steps">
       <div class="step">
         <div class="step-num">01</div>
-        <h3>Enter Your Birth Info</h3>
-        <p>Date, time, and location of birth. That's all we need to calculate your natal chart and Zi Wei chart.</p>
+        <h3 data-i18n="how.s1.title">Enter Your Birth Info</h3>
+        <p data-i18n="how.s1.desc">Date, time, and location of birth. That's all we need to calculate your natal chart and Zi Wei chart.</p>
       </div>
       <div class="step">
         <div class="step-num">02</div>
-        <h3>Take the MBTI Test</h3>
-        <p>60 questions, 5 minutes. Or import your existing MBTI type if you already know it.</p>
+        <h3 data-i18n="how.s2.title">Take the MBTI Test</h3>
+        <p data-i18n="how.s2.desc">60 questions, 5 minutes. Or import your existing MBTI type if you already know it.</p>
       </div>
       <div class="step">
         <div class="step-num">03</div>
-        <h3>AI Fuses Everything</h3>
-        <p>Our AI doesn't just list each system — it synthesizes them into one coherent, deeply personal portrait.</p>
+        <h3 data-i18n="how.s3.title">AI Fuses Everything</h3>
+        <p data-i18n="how.s3.desc">Our AI doesn't just list each system — it synthesizes them into one coherent, deeply personal portrait.</p>
       </div>
       <div class="step">
         <div class="step-num">04</div>
-        <h3>Meet Your Soul</h3>
-        <p>Receive your Soul Profile: keywords, core traits, shadow side, life theme, and daily personalized insights.</p>
+        <h3 data-i18n="how.s4.title">Meet Your Soul</h3>
+        <p data-i18n="how.s4.desc">Receive your Soul Profile: keywords, core traits, shadow side, life theme, and daily personalized insights.</p>
       </div>
     </div>
   </section>
@@ -141,14 +150,14 @@
   <!-- Try It Section -->
   <section class="try-section" id="try">
     <div class="section-header">
-      <h2>Generate Your Soul Profile</h2>
-      <p>Free. No signup required. Takes 2 minutes.</p>
+      <h2 data-i18n="try.title">Generate Your Soul Profile</h2>
+      <p data-i18n="try.subtitle">Free. No signup required. Takes 2 minutes.</p>
     </div>
 
     <div class="try-container">
       <!-- Step 1: Birth Info -->
       <div id="step1" class="try-step active">
-        <h3>✦ When and where were you born?</h3>
+        <h3 data-i18n="try.step1">✦ When and where were you born?</h3>
         <div class="form-row">
           <div class="form-group">
             <label>Birth Date</label>
@@ -253,13 +262,25 @@
             </div>
 
             <div class="result-cta">
-              <button class="btn-primary" onclick="scrollToSection('pricing')">
+              <div id="premiumBadge" style="display:none;padding:8px 16px;background:linear-gradient(135deg,#d4a574,#b8860b);border-radius:20px;font-size:12px;color:#0a0a1a;font-weight:600;margin-bottom:16px;display:inline-block">
+                ✦ PREMIUM MEMBER — Full Access
+              </div>
+              <button class="btn-primary" id="unlockBtn" onclick="scrollToSection('pricing')">
                 Unlock Full Analysis — $9.99/mo
               </button>
-              <p class="cta-sub">Or share your free profile with friends</p>
+              <p class="cta-sub" id="ctaSub">Or share your free profile with friends</p>
               <button class="btn-ghost" onclick="shareProfile()">
                 ✦ Share Soul Profile
               </button>
+
+              <!-- 反馈系统 -->
+              <div class="feedback-bar" id="feedbackBar">
+                <span class="feedback-label" data-i18n="try.feedback">How accurate is this?</span>
+                <button class="feedback-btn" onclick="submitFeedback('accurate',this)" data-i18n="try.accurate">👍 准</button>
+                <button class="feedback-btn" onclick="submitFeedback('inaccurate',this)" data-i18n="try.inaccurate">👎 不准</button>
+                <button class="feedback-btn" onclick="submitFeedback('saved',this)" data-i18n="try.save">⭐ 收藏</button>
+              </div>
+              <div id="feedbackThanks" style="display:none;font-size:13px;color:#6fcf97;margin-top:8px" data-i18n="try.thanks">✦ Thanks! Your feedback helps us get better.</div>
             </div>
           </div>
 
@@ -274,8 +295,8 @@
   <!-- Pricing -->
   <section class="pricing" id="pricing">
     <div class="section-header">
-      <h2>Choose Your Depth</h2>
-      <p>Start free. Go deeper when you're ready.</p>
+      <h2 data-i18n="price.title">Choose Your Depth</h2>
+      <p data-i18n="price.subtitle">Start free. Go deeper when you're ready.</p>
     </div>
     <div class="pricing-grid">
       <div class="price-card">
@@ -283,10 +304,10 @@
         <div class="price-amount">$0</div>
         <div class="price-period">forever</div>
         <ul class="price-features">
-          <li>✦ Basic Soul Profile (3 keywords)</li>
-          <li>✦ One-sentence portrait</li>
-          <li>✦ 1 daily insight</li>
-          <li>✦ Share with friends</li>
+          <li data-i18n="price.free.f1">✦ Basic Soul Profile (3 keywords)</li>
+          <li data-i18n="price.free.f2">✦ One-sentence portrait</li>
+          <li data-i18n="price.free.f3">✦ 1 daily insight</li>
+          <li data-i18n="price.free.f4">✦ Share with friends</li>
         </ul>
         <button class="btn-outline" onclick="scrollToSection('try')">Get Started</button>
       </div>
@@ -296,13 +317,13 @@
         <div class="price-amount">$9.99</div>
         <div class="price-period">/month</div>
         <ul class="price-features">
-          <li>✦ Full 6-dimension analysis</li>
-          <li>✦ Unlimited compatibility reports</li>
-          <li>✦ Daily personalized insights</li>
-          <li>✦ Deep natal chart reading</li>
-          <li>✦ AI palm & face reading (v2)</li>
-          <li>✦ Zi Wei Dou Shu analysis (v2)</li>
-          <li>✦ Priority AI responses</li>
+          <li data-i18n="price.prem.f1">✦ Full 6-dimension analysis</li>
+          <li data-i18n="price.prem.f2">✦ Unlimited compatibility reports</li>
+          <li data-i18n="price.prem.f3">✦ Daily personalized insights</li>
+          <li data-i18n="price.prem.f4">✦ Deep natal chart reading</li>
+          <li data-i18n="price.prem.f5">✦ AI palm & face reading (v2)</li>
+          <li data-i18n="price.prem.f6">✦ Zi Wei Dou Shu analysis (v2)</li>
+          <li data-i18n="price.prem.f7">✦ Priority AI responses</li>
         </ul>
         <button class="btn-primary">Start 7-Day Free Trial</button>
       </div>
@@ -311,12 +332,270 @@
         <div class="price-amount">$59.99</div>
         <div class="price-period">/year (save 50%)</div>
         <ul class="price-features">
-          <li>✦ Everything in Premium</li>
-          <li>✦ Yearly soul evolution report</li>
-          <li>✦ Exclusive content</li>
-          <li>✦ Early access to new features</li>
+          <li data-i18n="price.ann.f1">✦ Everything in Premium</li>
+          <li data-i18n="price.ann.f2">✦ Yearly soul evolution report</li>
+          <li data-i18n="price.ann.f3">✦ Exclusive content</li>
+          <li data-i18n="price.ann.f4">✦ Early access to new features</li>
         </ul>
         <button class="btn-outline">Start 7-Day Free Trial</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Phase 2: My Circle 关系圈分析 -->
+  <section class="circle-section" id="circle">
+    <div class="section-header">
+      <h2 data-i18n="circle.title">🔮 My Circle — Relationship Intelligence</h2>
+      <p data-i18n="circle.subtitle">Add the people around you. Get weekly insights on how to navigate every relationship.</p>
+    </div>
+
+    <div class="circle-container">
+      <!-- 添加关系人 -->
+      <div class="circle-add-form">
+        <h3>Add Someone to Your Circle</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Their Name</label>
+            <input type="text" id="circleName" placeholder="e.g. Boss, Sarah, Mom...">
+          </div>
+          <div class="form-group">
+            <label>Relationship</label>
+            <select id="circleRelation">
+              <option value="boss">👔 Boss / Manager</option>
+              <option value="colleague">👥 Colleague</option>
+              <option value="partner">💕 Partner / Spouse</option>
+              <option value="friend">🤝 Friend</option>
+              <option value="family">👨‍👩‍👧 Family</option>
+              <option value="client">💼 Client</option>
+              <option value="crush">💘 Crush / Date</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Their Birth Date</label>
+            <input type="date" id="circleBirthDate">
+          </div>
+          <div class="form-group">
+            <label>Their MBTI (if known)</label>
+            <select id="circleMBTI">
+              <option value="">Unknown</option>
+              <option value="INTJ">INTJ</option><option value="INTP">INTP</option>
+              <option value="ENTJ">ENTJ</option><option value="ENTP">ENTP</option>
+              <option value="INFJ">INFJ</option><option value="INFP">INFP</option>
+              <option value="ENFJ">ENFJ</option><option value="ENFP">ENFP</option>
+              <option value="ISTJ">ISTJ</option><option value="ISFJ">ISFJ</option>
+              <option value="ESTJ">ESTJ</option><option value="ESFJ">ESFJ</option>
+              <option value="ISTP">ISTP</option><option value="ISFP">ISFP</option>
+              <option value="ESTP">ESTP</option><option value="ESFP">ESFP</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="addPersonToCircle()">✦ Add to My Circle</button>
+      </div>
+
+      <!-- 关系人列表 -->
+      <div class="circle-list" id="circleList">
+        <div class="circle-empty">
+          <div class="empty-icon">👥</div>
+          <p>Your circle is empty. Add your boss, colleagues, partner, or friends to get relationship insights.</p>
+        </div>
+      </div>
+
+      <!-- 周度关系预测 -->
+      <div class="weekly-forecast" id="weeklyForecast" style="display:none">
+        <h3>📅 This Week's Relationship Forecast</h3>
+        <div id="forecastContent"></div>
+        <button class="btn-ghost" onclick="generateWeeklyForecast()">🔮 Refresh Forecast</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Phase 3: Feng Shui 风水分析 -->
+  <section class="fengshui-section" id="fengshui">
+    <div class="section-header">
+      <h2 data-i18n="fs.title">🏠 Feng Shui — Space Intelligence</h2>
+      <p data-i18n="fs.subtitle">Analyze your home and office layout. Get personalized adjustments to improve energy flow.</p>
+    </div>
+
+    <div class="fengshui-container">
+      <!-- 空间类型选择 -->
+      <div class="fengshui-type-selector">
+        <button class="fengshui-type-btn active" data-type="home" onclick="selectSpaceType('home')">
+          🏠 Home / Apartment
+        </button>
+        <button class="fengshui-type-btn" data-type="office" onclick="selectSpaceType('office')">
+          🏢 Office / Desk
+        </button>
+      </div>
+
+      <!-- 住宅风水表单 -->
+      <div id="fengshuiHomeForm" class="fengshui-form">
+        <h3>🏠 Home Analysis</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Building Direction (Facing)</label>
+            <select id="homeDirection">
+              <option value="south">South (朝南)</option>
+              <option value="north">North (朝北)</option>
+              <option value="east">East (朝东)</option>
+              <option value="west">West (朝西)</option>
+              <option value="southeast">Southeast (朝东南)</option>
+              <option value="southwest">Southwest (朝西南)</option>
+              <option value="northeast">Northeast (朝东北)</option>
+              <option value="northwest">Northwest (朝西北)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Front Door Faces</label>
+            <select id="doorDirection">
+              <option value="south">South</option>
+              <option value="north">North</option>
+              <option value="east">East</option>
+              <option value="west">West</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Bedroom Location</label>
+            <select id="bedroomLocation">
+              <option value="southwest">Southwest (西南)</option>
+              <option value="southeast">Southeast (东南)</option>
+              <option value="northwest">Northwest (西北)</option>
+              <option value="northeast">Northeast (东北)</option>
+              <option value="south">South (南)</option>
+              <option value="north">North (北)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Bed Position</label>
+            <select id="bedPosition">
+              <option value="head_south">Head South, Feet North</option>
+              <option value="head_north">Head North, Feet South</option>
+              <option value="head_east">Head East, Feet West</option>
+              <option value="head_west">Head West, Feet East</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Current Concerns (optional)</label>
+          <input type="text" id="homeConcerns" placeholder="e.g. poor sleep, money issues, relationship tension...">
+        </div>
+        <button class="btn-primary" onclick="analyzeFengShui('home')">🔮 Analyze Home Feng Shui</button>
+      </div>
+
+      <!-- 办公室风水表单 -->
+      <div id="fengshuiOfficeForm" class="fengshui-form" style="display:none">
+        <h3>🏢 Office / Desk Analysis</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Desk Faces</label>
+            <select id="deskDirection">
+              <option value="south">South</option>
+              <option value="north">North</option>
+              <option value="east">East</option>
+              <option value="west">West</option>
+              <option value="southeast">Southeast</option>
+              <option value="southwest">Southwest</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Desk Position</label>
+            <select id="deskPosition">
+              <option value="facing_wall">Facing a Wall</option>
+              <option value="facing_door">Facing the Door</option>
+              <option value="back_to_door">Back to the Door</option>
+              <option value="window_behind">Window Behind</option>
+              <option value="window_side">Window to the Side</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Office Floor</label>
+            <select id="officeFloor">
+              <option value="low">Low Floor (1-5)</option>
+              <option value="mid">Mid Floor (6-15)</option>
+              <option value="high">High Floor (16+)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Your Career Goal</label>
+            <input type="text" id="careerGoal" placeholder="e.g. promotion, new job, business growth...">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="analyzeFengShui('office')">🔮 Analyze Office Feng Shui</button>
+      </div>
+
+      <!-- 风水分析结果 -->
+      <div id="fengshuiResult" class="fengshui-result" style="display:none">
+        <div id="fengshuiResultContent"></div>
+        <button class="btn-ghost" style="margin-top:16px" onclick="document.getElementById('fengshuiResult').style.display='none'">
+          ← Analyze Again
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Phase 2.5: 面相/手相 AI 分析 -->
+  <section class="photo-upload-section" id="photos">
+    <div class="section-header">
+      <h2 data-i18n="photo.title">🖐️ AI Face & Palm Reading</h2>
+      <p data-i18n="photo.subtitle">Upload a photo. Our AI reads your facial features and palm lines. Ancient art meets modern technology.</p>
+    </div>
+    <div class="photo-upload-container">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <!-- 面相上传 -->
+        <div>
+          <h3 style="font-size:16px;color:#f8fafc;margin-bottom:12px;font-family:'Inter',sans-serif;font-weight:600" data-i18n="photo.face">📸 Face Reading</h3>
+          <div class="upload-zone" id="faceZone">
+            <div class="upload-icon">👤</div>
+            <div class="upload-text" data-i18n="photo.face.upload">Upload a clear face photo</div>
+            <div class="upload-hint" data-i18n="photo.face.hint">Click or drag & drop</div>
+          </div>
+          <div class="upload-preview" id="facePreview">
+            <img id="faceImg" src="" alt="Face">
+            <button class="upload-analyze-btn" onclick="analyzePhoto('face')" data-i18n="photo.analyze.face">🔮 Analyze Face</button>
+          </div>
+          <div class="photo-result" id="facePhotoResult">
+            <div id="facePhotoContent"></div>
+          </div>
+        </div>
+        <!-- 手相上传 -->
+        <div>
+          <h3 style="font-size:16px;color:#f8fafc;margin-bottom:12px;font-family:'Inter',sans-serif;font-weight:600" data-i18n="photo.palm">🖐️ Palm Reading</h3>
+          <div class="upload-zone" id="palmZone">
+            <div class="upload-icon">✋</div>
+            <div class="upload-text" data-i18n="photo.palm.upload">Upload a clear palm photo</div>
+            <div class="upload-hint" data-i18n="photo.palm.hint">Click or drag & drop</div>
+          </div>
+          <div class="upload-preview" id="palmPreview">
+            <img id="palmImg" src="" alt="Palm">
+            <button class="upload-analyze-btn" onclick="analyzePhoto('palm')" data-i18n="photo.analyze.palm">🔮 Analyze Palm</button>
+          </div>
+          <div class="photo-result" id="palmPhotoResult">
+            <div id="palmPhotoContent"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 场景建议（时间线驱动） -->
+  <section class="scene-section" id="scenes">
+    <div class="section-header">
+      <h2 data-i18n="scene.title">📅 This Week's Life Scenes</h2>
+      <p data-i18n="scene.subtitle">Dynamic advice for workplace, relationships, and personal growth — powered by your unique profile.</p>
+    </div>
+    <div class="scene-container">
+      <div id="sceneContent">
+        <div style="text-align:center;padding:40px;color:#64748b">
+          <p data-i18n="scene.empty">Generate your profile first, then come back for weekly scene advice.</p>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:16px">
+        <button class="btn-ghost" onclick="loadScenes()" data-i18n="scene.btn">🔮 Generate This Week's Scenes</button>
       </div>
     </div>
   </section>
@@ -336,6 +615,7 @@
   </footer>
 
   <script src="js/astrology.js"></script>
+  <script src="js/iching.js"></script>
   <script src="js/profile.js"></script>
   <script src="js/app.js"></script>
 </body>
