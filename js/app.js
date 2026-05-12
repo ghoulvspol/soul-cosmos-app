@@ -644,7 +644,7 @@ function generateProfile() {
     fetch(CONFIG.apiBase + '/api/generate-profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ natalChart, mbtiType: selectedMBTI, ziweiChart, iching: ichingInfo, lang: currentLang, gender: document.getElementById('birthGender')?.value || 'unknown' }),
+      body: JSON.stringify({ natalChart, mbtiType: selectedMBTI, ziweiChart, iching: ichingInfo, lang: currentLang, gender: document.getElementById('birthGender')?.value || 'unknown', birthDate: birthDate, birthTime: birthTime }),
     })
       .then(res => res.json())
       .then(data => {
@@ -709,6 +709,7 @@ function renderResult(profile, natalChart, ziweiChart, model) {
     const zodiacEl = document.getElementById('resultZodiac');
     const ichingHex = window._currentIching;
     const ichingTag = ichingHex ? `☯️ ${ichingHex.symbol} ${ichingHex.number}. ${ichingHex.english}` : '';
+    const baziTag = profile.bazi ? `📜 ${profile.bazi.fourPillars}` : '';
     zodiacEl.innerHTML = [
       `☀ ${natalChart.sun.symbol} ${natalChart.sun.name} Sun`,
       `☽ ${natalChart.moon.symbol} ${natalChart.moon.name} Moon`,
@@ -716,6 +717,7 @@ function renderResult(profile, natalChart, ziweiChart, model) {
       `🧠 ${selectedMBTI}`,
       `☯ ${ziweiChart.mainStar}`,
       ichingTag,
+      baziTag,
     ].filter(Boolean).map(t => `<span class="zodiac-tag">${t}</span>`).join('');
 
     // 推理过程透明化

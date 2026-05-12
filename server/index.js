@@ -6,8 +6,28 @@ const express = require('express');
 const path = require('path');
 const http = require('http');
 const https = require('https');
+const { execSync } = require('child_process');
 
 const app = express();
+
+/**
+ * 调用 Python 八字排盘引擎
+ */
+function calculateBazi(birthDate, birthTime, gender) {
+  try {
+    const [year, month, day] = birthDate.split('-').map(Number);
+    const [hour] = (birthTime || '12:00').split(':').map(Number);
+    const scriptPath = path.join(__dirname, 'bazi.py');
+    const result = execSync(
+      `python3 "${scriptPath}" ${year} ${month} ${day} ${hour} ${gender || 'unknown'}`,
+      { encoding: 'utf-8', timeout: 10000 }
+    );
+    return JSON.parse(result);
+  } catch (err) {
+    console.error('BaZi calculation error:', err.message);
+    return null;
+  }
+}
 const PORT = 8066;
 
 // Mify 网关配置
@@ -126,7 +146,14 @@ app.post('/api/generate-profile', async (req, res) => {
       return res.status(400).json({ error: 'Missing natalChart or mbtiType' });
     }
 
-    const systemPrompt = `You are SOUL COSMOS — a master personality analyst who synthesizes insights from Western Astrology, Eastern Zi Wei Dou Shu (紫微斗数), I Ching (易经), MBTI personality typing, and Blood Type theory.
+    // 计算八字排盘
+    const bazi = calculateBazi(
+      req.body.birthDate || '1995-06-15',
+      req.body.birthTime || '12:00',
+      gender
+    );
+
+    const systemPrompt = `You are SOUL COSMOS — a master personality analyst who synthesizes insights from Western Astrology, Eastern Zi Wei Dou Shu (紫微斗数), BaZi (八字命理), I Ching (易经), MBTI personality typing, and Social Psychology.
 
 CRITICAL: You MUST respond entirely in ${outputLang}. All field values (soulKeywords, oneSentencePortrait, coreTraits, shadows, lifeTheme, dailyInsight) must be in ${outputLang}.
 
@@ -181,6 +208,19 @@ WESTERN NATAL CHART:
 - Dominant Element: ${natalChart.dominantElement}
 
 MBTI TYPE: ${mbtiType}
+
+${bazi ? `BAZI (八字命理) - FOUR PILLARS:
+- Year Pillar: ${bazi.yearPillar} (${bazi.pillars[0].tianGanWuXing}${bazi.pillars[0].diZhiWuXing})
+- Month Pillar: ${bazi.monthPillar} (${bazi.pillars[1].tianGanWuXing}${bazi.pillars[1].diZhiWuXing})
+- Day Pillar: ${bazi.dayPillar} (${bazi.pillars[2].tianGanWuXing}${bazi.pillars[2].diZhiWuXing})
+- Hour Pillar: ${bazi.hourPillar} (${bazi.pillars[3].tianGanWuXing}${bazi.pillars[3].diZhiWuXing})
+- Day Master (日主): ${bazi.riZhu} (${bazi.riZhuWuXing}, ${bazi.riZhuYinYang}) — ${bazi.riZhuTrait}
+- Pattern (格局): ${bazi.geJu}
+- Five Elements: Wood ${bazi.wuXing.count['木']} / Fire ${bazi.wuXing.count['火']} / Earth ${bazi.wuXing.count['土']} / Metal ${bazi.wuXing.count['金']} / Water ${bazi.wuXing.count['水']}
+- Dominant: ${bazi.wuXing.dominant} | Weakest: ${bazi.wuXing.weakest}${bazi.wuXing.lack ? ' | Lacking: ' + bazi.wuXing.lack : ''}
+- Lunar: ${bazi.lunar.yearChinese}年${bazi.lunar.monthChinese}月${bazi.lunar.dayChinese}日
+- Ten Gods (十神): Year=${bazi.pillars[0].shiShen}, Month=${bazi.pillars[1].shiShen}, Hour=${bazi.pillars[3].shiShen}
+` : ''}
 
 ZI WEI DOU SHU (紫微斗数):
 - Main Star: ${ziweiChart.mainStar}
@@ -240,12 +280,15 @@ Create a deeply personal, specific soul portrait. Fuse ALL systems (Astrology + 
     if (!profile.reasoningSteps || !profile.reasoningSteps.length) {
       profile.reasoningSteps = [
         { system: isZh ? '西方星盘' : 'Western Astrology', icon: '🌌', input: `Sun ${natalChart.sun.name}, Moon ${natalChart.moon.name}, Rising ${natalChart.rising.name}`, reasoning: isZh ? `${natalChart.sun.name}太阳赋予${natalChart.sun.element}元素的核心驱动力。${natalChart.moon.name}月亮带来情感深度。${natalChart.rising.name}上升塑造外在表现。` : `${natalChart.sun.name} Sun provides ${natalChart.sun.element} core drive. ${natalChart.moon.name} Moon adds emotional depth. ${natalChart.rising.name} Rising shapes outer presentation.`, conclusion: isZh ? `核心原型：${natalChart.sun.element}元素主导的${natalChart.sun.name}灵魂` : `Core archetype: ${natalChart.sun.element}-dominated ${natalChart.sun.name} soul` },
+        { system: isZh ? '八字命理' : 'BaZi (Four Pillars)', icon: '📜', input: bazi ? bazi.fourPillars : 'N/A', reasoning: bazi ? (isZh ? `日主${bazi.riZhu}（${bazi.riZhuWuXing}，${bazi.riZhuYinYang}），${bazi.riZhuTrait}。格局${bazi.geJu}。主导五行${bazi.wuXing.dominant}，最弱${bazi.wuXing.weakest}。` : `Day Master ${bazi.riZhu} (${bazi.riZhuWuXing}, ${bazi.riZhuYinYang}). Pattern: ${bazi.geJu}. Dominant: ${bazi.wuXing.dominant}, Weakest: ${bazi.wuXing.weakest}.`) : (isZh ? '八字数据未获取' : 'BaZi data not available'), conclusion: bazi ? (isZh ? `先天格局：${bazi.geJu}，${bazi.wuXing.lack ? '五行缺' + bazi.wuXing.lack : '五行均衡'}` : `Innate pattern: ${bazi.geJu}`) : '' },
         { system: isZh ? '紫微斗数' : 'Zi Wei Dou Shu', icon: '☯', input: `Main Star: ${ziweiChart.mainStar}`, reasoning: isZh ? `${ziweiChart.mainStar}星落入${ziweiChart.lifePalace}，揭示先天格局与人生主题。` : `${ziweiChart.mainStar} star in ${ziweiChart.lifePalace} reveals innate life pattern and themes.`, conclusion: isZh ? `命理格局：${ziweiChart.mainStar}主导` : `Destiny pattern: ${ziweiChart.mainStar} dominant` },
         { system: isZh ? '易经' : 'I Ching', icon: '☯️', input: `${iching?.number || 1}. ${iching?.name || '乾'}`, reasoning: isZh ? (iching?.judgment || '元亨利贞。') : (iching?.judgmentEn || 'Sublime success.'), conclusion: isZh ? `生命能量：${iching?.keywords?.join('、') || '创造、领导'}` : `Life energy: ${iching?.keywords?.join(', ') || 'Creative, Leadership'}` },
         { system: 'MBTI', icon: '🧠', input: mbtiType, reasoning: isZh ? `${mbtiType}型人格的认知功能栈决定了信息处理和决策偏好。` : `The ${mbtiType} cognitive function stack determines information processing and decision preferences.`, conclusion: isZh ? `决策风格：${mbtiType[0] === 'I' ? '内向直觉' : '外向感觉'}主导` : `Decision style: ${mbtiType[0] === 'I' ? 'Introverted intuition' : 'Extraverted sensing'} dominant` },
-        { system: isZh ? '融合' : 'Fusion', icon: '✦', input: isZh ? '所有体系交叉验证' : 'Cross-validation of all systems', reasoning: isZh ? '东方命理（紫微）+ 西方心理学（星盘MBTI）+ 古老智慧（易经）四维交叉验证，得出统一画像。' : 'Eastern destiny (Zi Wei) + Western psychology (Astrology+MBTI) + Ancient wisdom (I Ching) cross-validated into unified portrait.', conclusion: isZh ? `最终画像：${profile.soulKeywords?.join(' · ')}` : `Final portrait: ${profile.soulKeywords?.join(' · ')}` },
+        { system: isZh ? '融合' : 'Fusion', icon: '✦', input: isZh ? '所有体系交叉验证' : 'Cross-validation of all systems', reasoning: isZh ? '东方命理（八字+紫微）+ 西方心理学（星盘+MBTI）+ 古老智慧（易经）六维交叉验证，得出统一画像。' : 'Eastern destiny (BaZi+Zi Wei) + Western psychology (Astrology+MBTI) + Ancient wisdom (I Ching) cross-validated into unified portrait.', conclusion: isZh ? `最终画像：${profile.soulKeywords?.join(' · ')}` : `Final portrait: ${profile.soulKeywords?.join(' · ')}` },
       ];
     }
+    // 附加八字数据到响应
+    profile.bazi = bazi;
     profile.careerGuidance = profile.careerGuidance || (isZh ? '你的星盘显示你适合需要创造力和洞察力的工作。在团队中，你更倾向于深度思考而非表面执行。' : 'Your chart suggests you thrive in roles requiring creativity and insight. In teams, you prefer deep thinking over surface-level execution.');
     profile.relationshipStyle = profile.relationshipStyle || (isZh ? '你在关系中追求深度连接而非表面社交。你倾向于用行动而非言语表达爱意。' : 'You seek deep connections over surface-level socializing. You tend to express love through actions rather than words.');
     profile.luckyElements = profile.luckyElements || {
