@@ -257,17 +257,20 @@
 
             <div class="result-zodiac" id="resultZodiac"></div>
 
-            <!-- 推理过程（动态渐显 + 汇聚总结） -->
+            <!-- 推理过程（默认展开，可折叠） -->
             <div class="reasoning-section" id="resultReasoning" style="display:none">
-              <div class="reasoning-header">
+              <div class="reasoning-header" onclick="toggleReasoning()">
                 <span class="reasoning-header-icon">✦</span>
                 <span class="reasoning-header-text">推理过程 · Reasoning Process</span>
+                <span class="reasoning-toggle-arrow" id="reasoningArrow">▾</span>
               </div>
-              <div class="reasoning-chain" id="reasoningChain"></div>
-              <div class="reasoning-convergence" id="reasoningConvergence" style="display:none">
-                <div class="convergence-icon">🎯</div>
-                <div class="convergence-title">多维交叉验证 · Cross-Validation</div>
-                <div class="convergence-text" id="convergenceText"></div>
+              <div class="reasoning-body" id="reasoningBody">
+                <div class="reasoning-chain" id="reasoningChain"></div>
+                <div class="reasoning-convergence" id="reasoningConvergence" style="display:none">
+                  <div class="convergence-icon">🎯</div>
+                  <div class="convergence-title">多维交叉验证 · Cross-Validation</div>
+                  <div class="convergence-text" id="convergenceText"></div>
+                </div>
               </div>
             </div>
 

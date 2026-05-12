@@ -319,12 +319,13 @@ function toggleLang() {
   }
 }
 
-// ========== 推理过程展开/收起 ==========
-function toggleReasoning(btn) {
-  const chain = btn.nextElementSibling;
-  const icon = btn.querySelector('.reasoning-toggle-icon');
-  chain.classList.toggle('open');
-  icon.classList.toggle('open');
+// ========== 推理过程折叠/展开 ==========
+function toggleReasoning() {
+  const body = document.getElementById('reasoningBody');
+  const arrow = document.getElementById('reasoningArrow');
+  if (!body || !arrow) return;
+  body.classList.toggle('collapsed');
+  arrow.classList.toggle('collapsed');
 }
 
 // ========== 出生城市自定义输入 ==========
