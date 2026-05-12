@@ -168,36 +168,47 @@ Your writing style:
 You MUST respond with valid JSON in this exact format:
 {
   "reasoningSteps": [
-    {"system": "Western Astrology", "icon": "🌌", "input": "Sun Scorpio, Moon Pisces, Rising Leo", "reasoning": "Scorpio Sun gives depth and intensity. Pisces Moon adds emotional sensitivity. Leo Rising projects confidence.", "conclusion": "Core archetype: The Hidden Emperor — outwardly commanding, inwardly oceanic"},
-    {"system": "Zi Wei Dou Shu", "icon": "☯", "input": "Main Star: 紫微, Life Palace: 命宫", "reasoning": "紫微 in Life Palace indicates natural authority and leadership destiny.", "conclusion": "Leadership pattern: born to lead, not to follow"},
-    {"system": "I Ching", "icon": "☯️", "input": "Hexagram 1: The Creative", "reasoning": "Pure yang energy — heaven moving with power. Supreme success through perseverance.", "conclusion": "Life energy: unstoppable creative force"},
-    {"system": "MBTI", "icon": "🧠", "input": "INFJ", "reasoning": "Ni-Fe: internal intuition + external feeling. Sees patterns others miss, but needs solitude to recharge.", "conclusion": "Decision style: intuitive depth over analytical breadth"},
-    {"system": "Fusion", "icon": "✦", "input": "All systems combined", "reasoning": "Cross-validating all four systems: Eastern destiny (紫微) + Western psychology (Scorpio INFJ) + Ancient wisdom (乾卦) converges on one archetype.", "conclusion": "Final portrait: The Deep Visionary"}
+    {"system": "BaZi (八字)", "icon": "📜", "input": "Four Pillars: XX XX XX XX", "reasoning": "Analyze each pillar's meaning and their interactions", "conclusion": "Core destiny pattern"},
+    {"system": "Western Astrology", "icon": "🌌", "input": "Sun/Moon/Rising signs", "reasoning": "How these signs interact with the BaZi profile", "conclusion": "Psychological archetype"},
+    {"system": "Zi Wei Dou Shu", "icon": "☯", "input": "Main Star + palaces", "reasoning": "What the star placements reveal", "conclusion": "Life pattern"},
+    {"system": "I Ching", "icon": "☯️", "input": "Hexagram", "reasoning": "What the hexagram says about this person's energy", "conclusion": "Life energy"},
+    {"system": "MBTI", "icon": "🧠", "input": "Type", "reasoning": "How cognitive functions map to the astrological profile", "conclusion": "Decision style"},
+    {"system": "Fusion", "icon": "✦", "input": "Cross-validation", "reasoning": "How all systems converge on one unified portrait", "conclusion": "Final archetype name"}
   ],
-  "soulKeywords": ["word1", "word2", "word3", "word4"],
-  "oneSentencePortrait": "A deeply personal, specific sentence about this person",
+  "soulKeywords": ["keyword1", "keyword2", "keyword3", "keyword4"],
+  "oneSentencePortrait": "A deeply personal, specific, poetic sentence — must reference at least 2 different systems (BaZi + Astrology or MBTI)",
   "coreTraits": [
-    {"trait": "Trait Name", "description": "2-3 sentence explanation with specific references"}
+    {"trait": "Trait Name", "description": "Detailed 3-4 sentence explanation with specific BaZi/Astrology references. Example: '丙火日主赋予你阳光般的感染力...加上ENFJ的Fe功能...'"}
   ],
   "shadows": [
-    {"challenge": "Challenge Name", "description": "Honest but compassionate description"}
+    {"challenge": "Challenge Name", "description": "Honest 2-3 sentence analysis of the shadow side, with specific element/star references and practical advice"}
   ],
-  "lifeTheme": "The overarching narrative of this person's life journey, 2-3 sentences",
-  "dailyInsight": "A personalized daily insight for today, 1-2 sentences",
-  "marriageFortune": "Marriage and romantic relationship analysis — when to meet the right person, relationship patterns, 2-3 sentences",
-  "careerGuidance": "Career strengths, ideal work environment, best industries, 2-3 sentences",
-  "healthAdvice": "Physical constitution, health vulnerabilities, wellness tips based on five elements, 2-3 sentences",
-  "annualFortune": "This year's overall fortune trend — opportunities, challenges, key months, 2-3 sentences",
-  "futureDestiny": "Life trajectory and destiny direction — major turning points, long-term outlook, 2-3 sentences",
-  "childrenFortune": "Children and offspring fortune — relationship with children, number tendency, 2-3 sentences",
-  "relationshipStyle": "How this person behaves in love and friendships, 2-3 sentences",
+  "lifeTheme": "3-4 sentences describing the overarching life narrative — must reference the person's specific elemental balance and destiny pattern",
+  "lifePhases": {
+    "early": "0-30 years: What challenges and lessons define early life? (2-3 sentences, reference BaZi大运)",
+    "middle": "30-50 years: When does fortune turn? What opportunities arise? (2-3 sentences)",
+    "later": "50+ years: What does the later life look like? (2-3 sentences)"
+  },
+  "strengthsAndWarnings": {
+    "strengths": ["strength1: detailed explanation", "strength2: detailed explanation", "strength3: detailed explanation"],
+    "warnings": ["warning1: specific actionable advice", "warning2: specific actionable advice"]
+  },
+  "selfImprovement": "3-4 sentences of practical self-improvement advice based on the person's elemental weaknesses. Example: '命局缺金，建议多接触理性思维、理财、规则感强的圈子...'",
+  "dailyInsight": "A personalized daily insight, 2-3 sentences, referencing today's planetary transits or BaZi flow",
+  "marriageFortune": "Detailed 3-4 sentence marriage/romance analysis — attachment style, giving patterns, what kind of partner suits them, timing guidance",
+  "careerGuidance": "Detailed 3-4 sentence career analysis — ideal industries, work style, leadership potential, specific role recommendations",
+  "healthAdvice": "2-3 sentences about physical constitution based on five elements, specific vulnerabilities, wellness tips",
+  "annualFortune": "2-3 sentences about this year's trend — opportunities, challenges, key months to watch",
+  "futureDestiny": "3-4 sentences about life trajectory — major turning points, long-term outlook, what the destiny pattern predicts",
+  "childrenFortune": "2-3 sentences about children fortune — parenting style, relationship quality",
+  "relationshipStyle": "2-3 sentences about how this person behaves in love and friendships",
   "luckyElements": {
     "colors": ["color1", "color2"],
     "numbers": ["number1", "number2"],
     "direction": "best direction",
     "day": "luckiest day of week"
   },
-  "compatibilityTip": "One sentence about what kind of partner/friend suits this person best"
+  "compatibilityTip": "2-3 sentences about ideal partner characteristics — reference both BaZi zodiac compatibility and MBTI pairing"
 }
 
 IMPORTANT: Output ONLY the JSON object. No markdown, no explanation, no code blocks.`;
@@ -360,6 +371,29 @@ Create a deeply personal, specific soul portrait. Fuse ALL systems into ONE cohe
     profile.futureDestiny = profile.futureDestiny || (isZh ? `你的人生轨迹呈现逐步上升的趋势。${bazi?.geJu || ''}格局赋予你稳步发展的潜力，中年后迎来收获期。` : `Your life trajectory shows gradual upward movement. Your ${bazi?.geJu || ''} pattern grants steady development potential, with rewards coming in mid-life.`);
     profile.childrenFortune = profile.childrenFortune || (isZh ? `${bazi?.riZhuWuXing || ''}元素日主的你，与子女的缘分深厚。你倾向于给予孩子自由探索的空间，同时保持温暖的引导。` : `As a ${bazi?.riZhuWuXing || ''} Day Master, you have deep bonds with children. You tend to give kids freedom to explore while maintaining warm guidance.`);
     profile.relationshipStyle = profile.relationshipStyle || (isZh ? '你在关系中追求深度连接而非表面社交。你倾向于用行动而非言语表达爱意。' : 'You seek deep connections over surface-level socializing. You tend to express love through actions rather than words.');
+
+    // 人生阶段分析
+    profile.lifePhases = profile.lifePhases || {
+      early: isZh ? `早年（0-30岁）：${natalChart.sun.element}元素主导的你，早年经历较多变动和挑战。这段时间是性格塑造期，虽然辛苦但为未来打下坚实基础。` : `Early life (0-30): Your ${natalChart.sun.element}-dominant nature brings many changes and challenges in early years. This period shapes your character — tough but foundational.`,
+      middle: isZh ? `中年（30-50岁）：运势逐渐上升，贵人出现，事业进入收获期。${bazi?.geJu || ''}格局的能量在此时充分释放。` : `Mid-life (30-50): Fortune rises, mentors appear, career enters harvest period. Your ${bazi?.geJu || ''} pattern fully activates.`,
+      later: isZh ? `晚年（50岁以后）：越老越有福，生活安稳，子女孝顺，享受前半生奋斗的成果。` : `Later life (50+): Growing fortune, stability, and enjoying the fruits of earlier efforts.`,
+    };
+
+    // 优势与提醒
+    profile.strengthsAndWarnings = profile.strengthsAndWarnings || {
+      strengths: isZh
+        ? [`${bazi?.riZhu || ''}日主赋予你独特的生命能量：${bazi?.riZhuTrait || ''}`, `${natalChart.sun.element}元素带来${natalChart.sun.element === '火' ? '热情与感染力' : natalChart.sun.element === '土' ? '稳重与可靠性' : natalChart.sun.element === '金' ? '决断力与精准' : natalChart.sun.element === '水' ? '智慧与适应力' : '创造力与成长力'}`, `${mbtiType}型人格的${mbtiType[2] === 'T' ? '理性分析' : '共情理解'}能力是你的核心竞争力`]
+        : [`${bazi?.riZhu || ''} Day Master grants you unique life energy`, `${natalChart.sun.element} element brings ${natalChart.sun.element === 'Fire' ? 'passion and charisma' : natalChart.sun.element === 'Earth' ? 'stability and reliability' : natalChart.sun.element === 'Metal' ? 'decisiveness and precision' : natalChart.sun.element === 'Water' ? 'wisdom and adaptability' : 'creativity and growth'}`, `Your ${mbtiType} personality's ${mbtiType[2] === 'T' ? 'analytical' : 'empathetic'} strength is your core competitive advantage`],
+      warnings: isZh
+        ? [`命局${bazi?.wuXing?.lack ? '缺' + bazi.wuXing.lack : '五行偏弱'}，需要注意${bazi?.wuXing?.lack === '金' ? '理性思维、边界感、理财能力' : bazi?.wuXing?.lack === '木' ? '成长规划、创造力、决断力' : bazi?.wuXing?.lack === '火' ? '热情、表达力、社交能量' : bazi?.wuXing?.lack === '土' ? '稳定性、耐心、落地执行' : '灵活性、情感表达、适应能力'}的培养`, `${natalChart.moon.name}月亮带来的情绪敏感需要学会管理，避免过度内耗`]
+        : [`Your chart ${bazi?.wuXing?.lack ? 'lacks ' + bazi.wuXing.lack : 'has weak elements'} — cultivate ${bazi?.wuXing?.lack === 'Metal' ? 'rational thinking, boundaries, financial discipline' : bazi?.wuXing?.lack === 'Wood' ? 'growth planning, creativity, decisiveness' : bazi?.wuXing?.lack === 'Fire' ? 'passion, expression, social energy' : bazi?.wuXing?.lack === 'Earth' ? 'stability, patience, execution' : 'flexibility, emotional expression, adaptability'}`, `Your ${natalChart.moon.name} moon's emotional sensitivity needs management to avoid burnout`],
+    };
+
+    // 自我成长建议
+    const lackMap = { '金': '理性思维、理财、规则感', '木': '成长规划、创造力、决断力', '火': '热情表达、社交能量、自信', '土': '稳定性、耐心、落地执行', '水': '灵活性、情感表达、适应力' };
+    profile.selfImprovement = profile.selfImprovement || (isZh
+      ? `你的命局${bazi?.wuXing?.lack ? '缺' + bazi.wuXing.lack : '五行有偏'}，建议多接触${lackMap[bazi?.wuXing?.lack] || '平衡各方面'}的环境和人群。${natalChart.moon.element === '水' ? '情绪管理是你的终身课题——学会表达而非压抑。' : '保持内心的平衡，避免过度投入某一方面。'}建立边界感、学会说"不"，是你最重要的成长方向。`
+      : `Your chart ${bazi?.wuXing?.lack ? 'lacks ' + bazi.wuXing.lack : 'has imbalanced elements'}. Seek environments that strengthen these areas. ${natalChart.moon.element === 'Water' ? 'Emotional management is your lifelong lesson — learn to express, not suppress.' : 'Maintain inner balance and avoid over-investing in any one area.'} Building boundaries and learning to say "no" is your most important growth direction.`);
     profile.luckyElements = profile.luckyElements || {
       colors: isZh ? ['深蓝', '紫色'] : ['Deep Blue', 'Purple'],
       numbers: isZh ? ['7', '3'] : ['7', '3'],

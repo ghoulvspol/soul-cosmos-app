@@ -814,6 +814,38 @@ function renderResult(profile, natalChart, ziweiChart, model) {
 
       addSection('💘', '配对建议', 'Compatibility Tip', profile.compatibilityTip);
 
+      // 人生阶段分析
+      if (profile.lifePhases) {
+        const lp = profile.lifePhases;
+        extraHTML += `
+          <div class="result-section">
+            <h3>🕐 ${isZh ? '人生阶段' : 'Life Phases'}</h3>
+            <div class="traits-list">
+              ${lp.early ? `<div class="trait-item"><strong>${isZh ? '早年（0-30岁）' : 'Early (0-30)'}</strong> — ${lp.early}</div>` : ''}
+              ${lp.middle ? `<div class="trait-item"><strong>${isZh ? '中年（30-50岁）' : 'Mid (30-50)'}</strong> — ${lp.middle}</div>` : ''}
+              ${lp.later ? `<div class="trait-item"><strong>${isZh ? '晚年（50岁+）' : 'Later (50+)'}</strong> — ${lp.later}</div>` : ''}
+            </div>
+          </div>`;
+      }
+
+      // 优势与提醒
+      if (profile.strengthsAndWarnings) {
+        const sw = profile.strengthsAndWarnings;
+        if (sw.strengths?.length) {
+          extraHTML += `<div class="result-section"><h3>✅ ${isZh ? '天生优势' : 'Natural Strengths'}</h3>`;
+          sw.strengths.forEach(s => { extraHTML += `<div class="trait-item">✦ ${s}</div>`; });
+          extraHTML += `</div>`;
+        }
+        if (sw.warnings?.length) {
+          extraHTML += `<div class="result-section"><h3>⚠️ ${isZh ? '需要注意' : 'Warnings'}</h3>`;
+          sw.warnings.forEach(w => { extraHTML += `<div class="shadow-item">⚠️ ${w}</div>`; });
+          extraHTML += `</div>`;
+        }
+      }
+
+      // 自我成长建议
+      addSection('🌱', '自我成长建议', 'Self Improvement', profile.selfImprovement);
+
       extraEl.innerHTML = extraHTML;
     }
 
