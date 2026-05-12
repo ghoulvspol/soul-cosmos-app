@@ -184,7 +184,12 @@ You MUST respond with valid JSON in this exact format:
   ],
   "lifeTheme": "The overarching narrative of this person's life journey, 2-3 sentences",
   "dailyInsight": "A personalized daily insight for today, 1-2 sentences",
-  "careerGuidance": "Career strengths and ideal work environment, 2-3 sentences",
+  "marriageFortune": "Marriage and romantic relationship analysis — when to meet the right person, relationship patterns, 2-3 sentences",
+  "careerGuidance": "Career strengths, ideal work environment, best industries, 2-3 sentences",
+  "healthAdvice": "Physical constitution, health vulnerabilities, wellness tips based on five elements, 2-3 sentences",
+  "annualFortune": "This year's overall fortune trend — opportunities, challenges, key months, 2-3 sentences",
+  "futureDestiny": "Life trajectory and destiny direction — major turning points, long-term outlook, 2-3 sentences",
+  "childrenFortune": "Children and offspring fortune — relationship with children, number tendency, 2-3 sentences",
   "relationshipStyle": "How this person behaves in love and friendships, 2-3 sentences",
   "luckyElements": {
     "colors": ["color1", "color2"],
@@ -348,7 +353,12 @@ Create a deeply personal, specific soul portrait. Fuse ALL systems into ONE cohe
       profile.dailyInsight = isZh ? `今天，关注你的${natalChart.moon.name}月亮能量，它正在引导你。` : `Today, listen to your ${natalChart.moon.name} moon energy — it is guiding you.`;
     }
 
+    profile.marriageFortune = profile.marriageFortune || (isZh ? `${sunZh}座的你在感情中追求深度连接。${bazi?.riZhuWuXing || ''}元素主导的你，倾向于用行动表达爱意。最佳婚恋时机与你的大运流年密切相关。` : `As a ${natalChart.sun.name}, you seek deep emotional connections in love. Your ${bazi?.riZhuWuXing || ''}-dominant nature expresses love through actions. Best timing for relationships aligns with your life cycles.`);
     profile.careerGuidance = profile.careerGuidance || (isZh ? '你的星盘显示你适合需要创造力和洞察力的工作。在团队中，你更倾向于深度思考而非表面执行。' : 'Your chart suggests you thrive in roles requiring creativity and insight. In teams, you prefer deep thinking over surface-level execution.');
+    profile.healthAdvice = profile.healthAdvice || (isZh ? `你的${bazi?.riZhuWuXing || ''}元素主导体质，需要注意${bazi?.wuXing?.weakest || ''}元素相关的健康问题。建议保持规律作息，适当运动。` : `Your ${bazi?.riZhuWuXing || ''}-dominant constitution suggests paying attention to ${bazi?.wuXing?.weakest || ''}-related health areas. Regular sleep and exercise are recommended.`);
+    profile.annualFortune = profile.annualFortune || (isZh ? '今年整体运势平稳向好，适合在事业上稳步推进。注意人际关系的维护，下半年有不错的机遇。' : 'This year trends steady and positive. Good for steady career progress. Watch relationships; opportunities arise in the second half.');
+    profile.futureDestiny = profile.futureDestiny || (isZh ? `你的人生轨迹呈现逐步上升的趋势。${bazi?.geJu || ''}格局赋予你稳步发展的潜力，中年后迎来收获期。` : `Your life trajectory shows gradual upward movement. Your ${bazi?.geJu || ''} pattern grants steady development potential, with rewards coming in mid-life.`);
+    profile.childrenFortune = profile.childrenFortune || (isZh ? `${bazi?.riZhuWuXing || ''}元素日主的你，与子女的缘分深厚。你倾向于给予孩子自由探索的空间，同时保持温暖的引导。` : `As a ${bazi?.riZhuWuXing || ''} Day Master, you have deep bonds with children. You tend to give kids freedom to explore while maintaining warm guidance.`);
     profile.relationshipStyle = profile.relationshipStyle || (isZh ? '你在关系中追求深度连接而非表面社交。你倾向于用行动而非言语表达爱意。' : 'You seek deep connections over surface-level socializing. You tend to express love through actions rather than words.');
     profile.luckyElements = profile.luckyElements || {
       colors: isZh ? ['深蓝', '紫色'] : ['Deep Blue', 'Purple'],

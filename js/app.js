@@ -133,7 +133,7 @@ const I18N = {
     'hero.stat1': 'Wisdom Systems', 'hero.stat2': 'Fusion Engine', 'hero.stat3': 'Unique Profiles',
     // How It Works
     'how.title': 'How It Works', 'how.subtitle': 'From input to insight in 60 seconds.',
-    'how.s1.title': 'Enter Your Birth Info', 'how.s1.desc': 'Date, time, and location of birth. That\'s all we need to calculate your natal chart and Zi Wei chart.',
+    'how.s1.title': 'Enter Your Birth Info', 'how.s1.desc': 'Date, time, gender, and location of birth. That\'s all we need to calculate your natal chart, BaZi, and Zi Wei chart.',
     'how.s2.title': 'Take the MBTI Test', 'how.s2.desc': '60 questions, 5 minutes. Or import your existing MBTI type if you already know it.',
     'how.s3.title': 'AI Fuses Everything', 'how.s3.desc': 'Our AI doesn\'t just list each system — it synthesizes them into one coherent, deeply personal portrait.',
     'how.s4.title': 'Meet Your Soul', 'how.s4.desc': 'Receive your Soul Profile: keywords, core traits, shadow side, life theme, and daily personalized insights.',
@@ -224,7 +224,7 @@ const I18N = {
     'hero.stat1': '智慧体系', 'hero.stat2': '融合引擎', 'hero.stat3': '独特画像',
     // How It Works
     'how.title': '使用方法', 'how.subtitle': '从输入到洞察，60秒搞定。',
-    'how.s1.title': '输入出生信息', 'how.s1.desc': '出生日期、时间和地点。仅此而已，我们就能计算你的星盘和紫微命盘。',
+    'how.s1.title': '输入出生信息', 'how.s1.desc': '出生日期、时间、性别和地点。仅此而已，我们就能计算你的星盘、八字和紫微命盘。',
     'how.s2.title': '做MBTI测试', 'how.s2.desc': '60道题，5分钟。或者直接导入你已知的MBTI类型。',
     'how.s3.title': 'AI融合一切', 'how.s3.desc': '我们的AI不只是罗列每个体系——它把它们融合成一个连贯的、深度个性化的画像。',
     'how.s4.title': '遇见你的灵魂', 'how.s4.desc': '收到你的灵魂画像：关键词、核心特质、阴影面、人生主题和每日个性化洞察。',
@@ -781,23 +781,19 @@ function renderResult(profile, natalChart, ziweiChart, model) {
       const isZh = currentLang === 'zh';
       let extraHTML = '';
 
-      // 职业指引
-      if (profile.careerGuidance) {
-        extraHTML += `
-          <div class="result-section">
-            <h3>💼 ${isZh ? '职业指引' : 'Career Guidance'}</h3>
-            <p class="life-theme">${profile.careerGuidance}</p>
-          </div>`;
-      }
+      const addSection = (icon, titleZh, titleEn, content) => {
+        if (content) {
+          extraHTML += `<div class="result-section"><h3>${icon} ${isZh ? titleZh : titleEn}</h3><p class="life-theme">${content}</p></div>`;
+        }
+      };
 
-      // 感情风格
-      if (profile.relationshipStyle) {
-        extraHTML += `
-          <div class="result-section">
-            <h3>💕 ${isZh ? '感情风格' : 'Relationship Style'}</h3>
-            <p class="life-theme">${profile.relationshipStyle}</p>
-          </div>`;
-      }
+      addSection('💕', '姻缘分析', 'Marriage & Romance', profile.marriageFortune);
+      addSection('💼', '事业指引', 'Career Guidance', profile.careerGuidance);
+      addSection('🏥', '健康建议', 'Health Advice', profile.healthAdvice);
+      addSection('📅', '今年运势', 'Annual Fortune', profile.annualFortune);
+      addSection('🔮', '未来命运', 'Future Destiny', profile.futureDestiny);
+      addSection('👶', '子女缘分', 'Children Fortune', profile.childrenFortune);
+      addSection('💘', '感情风格', 'Relationship Style', profile.relationshipStyle);
 
       // 幸运元素
       if (profile.luckyElements) {
@@ -816,14 +812,7 @@ function renderResult(profile, natalChart, ziweiChart, model) {
           </div>`;
       }
 
-      // 配对建议
-      if (profile.compatibilityTip) {
-        extraHTML += `
-          <div class="result-section">
-            <h3>💘 ${isZh ? '配对建议' : 'Compatibility Tip'}</h3>
-            <p class="life-theme">${profile.compatibilityTip}</p>
-          </div>`;
-      }
+      addSection('💘', '配对建议', 'Compatibility Tip', profile.compatibilityTip);
 
       extraEl.innerHTML = extraHTML;
     }
