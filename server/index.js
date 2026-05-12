@@ -135,7 +135,7 @@ Your writing style:
 - Blend Eastern and Western metaphors naturally
 - Avoid fortune-cookie language or Barnum effect statements
 - Be honest about shadows, not just flattering
-- Write in English
+- ALL OUTPUT MUST BE IN ${outputLang} — every word, every field, no exceptions
 
 You MUST respond with valid JSON in this exact format:
 {
@@ -228,13 +228,14 @@ Create a deeply personal, specific soul portrait. Fuse ALL systems (Astrology + 
  */
 app.post('/api/daily-insight', async (req, res) => {
   try {
-    const { soulKeywords, portrait, sunSign, moonSign, mbtiType } = req.body;
+    const { soulKeywords, portrait, sunSign, moonSign, mbtiType, lang } = req.body;
+    const L = lang === 'zh' ? 'Chinese (中文)' : 'English';
 
     const systemPrompt = `You are writing a daily insight for a specific person based on their unique soul profile.
 Style: Like Co-Star but warmer and more insightful. Short, punchy, personal. Use emoji sparingly.
 Format: One paragraph, 2-3 sentences max. Start with an action or observation, not a greeting.
 Today's date: ${new Date().toISOString().slice(0, 10)}
-Write in English.`;
+ALL OUTPUT MUST BE IN ${L}. Every word, no exceptions.`;
 
     const userPrompt = `Soul Keywords: ${soulKeywords?.join(', ')}
 Portrait: ${portrait}
@@ -259,10 +260,11 @@ Write today's personalized insight. Make it feel like you're reading their mind.
  */
 app.post('/api/compatibility', async (req, res) => {
   try {
-    const { profileA, profileB } = req.body;
+    const { profileA, profileB, lang } = req.body;
+    const L = lang === 'zh' ? 'Chinese (中文)' : 'English';
 
     const systemPrompt = `You are analyzing the compatibility between two people based on their combined natal charts and MBTI types.
-Write in English. Be specific and insightful.
+ALL OUTPUT MUST BE IN ${L}. Be specific and insightful.
 Respond with valid JSON:
 {
   "score": 0-100,
@@ -303,7 +305,8 @@ Analyze their compatibility.`;
  */
 app.post('/api/weekly-forecast', async (req, res) => {
   try {
-    const { myProfile, people } = req.body;
+    const { myProfile, people, lang } = req.body;
+    const L = lang === 'zh' ? 'Chinese (中文)' : 'English';
     if (!people?.length) return res.json({ forecasts: [] });
 
     const peopleList = people.map((p, i) =>
@@ -311,7 +314,7 @@ app.post('/api/weekly-forecast', async (req, res) => {
     ).join('\n');
 
     const systemPrompt = `You are a relationship intelligence advisor combining Western astrology, Eastern philosophy, and social psychology.
-Write in English. Be practical, specific, and slightly humorous — like a wise friend giving real advice.
+ALL OUTPUT MUST BE IN ${L}. Be practical, specific, and slightly humorous — like a wise friend giving real advice.
 Today is ${new Date().toISOString().slice(0, 10)}.
 
 Respond with valid JSON:
@@ -367,9 +370,10 @@ app.post('/api/fengshui', async (req, res) => {
   try {
     const params = req.body;
     const userElement = params.userProfile?.element || 'Unknown';
+    const L = params.lang === 'zh' ? 'Chinese (中文)' : 'English';
 
     const systemPrompt = `You are a Feng Shui master with deep knowledge of Chinese metaphysics, combined with modern interior design sensibility.
-Write in English. Be practical — give advice people can actually follow without renovating their home.
+ALL OUTPUT MUST BE IN ${L}. Be practical — give advice people can actually follow without renovating their home.
 Consider the user's birth element (${userElement}) for personalized recommendations.
 
 Respond with valid JSON:
@@ -461,11 +465,12 @@ Give practical office Feng Shui recommendations. Consider:
  */
 app.post('/api/photo-analysis', async (req, res) => {
   try {
-    const { type, userProfile } = req.body;
+    const { type, userProfile, lang } = req.body;
+    const L = lang === 'zh' ? 'Chinese (中文)' : 'English';
     const memoryContext = getMemoryContext();
 
     const systemPrompt = `You are a ${type === 'face' ? 'face reading (面相)' : 'palm reading (手相)'} master combining Chinese physiognomy with modern psychology.
-Write in English. Be specific and insightful.
+ALL OUTPUT MUST BE IN ${L}. Be specific and insightful.
 ${memoryContext}
 
 Respond with valid JSON:
@@ -510,12 +515,14 @@ Make it feel personal and specific to their profile.`;
  */
 app.post('/api/scenes', async (req, res) => {
   try {
-    const { userProfile } = req.body;
+    const { userProfile, lang } = req.body;
+    const L = lang === 'zh' ? 'Chinese (中文)' : 'English';
     const memoryContext = getMemoryContext();
 
     const systemPrompt = `You are a life scene advisor combining Eastern metaphysics, Western astrology, and social psychology.
 Generate 3-4 weekly scene-based advice cards for the user.
 Today is ${new Date().toISOString().slice(0, 10)}.
+ALL OUTPUT MUST BE IN ${L}.
 Write in English. Be practical, specific, and slightly humorous.
 ${memoryContext}
 

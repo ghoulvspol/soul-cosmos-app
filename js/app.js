@@ -381,6 +381,7 @@ function analyzePhoto(type) {
     body: JSON.stringify({
       type, // 'face' or 'palm'
       userProfile: getUserProfile(),
+      lang: currentLang,
     }),
   })
     .then(r => r.json())
@@ -419,7 +420,7 @@ function loadScenes() {
   fetch(`${CONFIG.apiBase}/api/scenes`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userProfile: getUserProfile() }),
+    body: JSON.stringify({ userProfile: getUserProfile(), lang: currentLang }),
   })
     .then(r => r.json())
     .then(data => {
@@ -846,6 +847,7 @@ function analyzeRelationship(personId) {
       profileB: { sun: person.zodiac.name, moon: 'Unknown', rising: 'Unknown', mbti: person.mbti || 'Unknown' },
       relationship: person.relation,
       context: `This is my ${person.relation}. Give practical advice on how to interact with them this week.`,
+      lang: currentLang,
     }),
   })
     .then(r => r.json())
@@ -890,6 +892,7 @@ function generateWeeklyForecast() {
         name: p.name, relation: p.relation,
         sun: p.zodiac.name, mbti: p.mbti || 'Unknown',
       })),
+      lang: currentLang,
     }),
   })
     .then(r => r.json())
@@ -958,6 +961,7 @@ function analyzeFengShui(type) {
   const birthTime = document.getElementById('birthTime').value || '12:00';
   const myChart = Astrology.getNatalChart(birthDate, birthTime, 'new_york');
 
+  params.lang = currentLang;
   params.userProfile = {
     sun: myChart.sun.name,
     element: myChart.dominantElement,
