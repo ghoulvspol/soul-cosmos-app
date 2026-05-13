@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide Your Life — AI-Powered Personality Discovery</title>
+<meta name="description" content="Discover your multi-dimensional personality through MBTI, astrology, psychology, and ancient wisdom.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#06081A;--card:rgba(12,10,30,0.9);--gold:#D4AF37;--gold-bright:#F0D060;--gold-dim:rgba(212,175,55,0.12);--purple:#6B3FA0;--purple-deep:#1A0E2E;--text:#E8E4D9;--dim:#7A7568;--teal:#58EBC2;--rose:#B76E79;--blue:#4A8BC2}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.7}
+
+/* ===== Canvas Layers ===== */
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+#nebula{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0.4}
+#dust{position:fixed;inset:0;z-index:2;pointer-events:none}
+
+/* ===== Mystical Fog ===== */
+.fog{position:fixed;inset:0;z-index:3;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(107,63,160,0.08) 0%,transparent 60%),radial-gradient(ellipse at 20% 0%,rgba(74,139,194,0.05) 0%,transparent 50%),radial-gradient(ellipse at 80% 50%,rgba(212,175,55,0.03) 0%,transparent 40%)}
+
+/* ===== Sigil Decorations ===== */
+@keyframes sigil-rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes sigil-pulse{0%,100%{opacity:0.08;transform:scale(1)}50%{opacity:0.15;transform:scale(1.05)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes glow-pulse{0%,100%{box-shadow:0 0 20px rgba(212,175,55,0.1),0 0 60px rgba(212,175,55,0.05)}50%{box-shadow:0 0 40px rgba(212,175,55,0.2),0 0 80px rgba(212,175,55,0.1)}}
+@keyframes text-reveal{from{opacity:0;transform:translateY(20px);filter:blur(4px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes border-flow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes rune-draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+
+.sigil{position:absolute;pointer-events:none;opacity:0.06}
+.sigil svg{animation:sigil-rotate 120s linear infinite}
+.sigil-1{top:10%;left:5%;width:200px;height:200px}
+.sigil-2{top:60%;right:3%;width:150px;height:150px}
+.sigil-2 svg{animation-direction:reverse;animation-duration:90s}
+.sigil-3{bottom:20%;left:8%;width:120px;height:120px}
+
+/* ===== Navigation ===== */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(6,8,26,0.85);backdrop-filter:blur(30px);border-bottom:1px solid rgba(212,175,55,0.06)}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:'Cinzel',serif;font-size:1.1rem;font-weight:700;color:var(--gold);letter-spacing:0.12em;text-transform:uppercase}
+.nav-links{display:flex;gap:20px;align-items:center}
+.nav-links a{color:var(--dim);text-decoration:none;font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;transition:all 0.3s;position:relative}
+.nav-links a:hover{color:var(--gold)}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--gold);transition:width 0.3s}
+.nav-links a:hover::after{width:100%}
+.btn-nav{padding:8px 20px;background:transparent;border:1px solid rgba(212,175,55,0.3);color:var(--gold);font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.4s;font-family:'Cinzel',serif;position:relative;overflow:hidden}
+.btn-nav::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(212,175,55,0.1),transparent);transform:translateX(-100%);transition:transform 0.5s}
+.btn-nav:hover::before{transform:translateX(100%)}
+.btn-nav:hover{background:rgba(212,175,55,0.08);box-shadow:0 0 30px rgba(212,175,55,0.15)}
+.btn-lang{padding:6px 12px;background:transparent;border:1px solid rgba(212,175,55,0.15);color:var(--dim);font-size:0.62rem;cursor:pointer;border-radius:2px;font-family:inherit;transition:all 0.3s}
+.btn-lang:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ===== Hero ===== */
+.hero{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px}
+.hero-sigil{width:100px;height:100px;margin-bottom:32px;position:relative;animation:float 6s ease-in-out infinite}
+.hero-sigil::before{content:'✦';font-size:48px;color:var(--gold);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-shadow:0 0 40px rgba(212,175,55,0.4)}
+.hero-sigil::after{content:'';position:absolute;inset:-15px;border:1px solid rgba(212,175,55,0.15);border-radius:50%;animation:glow-pulse 4s ease-in-out infinite}
+.hero-sigil-ring{position:absolute;inset:-30px;border:1px solid rgba(212,175,55,0.06);border-radius:50%;animation:sigil-rotate 20s linear infinite}
+.hero-sigil-ring::before{content:'';position:absolute;top:-3px;left:50%;width:6px;height:6px;background:var(--gold);border-radius:50%;transform:translateX(-50%)}
+.hero-badge{font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(212,175,55,0.2);padding:8px 24px;border-radius:2px;margin-bottom:32px;position:relative}
+.hero-badge::before,.hero-badge::after{content:'';position:absolute;width:8px;height:8px;border:1px solid rgba(212,175,55,0.3)}
+.hero-badge::before{top:-4px;left:-4px;border-right:none;border-bottom:none}
+.hero-badge::after{bottom:-4px;right:-4px;border-left:none;border-top:none}
+.hero h1{font-family:'Cinzel',serif;font-size:clamp(2rem,5vw,3.8rem);font-weight:700;line-height:1.2;margin-bottom:24px;letter-spacing:0.04em}
+.hero h1 .gold{color:var(--gold);text-shadow:0 0 30px rgba(212,175,55,0.3)}
+.hero h1 .line{display:block;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);margin:12px auto;width:60%}
+.hero-sub{font-size:0.9rem;color:var(--dim);max-width:480px;line-height:1.9;margin-bottom:40px;font-weight:300}
+.hero-cta{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.btn-primary{padding:14px 36px;background:linear-gradient(135deg,var(--gold),#B8860B);border:none;color:var(--bg);font-family:'Cinzel',serif;font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.4s;position:relative;overflow:hidden}
+.btn-primary::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,0.2),transparent 60%);opacity:0;transition:opacity 0.4s}
+.btn-primary:hover::before{opacity:1}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(212,175,55,0.3),0 0 80px rgba(212,175,55,0.1)}
+.btn-ghost{padding:14px 36px;background:transparent;border:1px solid rgba(212,175,55,0.2);color:var(--gold);font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.4s}
+.btn-ghost:hover{border-color:var(--gold);background:rgba(212,175,55,0.04);box-shadow:0 0 30px rgba(212,175,55,0.08)}
+.hero-disclaimer{margin-top:28px;font-size:0.6rem;color:var(--dim);opacity:0.5;letter-spacing:0.02em}
+
+/* ===== Section ===== */
+.section{position:relative;z-index:10;padding:100px 24px;max-width:1100px;margin:0 auto}
+.section-header{text-align:center;margin-bottom:56px}
+.section-header .num{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.25em;color:var(--gold);text-transform:uppercase;margin-bottom:12px;opacity:0.7}
+.section-header h2{font-family:'Cinzel',serif;font-size:1.8rem;font-weight:700;margin-bottom:12px;letter-spacing:0.04em}
+.section-header p{color:var(--dim);font-size:0.85rem;max-width:460px;margin:0 auto;line-height:1.8}
+.divider{height:1px;background:linear-gradient(90deg,transparent 5%,rgba(212,175,55,0.12) 50%,transparent 95%);margin:0;position:relative;z-index:10}
+.divider::after{content:'◆';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--gold);font-size:0.5rem;opacity:0.3;background:var(--bg);padding:0 12px}
+
+/* ===== Cards with mystical border ===== */
+.mystic-card{background:var(--card);border:1px solid rgba(212,175,55,0.06);border-radius:2px;overflow:hidden;position:relative;transition:all 0.5s}
+.mystic-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,175,55,0.03),transparent 40%,transparent 60%,rgba(107,63,160,0.03));pointer-events:none}
+.mystic-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity 0.5s}
+.mystic-card:hover{border-color:rgba(212,175,55,0.15);transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,0.3),0 0 40px rgba(212,175,55,0.05)}
+.mystic-card:hover::after{opacity:0.5}
+
+/* Corner decorations */
+.corner-deco{position:absolute;width:12px;height:12px}
+.corner-deco.tl{top:0;left:0;border-top:1px solid var(--gold);border-left:1px solid var(--gold);opacity:0.3}
+.corner-deco.tr{top:0;right:0;border-top:1px solid var(--gold);border-right:1px solid var(--gold);opacity:0.3}
+.corner-deco.bl{bottom:0;left:0;border-bottom:1px solid var(--gold);border-left:1px solid var(--gold);opacity:0.3}
+.corner-deco.br{bottom:0;right:0;border-bottom:1px solid var(--gold);border-right:1px solid var(--gold);opacity:0.3}
+
+/* ===== Method ===== */
+.method-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px}
+@media(max-width:768px){.method-grid{grid-template-columns:1fr}}
+.method-card{padding:32px 24px;text-align:center}
+.method-icon{font-size:2.8rem;margin-bottom:16px;filter:drop-shadow(0 0 20px rgba(212,175,55,0.2))}
+.method-name{font-family:'Cinzel',serif;font-size:0.95rem;font-weight:600;color:var(--gold);margin-bottom:4px;letter-spacing:0.05em}
+.method-sub{font-size:0.6rem;color:var(--dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:16px}
+.method-items{list-style:none;padding:0}
+.method-items li{font-size:0.78rem;color:var(--dim);padding:6px 0;border-bottom:1px solid rgba(212,175,55,0.04)}
+.method-items li:last-child{border-bottom:none}
+
+/* ===== Steps ===== */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+@media(max-width:768px){.steps{grid-template-columns:1fr 1fr}}
+.step-card{padding:28px 16px;text-align:center}
+.step-num{font-family:'Cinzel',serif;font-size:2.2rem;font-weight:700;color:var(--gold);margin-bottom:10px;text-shadow:0 0 20px rgba(212,175,55,0.2)}
+.step-title{font-size:0.82rem;font-weight:600;margin-bottom:6px;letter-spacing:0.02em}
+.step-desc{font-size:0.7rem;color:var(--dim);line-height:1.6}
+
+/* ===== Features ===== */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:768px){.features-grid{grid-template-columns:1fr}}
+.feature-card{padding:28px 24px}
+.feature-icon{font-size:1.8rem;margin-bottom:14px;filter:drop-shadow(0 0 10px rgba(212,175,55,0.15))}
+.feature-title{font-family:'Cinzel',serif;font-size:0.88rem;font-weight:600;color:var(--text);margin-bottom:8px;letter-spacing:0.03em}
+.feature-desc{font-size:0.78rem;color:var(--dim);line-height:1.8}
+
+/* ===== Pricing ===== */
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:600px;margin:0 auto}
+@media(max-width:500px){.pricing-grid{grid-template-columns:1fr}}
+.price-card{padding:32px 24px;text-align:center}
+.price-card.featured{border-color:rgba(212,175,55,0.2)}
+.price-card.featured::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.price-name{font-family:'Cinzel',serif;font-size:0.9rem;color:var(--gold);margin-bottom:6px;letter-spacing:0.08em}
+.price-amount{font-family:'Cinzel',serif;font-size:2.4rem;font-weight:700;color:var(--gold);margin-bottom:2px;text-shadow:0 0 30px rgba(212,175,55,0.2)}
+.price-period{font-size:0.68rem;color:var(--dim);margin-bottom:20px}
+.price-features{list-style:none;padding:0;margin-bottom:24px;text-align:left}
+.price-features li{font-size:0.75rem;color:var(--dim);padding:6px 0;padding-left:20px;position:relative;border-bottom:1px solid rgba(212,175,55,0.03)}
+.price-features li::before{content:'✦';position:absolute;left:0;color:var(--gold);font-size:0.5rem;top:8px}
+
+/* ===== Testimonial ===== */
+.testimonial{text-align:center;max-width:560px;margin:0 auto;padding:48px 24px}
+.testimonial-quote{font-family:'Playfair Display',serif;font-size:1.15rem;font-style:italic;color:var(--text);line-height:1.9;margin-bottom:20px;position:relative}
+.testimonial-quote::before{content:'"';font-family:'Cinzel',serif;font-size:4rem;color:var(--gold);opacity:0.2;position:absolute;top:-20px;left:-10px}
+.testimonial-author{font-size:0.72rem;color:var(--dim);letter-spacing:0.05em}
+
+/* ===== FAQ ===== */
+.faq-item{padding:18px 0;border-bottom:1px solid rgba(212,175,55,0.05);cursor:pointer;transition:all 0.3s}
+.faq-item:hover{padding-left:8px}
+.faq-q{font-weight:600;font-size:0.88rem;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.faq-q::after{content:'+';color:var(--gold);font-size:1.1rem;transition:transform 0.3s;font-weight:300}
+.faq-item.open .faq-q::after{transform:rotate(45deg)}
+.faq-a{font-size:0.8rem;color:var(--dim);line-height:1.9;max-height:0;overflow:hidden;transition:max-height 0.4s ease}
+.faq-item.open .faq-a{max-height:200px}
+
+/* ===== Footer ===== */
+footer{position:relative;z-index:10;text-align:center;padding:48px 24px;border-top:1px solid rgba(212,175,55,0.04)}
+footer .logo{font-family:'Cinzel',serif;font-size:0.95rem;color:var(--gold);letter-spacing:0.1em;margin-bottom:8px}
+footer p{font-size:0.65rem;color:var(--dim);line-height:1.8}
+footer .disclaimer{margin-top:14px;font-size:0.58rem;color:var(--dim);opacity:0.4;max-width:520px;margin-left:auto;margin-right:auto}
+
+/* ===== Reveal Animation ===== */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 0.8s ease,transform 0.8s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+.reveal-delay-4{transition-delay:0.4s}
+
+/* ===== Scroll Indicator ===== */
+.scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;animation:float 3s ease-in-out infinite}
+.scroll-hint-line{width:1px;height:30px;background:linear-gradient(180deg,var(--gold),transparent);opacity:0.4}
+.scroll-hint-text{font-size:0.55rem;color:var(--dim);letter-spacing:0.15em;text-transform:uppercase}
+
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- Background Layers -->
+<canvas id="stars"></canvas>
+<canvas id="nebula"></canvas>
+<canvas id="dust"></canvas>
+<div class="fog"></div>
+
+<!-- Sigil Decorations -->
+<div class="sigil sigil-1"><svg viewBox="0 0 200 200" fill="none" stroke="rgba(212,175,55,0.3)" stroke-width="0.5"><circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="70"/><circle cx="100" cy="100" r="50"/><line x1="100" y1="10" x2="100" y2="190"/><line x1="10" y1="100" x2="190" y2="100"/><line x1="30" y1="30" x2="170" y2="170"/><line x1="170" y1="30" x2="30" y2="170"/></svg></div>
+<div class="sigil sigil-2"><svg viewBox="0 0 200 200" fill="none" stroke="rgba(107,63,160,0.3)" stroke-width="0.5"><polygon points="100,10 190,75 165,170 35,170 10,75"/><circle cx="100" cy="100" r="60"/><line x1="100" y1="10" x2="100" y2="190"/></svg></div>
+<div class="sigil sigil-3"><svg viewBox="0 0 200 200" fill="none" stroke="rgba(88,235,194,0.2)" stroke-width="0.5"><circle cx="100" cy="100" r="80"/><circle cx="100" cy="100" r="40"/><path d="M100 20 L100 180 M20 100 L180 100 M40 40 L160 160 M160 40 L40 160"/></svg></div>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">Guide Your Life</div>
+    <div class="nav-links">
+      <a href="#method">Method</a>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <button class="btn-lang" onclick="window.location.href='index.html'">中文</button>
+      <button class="btn-nav" onclick="document.getElementById('try').scrollIntoView({behavior:'smooth'})">Begin</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-sigil"><div class="hero-sigil-ring"></div></div>
+  <div class="hero-badge">AI-Powered Personality Discovery</div>
+  <h1>
+    <span class="gold">Understand Yourself</span>
+    <span class="line"></span>
+    <span style="font-size:0.6em;letter-spacing:0.1em;color:var(--dim)">at Every Level</span>
+  </h1>
+  <p class="hero-sub">
+    We blend modern psychology, MBTI, and celestial pattern analysis<br>
+    into one unified portrait — powered by AI, designed for self-awareness.
+  </p>
+  <div class="hero-cta">
+    <button class="btn-primary" onclick="document.getElementById('try').scrollIntoView({behavior:'smooth'})">✦ Get Your Profile — Free</button>
+    <button class="btn-ghost" onclick="document.getElementById('method').scrollIntoView({behavior:'smooth'})">Discover More</button>
+  </div>
+  <p class="hero-disclaimer">For entertainment and self-reflection purposes only</p>
+  <div class="scroll-hint">
+    <div class="scroll-hint-line"></div>
+    <div class="scroll-hint-text">Scroll</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Methodology -->
+<section class="section" id="method">
+  <div class="section-header reveal">
+    <div class="num">Our Approach</div>
+    <h2>Three Lenses, One Portrait</h2>
+    <p>Cross-validated insights from psychology, personality science, and celestial wisdom</p>
+  </div>
+  <div class="method-grid">
+    <div class="mystic-card method-card reveal reveal-delay-1">
+      <div class="corner-deco tl"></div><div class="corner-deco tr"></div><div class="corner-deco bl"></div><div class="corner-deco br"></div>
+      <div class="method-icon">🧠</div>
+      <div class="method-name">Modern Psychology</div>
+      <div class="method-sub">The Science</div>
+      <ul class="method-items">
+        <li>MBTI cognitive functions</li>
+        <li>Big Five trait mapping</li>
+        <li>Attachment style analysis</li>
+        <li>CBT-based growth guidance</li>
+      </ul>
+    </div>
+    <div class="mystic-card method-card reveal reveal-delay-2">
+      <div class="corner-deco tl"></div><div class="corner-deco tr"></div><div class="corner-deco bl"></div><div class="corner-deco br"></div>
+      <div class="method-icon">🌌</div>
+      <div class="method-name">Celestial Patterns</div>
+      <div class="method-sub">The Cosmos</div>
+      <ul class="method-items">
+        <li>Sun / Moon / Rising analysis</li>
+        <li>Element balance mapping</li>
+        <li>House placement insights</li>
+        <li>Compatibility patterns</li>
+      </ul>
+    </div>
+    <div class="mystic-card method-card reveal reveal-delay-3">
+      <div class="corner-deco tl"></div><div class="corner-deco tr"></div><div class="corner-deco bl"></div><div class="corner-deco br"></div>
+      <div class="method-icon">☯</div>
+      <div class="method-name">Eastern Wisdom</div>
+      <div class="method-sub">The Tradition</div>
+      <ul class="method-items">
+        <li>Zi Wei star chart</li>
+        <li>I Ching hexagram wisdom</li>
+        <li>Five elements harmony</li>
+        <li>Lifestyle alignment</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- How It Works -->
+<section class="section">
+  <div class="section-header reveal">
+    <div class="num">The Process</div>
+    <h2>Four Steps to Self-Discovery</h2>
+  </div>
+  <div class="steps">
+    <div class="mystic-card step-card reveal reveal-delay-1">
+      <div class="corner-deco tl"></div><div class="corner-deco br"></div>
+      <div class="step-num">I</div>
+      <div class="step-title">Birth Details</div>
+      <div class="step-desc">Your celestial coordinates — date, time, and place of origin</div>
+    </div>
+    <div class="mystic-card step-card reveal reveal-delay-2">
+      <div class="corner-deco tl"></div><div class="corner-deco br"></div>
+      <div class="step-num">II</div>
+      <div class="step-title">Personality Type</div>
+      <div class="step-desc">MBTI selection or quick assessment for cognitive mapping</div>
+    </div>
+    <div class="mystic-card step-card reveal reveal-delay-3">
+      <div class="corner-deco tl"></div><div class="corner-deco br"></div>
+      <div class="step-num">III</div>
+      <div class="step-title">AI Fusion</div>
+      <div class="step-desc">Multi-system cross-validation into one coherent portrait</div>
+    </div>
+    <div class="mystic-card step-card reveal reveal-delay-4">
+      <div class="corner-deco tl"></div><div class="corner-deco br"></div>
+      <div class="step-num">IV</div>
+      <div class="step-title">Your Portrait</div>
+      <div class="step-desc">Actionable insights for growth, relationships, and self-awareness</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Features -->
+<section class="section" id="features">
+  <div class="section-header reveal">
+    <div class="num">Capabilities</div>
+    <h2>Beyond a Simple Quiz</h2>
+  </div>
+  <div class="features-grid">
+    <div class="mystic-card feature-card reveal reveal-delay-1">
+      <div class="corner-deco tl"></div><div class="corner-deco br"></div>
+      <div class="feature-icon">✦</div>
+      <div class="feature-title">Multi-System Portrait</div>
+      <div class="feature-desc">Six dimensions cross-validated by AI — not a single quiz, but a unified portrait of who you truly are.</div>
+    </div>
+    <div class="mystic-card feature-card reveal reveal-delay-2">
+      <div class="corner-deco tl"></div><div class="corner-deco br"></div>
+      <div class="feature-icon">🔮</div>
+      <div class="feature-title">Daily Guidance</div>
+      <div class="feature-desc">Personalized daily insights aligned with your unique profile and celestial rhythms.</div>
+    </div>
+    <div class="mystic-card feature-card reveal reveal-delay-3">
+      <div class="corner-deco tl"></div><div class="corner-deco br"></div>
+      <div class="feature-icon">👥</div>
+      <div class="feature-title">Relationship Intelligence</div>
+      <div class="feature-desc">Map your social constellation. Understand how to navigate every relationship in your life.</div>
+    </div>
+    <div class="mystic-card feature-card reveal reveal-delay-1">
+      <div class="corner-deco tl"></div><div class="corner-deco br"></div>
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Growth Tracking</div>
+      <div class="feature-desc">Track your self-awareness journey. Watch your understanding deepen over time.</div>
+    </div>
+    <div class="mystic-card feature-card reveal reveal-delay-2">
+      <div class="corner-deco tl"></div><div class="corner-deco br"></div>
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">Actionable Wisdom</div>
+      <div class="feature-desc">Not just labels — specific, practical guidance for career, relationships, and personal growth.</div>
+    </div>
+    <div class="mystic-card feature-card reveal reveal-delay-3">
+      <div class="corner-deco tl"></div><div class="corner-deco br"></div>
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">Sacred Privacy</div>
+      <div class="feature-desc">Your inner world stays yours. We never sell personal data. Delete everything with one tap.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Try It -->
+<section class="section" id="try">
+  <div class="section-header reveal">
+    <div class="num">Begin</div>
+    <h2>Your Journey Awaits</h2>
+    <p>No sign-up required. Discover your portrait in moments.</p>
+  </div>
+  <div style="text-align:center;padding:40px 0" class="reveal">
+    <button class="btn-primary" style="font-size:0.82rem;padding:18px 48px" onclick="window.location.href='index.html'">
+      ✦ Enter the Cosmos
+    </button>
+    <p style="margin-top:20px;font-size:0.68rem;color:var(--dim)">Free basic portrait · No credit card · No account needed</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Pricing -->
+<section class="section" id="pricing">
+  <div class="section-header reveal">
+    <div class="num">Investment</div>
+    <h2>Choose Your Depth</h2>
+  </div>
+  <div class="pricing-grid">
+    <div class="mystic-card price-card reveal reveal-delay-1">
+      <div class="corner-deco tl"></div><div class="corner-deco tr"></div><div class="corner-deco bl"></div><div class="corner-deco br"></div>
+      <div class="price-name">Seeker</div>
+      <div class="price-amount">$0</div>
+      <div class="price-period">forever</div>
+      <ul class="price-features">
+        <li>Basic personality portrait</li>
+        <li>Daily celestial insight</li>
+        <li>Share with friends</li>
+      </ul>
+      <button class="btn-ghost" style="width:100%" onclick="window.location.href='index.html'">Begin</button>
+    </div>
+    <div class="mystic-card price-card featured reveal reveal-delay-2">
+      <div class="corner-deco tl"></div><div class="corner-deco tr"></div><div class="corner-deco bl"></div><div class="corner-deco br"></div>
+      <div class="price-name">Adept</div>
+      <div class="price-amount">$3.99</div>
+      <div class="price-period">/month</div>
+      <ul class="price-features">
+        <li>Full 6-dimension analysis</li>
+        <li>Unlimited compatibility readings</li>
+        <li>Weekly personalized guidance</li>
+        <li>Deep celestial chart reading</li>
+        <li>Relationship intelligence</li>
+        <li>Priority AI responses</li>
+      </ul>
+      <button class="btn-primary" style="width:100%">Subscribe via App</button>
+    </div>
+  </div>
+  <p style="text-align:center;margin-top:20px;font-size:0.65rem;color:var(--dim);letter-spacing:0.02em">Managed through Apple App Store · Cancel anytime</p>
+</section>
+
+<div class="divider"></div>
+
+<!-- Testimonial -->
+<section class="section">
+  <div class="testimonial reveal">
+    <div class="testimonial-quote">I've taken every personality quiz that exists. Guide Your Life is the first one that felt like it truly saw me — not just one facet, but the whole constellation of who I am.</div>
+    <div class="testimonial-author">— Early User, San Francisco</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="section-header reveal">
+    <div class="num">Questions</div>
+    <h2>Common Questions</h2>
+  </div>
+  <div style="max-width:580px;margin:0 auto">
+    <div class="faq-item reveal" onclick="this.classList.toggle('open')">
+      <div class="faq-q">Is this fortune telling?</div>
+      <div class="faq-a">No. Guide Your Life is a personality modeling tool that combines modern psychology with pattern recognition from celestial traditions. It's designed for self-reflection and personal growth, not prediction.</div>
+    </div>
+    <div class="faq-item reveal" onclick="this.classList.toggle('open')">
+      <div class="faq-q">How accurate is it?</div>
+      <div class="faq-a">Our AI cross-validates insights from multiple independent systems. Users report strong resonance with their portrait. But remember — this is for self-reflection, not professional advice.</div>
+    </div>
+    <div class="faq-item reveal" onclick="this.classList.toggle('open')">
+      <div class="faq-q">Is my data private?</div>
+      <div class="faq-a">Absolutely. We never sell personal data. Your information is encrypted and stored securely. Delete your account and all data at any time.</div>
+    </div>
+    <div class="faq-item reveal" onclick="this.classList.toggle('open')">
+      <div class="faq-q">Can I cancel anytime?</div>
+      <div class="faq-a">Yes. Manage your subscription through Apple App Store settings. Cancel anytime — you keep access until the end of your billing period.</div>
+    </div>
+    <div class="faq-item reveal" onclick="this.classList.toggle('open')">
+      <div class="faq-q">What systems do you use?</div>
+      <div class="faq-a">We blend MBTI personality typing, Western astrology, Eastern star chart analysis, I Ching wisdom, and evidence-based psychology — all cross-validated by our AI engine.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="logo">✦ Guide Your Life</div>
+  <p>AI-Powered Personality Discovery for Self-Awareness & Growth</p>
+  <p class="disclaimer">Guide Your Life is designed for entertainment and self-reflection purposes only. It is not a substitute for professional medical, psychological, financial, or legal advice. Results are generated by AI algorithms and should not be used as the sole basis for important life decisions.</p>
+  <p style="margin-top:10px;font-size:0.55rem;color:var(--dim);opacity:0.5">© 2026 Guide Your Life. All rights reserved.</p>
+</footer>
+
+<script>
+// ===== Starfield (Layer 1) =====
+const sCanvas=document.getElementById('stars'),sCtx=sCanvas.getContext('2d');
+let stars=[];
+function initStars(){
+  sCanvas.width=window.innerWidth;sCanvas.height=window.innerHeight;
+  stars=Array.from({length:200},()=>({x:Math.random()*sCanvas.width,y:Math.random()*sCanvas.height,r:Math.random()*1.5+0.2,a:Math.random(),d:Math.random()*0.003+0.001,s:Math.random()*0.5+0.5}));
+}
+function drawStars(){
+  sCtx.clearRect(0,0,sCanvas.width,sCanvas.height);
+  stars.forEach(s=>{
+    s.a+=s.d*s.s;if(s.a>1||s.a<0)s.d*=-1;
+    sCtx.beginPath();sCtx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    sCtx.fillStyle=`rgba(212,175,55,${s.a*0.6})`;sCtx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+initStars();drawStars();
+
+// ===== Nebula (Layer 2) =====
+const nCanvas=document.getElementById('nebula'),nCtx=nCanvas.getContext('2d');
+let nebulae=[];
+function initNebula(){
+  nCanvas.width=window.innerWidth;nCanvas.height=window.innerHeight;
+  nebulae=[
+    {x:nCanvas.width*0.2,y:nCanvas.height*0.3,r:300,color:'107,63,160',a:0.03},
+    {x:nCanvas.width*0.8,y:nCanvas.height*0.6,r:250,color:'74,139,194',a:0.02},
+    {x:nCanvas.width*0.5,y:nCanvas.height*0.8,r:350,color:'212,175,55',a:0.015},
+  ];
+}
+function drawNebula(){
+  nCtx.clearRect(0,0,nCanvas.width,nCanvas.height);
+  nebulae.forEach(n=>{
+    const grad=nCtx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
+    grad.addColorStop(0,`rgba(${n.color},${n.a})`);
+    grad.addColorStop(1,'transparent');
+    nCtx.fillStyle=grad;
+    nCtx.fillRect(n.x-n.r,n.y-n.r,n.r*2,n.r*2);
+  });
+}
+initNebula();drawNebula();
+
+// ===== Dust Particles (Layer 3) =====
+const dCanvas=document.getElementById('dust'),dCtx=dCanvas.getContext('2d');
+let dustParticles=[];
+function initDust(){
+  dCanvas.width=window.innerWidth;dCanvas.height=window.innerHeight;
+  dustParticles=Array.from({length:60},()=>({
+    x:Math.random()*dCanvas.width,y:Math.random()*dCanvas.height,
+    vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.2-0.1,
+    r:Math.random()*2+0.5,a:Math.random()*0.4+0.1,
+    life:Math.random()*200+100,age:0
+  }));
+}
+function drawDust(){
+  dCtx.clearRect(0,0,dCanvas.width,dCanvas.height);
+  dustParticles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.age++;
+    if(p.age>p.life||p.x<0||p.x>dCanvas.width||p.y<0||p.y>dCanvas.height){
+      p.x=Math.random()*dCanvas.width;p.y=dCanvas.height+10;
+      p.age=0;p.life=Math.random()*200+100;
+    }
+    const fade=p.age<30?p.age/30:p.age>p.life-30?(p.life-p.age)/30:1;
+    dCtx.beginPath();dCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    dCtx.fillStyle=`rgba(212,175,55,${p.a*fade})`;dCtx.fill();
+  });
+  requestAnimationFrame(drawDust);
+}
+initDust();drawDust();
+
+// ===== Constellation Lines (connecting nearby stars) =====
+function drawConstellations(){
+  const threshold=150;
+  sCtx.strokeStyle='rgba(212,175,55,0.04)';
+  sCtx.lineWidth=0.5;
+  for(let i=0;i<stars.length;i++){
+    for(let j=i+1;j<stars.length;j++){
+      const dx=stars[i].x-stars[j].x,dy=stars[i].y-stars[j].y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<threshold){
+        sCtx.globalAlpha=(1-dist/threshold)*0.15;
+        sCtx.beginPath();sCtx.moveTo(stars[i].x,stars[i].y);sCtx.lineTo(stars[j].x,stars[j].y);sCtx.stroke();
+      }
+    }
+  }
+  sCtx.globalAlpha=1;
+}
+
+// Override drawStars to include constellations
+const _origDrawStars=drawStars;
+drawStars=function(){
+  sCtx.clearRect(0,0,sCanvas.width,sCanvas.height);
+  stars.forEach(s=>{s.a+=s.d*s.s;if(s.a>1||s.a<0)s.d*=-1;sCtx.beginPath();sCtx.arc(s.x,s.y,s.r,0,Math.PI*2);sCtx.fillStyle=`rgba(212,175,55,${s.a*0.6})`;sCtx.fill()});
+  drawConstellations();
+  requestAnimationFrame(drawStars);
+};
+
+// ===== Scroll Reveal =====
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// ===== Resize =====
+window.addEventListener('resize',()=>{initStars();initNebula();initDust()});
+</script>
+
+</body>
+</html>

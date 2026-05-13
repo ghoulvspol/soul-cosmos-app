@@ -351,6 +351,10 @@ function getBirthCity() {
 function submitFeedback(type, el) {
   const portrait = document.getElementById('resultPortrait')?.textContent || '';
   Memory.addFeedback('profile', type, portrait);
+  // 登录用户同步到服务端
+  if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
+    Auth.saveFeedback(type, 'profile', portrait);
+  }
 
   // UI反馈
   document.querySelectorAll('.feedback-btn').forEach(b => b.classList.remove('selected'));
@@ -606,7 +610,6 @@ function generateProfile() {
   if (!selectedMBTI) return;
 
   showStep(3);
-  animateLoading();
 
   const birthDate = document.getElementById('birthDate').value;
   const birthTime = document.getElementById('birthTime').value;
@@ -621,6 +624,7 @@ function generateProfile() {
 
   if (CONFIG.isDemo) {
     // Demo模式：使用本地mock数据
+    animateLoading();
     setTimeout(() => {
       const demo = getDemoProfile(natalChart.sun.name);
       const ziweiKeywords = { '紫微': 'Regal', '天机': 'Clever', '太阳': 'Radiant', '武曲': 'Determined', '天同': 'Gentle', '廉贞': 'Passionate', '天府': 'Abundant', '太阴': 'Receptive', '贪狼': 'Ambitious', '巨门': 'Perceptive', '天相': 'Diplomatic', '天梁': 'Wise', '七杀': 'Fearless', '破军': 'Revolutionary' };
@@ -641,8 +645,13 @@ function generateProfile() {
       renderResult(profile, natalChart, ziweiChart, 'demo');
     }, 2000);
   } else {
-    // 真实AI模式：调用Mimo模型
-    fetch(CONFIG.apiBase + '/api/generate-profile', {
+    // 真实AI模式：loading 动画 → 推理链渐显 → AI 融合结果
+
+    // Step 1: 显示 loading 动画
+    animateLoading();
+
+    // Step 2: 请求 harness（140ms 返回推理链 + requestId）
+    fetch(CONFIG.apiBase + '/api/harness-profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ natalChart, mbtiType: selectedMBTI, ziweiChart, iching: ichingInfo, lang: currentLang, gender: document.getElementById('birthGender')?.value || 'unknown', birthDate: birthDate, birthTime: birthTime }),
@@ -650,25 +659,101 @@ function generateProfile() {
       .then(res => res.json())
       .then(data => {
         if (data.error) throw new Error(data.error);
-        let profile = data.profile;
-        // 保护：如果 profile 是字符串（JSON解析失败），尝试重新解析
-        if (typeof profile === 'string') {
-          try { profile = JSON.parse(profile); } catch { profile = null; }
+
+        // Step 3: 推理链到达（~140ms）→ 在 loading 区域渐显各维度分析
+        if (data.reasoningSteps?.length) {
+          showReasoningInLoading(data.reasoningSteps);
         }
-        if (!profile || typeof profile !== 'object' || !profile.soulKeywords) {
-          console.warn('Profile invalid, using fallback');
-          profile = ProfileEngine.generate(natalChart, selectedMBTI, ziweiChart);
-          renderResult(profile, natalChart, ziweiChart, 'local-fallback');
-        } else {
-          renderResult(profile, natalChart, ziweiChart, data.model);
+
+        // Step 4: 获取 AI 融合结果
+        if (data.cached && data.profile) {
+          // 缓存命中：立即渲染（跳过轮询）
+          const profile = data.profile;
+          profile.reasoningSteps = data.reasoningSteps;
+          renderResult(profile, natalChart, ziweiChart, 'harness-ai');
+        } else if (data.requestId) {
+          // 新请求：轮询融合结果
+          pollAndRender(data.requestId, data.reasoningSteps, natalChart, ziweiChart);
         }
       })
       .catch(err => {
-        console.error('AI Error:', err);
+        console.warn('AI request failed:', err.message);
         const profile = ProfileEngine.generate(natalChart, selectedMBTI, ziweiChart);
         renderResult(profile, natalChart, ziweiChart, 'local-fallback');
       });
   }
+}
+
+// ========== loading 区域渐显推理链 ==========
+function showReasoningInLoading(steps) {
+  const stepsEl = document.getElementById('loadingSteps');
+  if (!stepsEl) return;
+
+  // 替换 loading steps 为实际分析结果
+  stepsEl.innerHTML = steps.map((s, i) =>
+    `<div class="ls-item" style="opacity:0;transition:opacity .4s ${i * 0.3}s">${s.icon || '✦'} ${s.system}: ${s.reasoning?.slice(0, 60)}...</div>`
+  ).join('');
+
+  // 触发动画
+  requestAnimationFrame(() => {
+    stepsEl.querySelectorAll('.ls-item').forEach(el => el.style.opacity = '1');
+  });
+
+  // 更新 loading 文本
+  const loadingText = document.querySelector('.loading-text');
+  if (loadingText) loadingText.textContent = 'Fusing with AI...';
+}
+
+// ========== 轮询融合 + 渲染最终结果 ==========
+function pollAndRender(requestId, reasoningSteps, natalChart, ziweiChart) {
+  let attempts = 0;
+  const maxAttempts = 30;
+  const interval = 2000;
+
+  const poll = setInterval(async () => {
+    attempts++;
+    if (attempts > maxAttempts) {
+      clearInterval(poll);
+      // 超时：用本地 profile
+      const profile = ProfileEngine.generate(natalChart, selectedMBTI, ziweiChart);
+      profile.reasoningSteps = reasoningSteps;
+      renderResult(profile, natalChart, ziweiChart, 'local-fallback');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/fusion/${requestId}`);
+      const data = await res.json();
+
+      if (data.status === 'ready' && data.profile) {
+        clearInterval(poll);
+        const profile = data.profile;
+        profile.reasoningSteps = reasoningSteps;
+        renderResult(profile, natalChart, ziweiChart, 'harness-ai');
+      } else if (data.status === 'failed') {
+        clearInterval(poll);
+        const profile = ProfileEngine.generate(natalChart, selectedMBTI, ziweiChart);
+        profile.reasoningSteps = reasoningSteps;
+        renderResult(profile, natalChart, ziweiChart, 'local-fallback');
+      }
+    } catch {}
+  }, interval);
+}
+
+// ========== 更新推理链 UI（不重渲染整个页面）==========
+function updateReasoningUI(steps) {
+  const reasoningEl = document.getElementById('resultReasoning');
+  const chainEl = document.getElementById('reasoningChain');
+  if (!reasoningEl || !chainEl || !steps?.length) return;
+
+  reasoningEl.style.display = '';
+  chainEl.innerHTML = steps.map((step, i) => `
+    <div class="reasoning-step" style="animation-delay:${(i * 0.2).toFixed(1)}s">
+      <div class="step-system">${step.icon || '✦'} ${step.system || ''}</div>
+      ${step.input ? `<div class="step-input">${step.input}</div>` : ''}
+      <div class="step-reasoning">${step.reasoning || ''}</div>
+      ${step.conclusion ? `<div class="step-conclusion">→ ${step.conclusion}</div>` : ''}
+    </div>`).join('');
 }
 
 // ========== 加载动画 ==========
@@ -698,16 +783,25 @@ function stopLoading() {
 
 // ========== 渲染结果 ==========
 function renderResult(profile, natalChart, ziweiChart, model) {
-  stopLoading();
+  // 保存供分享卡片使用
+  window._lastProfile = profile;
+  window._lastNatalChart = natalChart;
+  window._lastZiweiChart = ziweiChart;
 
-  setTimeout(() => {
-    document.getElementById('loadingState').classList.add('hidden');
-    document.getElementById('resultState').classList.remove('hidden');
+  // 停止 loading 动画，隐藏 loading，显示结果
+  stopLoading();
+  document.getElementById('loadingState').classList.add('hidden');
+  document.getElementById('resultState').classList.remove('hidden');
+
+  const show = () => {
 
     // 模型标识
-    const modelTag = model !== 'local-fallback'
-      ? `<div style="font-size:10px;color:#64748b;margin-top:8px;">Powered by ${model}</div>`
-      : '';
+    let modelTag = '';
+    if (model === 'loading') {
+      modelTag = '<div id="aiEnhancing" style="font-size:11px;color:#a78bfa;margin-top:8px;display:flex;align-items:center;gap:6px"><span class="ai-spinner"></span> AI is enhancing your profile...</div>';
+    } else if (model !== 'local-fallback') {
+      modelTag = `<div style="font-size:10px;color:#64748b;margin-top:8px;">Powered by ${model}</div>`;
+    }
 
     // 关键词
     const keywords = profile.soulKeywords || profile.keywords || [];
@@ -954,7 +1048,126 @@ function renderResult(profile, natalChart, ziweiChart, model) {
 
     // 滚动到结果
     document.getElementById('resultState').scrollIntoView({ behavior: 'smooth' });
-  }, 500);
+
+    // 登录用户：保存画像和分析历史到服务端
+    if (typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
+      const birthDate = document.getElementById('birthDate')?.value;
+      const birthTime = document.getElementById('birthTime')?.value;
+      const birthCity = getBirthCity();
+      const gender = document.getElementById('birthGender')?.value || 'unknown';
+      Auth.saveProfile({
+        birth_date: birthDate, birth_time: birthTime, birth_city: birthCity,
+        gender, mbti_type: selectedMBTI,
+        natal_chart: natalChart, ziwei_chart: ziweiChart,
+        bazi_data: profile.bazi || null, soul_profile: profile
+      });
+      Auth.saveAnalysis('profile', { natalChart, ziweiChart, mbti: selectedMBTI }, profile, model);
+      // 刷新历史列表
+      Auth.loadUserData();
+    }
+    // 更新关系网图谱
+    updateNetworkGraph();
+  };
+
+  show();
+}
+
+// ========== 轮询 AI 融合结果 ==========
+function pollFusion(requestId, baseProfile, natalChart, ziweiChart) {
+  let attempts = 0;
+  const maxAttempts = 30;
+  const interval = 2000;
+
+  const poll = setInterval(async () => {
+    attempts++;
+    if (attempts > maxAttempts) {
+      clearInterval(poll);
+      removeEnhancingIndicator();
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/fusion/${requestId}`);
+      const data = await res.json();
+
+      if (data.status === 'ready' && data.profile) {
+        clearInterval(poll);
+        // AI 融合完成，原地更新结果（不重渲染整个页面）
+        mergeAIResult(data.profile, baseProfile);
+        removeEnhancingIndicator();
+      } else if (data.status === 'failed') {
+        clearInterval(poll);
+        removeEnhancingIndicator();
+        // 融合失败，保留本地结果
+        console.warn('AI fusion failed, keeping local result');
+      }
+      // status === 'loading' → 继续轮询
+    } catch (err) {
+      console.warn('Poll error:', err);
+    }
+  }, interval);
+}
+
+// ========== AI 结果原地更新（不重渲染页面）==========
+function mergeAIResult(aiProfile, baseProfile) {
+  // 更新关键词
+  const keywordsEl = document.getElementById('resultKeywords');
+  if (keywordsEl && aiProfile.soulKeywords?.length) {
+    keywordsEl.innerHTML = aiProfile.soulKeywords.join(' · ');
+  }
+  // 更新画像描述
+  const portraitEl = document.getElementById('resultPortrait');
+  if (portraitEl && aiProfile.oneSentencePortrait) {
+    portraitEl.textContent = aiProfile.oneSentencePortrait;
+  }
+  // 更新核心特质
+  const traitsEl = document.getElementById('resultTraits');
+  if (traitsEl && aiProfile.coreTraits?.length) {
+    traitsEl.innerHTML = aiProfile.coreTraits.map(t =>
+      `<div class="trait-item"><strong>${t.trait}</strong><p>${t.description}</p></div>`
+    ).join('');
+  }
+  // 更新阴影面
+  const shadowsEl = document.getElementById('resultShadows');
+  if (shadowsEl && aiProfile.shadows?.length) {
+    shadowsEl.innerHTML = aiProfile.shadows.map(s =>
+      `<div class="shadow-item"><strong>${s.challenge}</strong><p>${s.description}</p></div>`
+    ).join('');
+  }
+  // 更新人生主题
+  const themeEl = document.getElementById('resultTheme');
+  if (themeEl && aiProfile.lifeTheme) {
+    themeEl.textContent = aiProfile.lifeTheme;
+  }
+  // 更新每日洞察
+  const dailyEl = document.getElementById('resultDaily');
+  if (dailyEl && aiProfile.dailyInsight) {
+    dailyEl.textContent = aiProfile.dailyInsight;
+  }
+  // 更新扩展信息
+  if (aiProfile.marriageFortune || aiProfile.careerGuidance || aiProfile.luckyElements) {
+    const extraEl = document.getElementById('resultExtra');
+    if (extraEl) {
+      let html = '';
+      const isZh = currentLang === 'zh';
+      if (aiProfile.marriageFortune) html += `<div class="result-section"><h3>💕 ${isZh?'感情':'Marriage'}</h3><p>${aiProfile.marriageFortune}</p></div>`;
+      if (aiProfile.careerGuidance) html += `<div class="result-section"><h3>💼 ${isZh?'事业':'Career'}</h3><p>${aiProfile.careerGuidance}</p></div>`;
+      if (aiProfile.healthAdvice) html += `<div class="result-section"><h3>🌿 ${isZh?'健康':'Health'}</h3><p>${aiProfile.healthAdvice}</p></div>`;
+      if (aiProfile.luckyElements) {
+        const le = aiProfile.luckyElements;
+        html += `<div class="result-section"><h3>🍀 ${isZh?'幸运元素':'Lucky'}</h3><p>${le.colors?.join(', ')||''} · ${le.numbers?.join(', ')||''} · ${le.direction||''} · ${le.day||''}</p></div>`;
+      }
+      extraEl.innerHTML = html;
+    }
+  }
+
+  // 更新全局 profile 引用
+  window._lastProfile = { ...baseProfile, ...aiProfile };
+}
+
+function removeEnhancingIndicator() {
+  const el = document.getElementById('aiEnhancing');
+  if (el) el.remove();
 }
 
 // ========== 重置 ==========
@@ -975,6 +1188,12 @@ function shareProfile() {
   const keywords = document.getElementById('resultKeywords').textContent;
   const text = `✦ My Soul Profile: ${keywords}\n\nDiscover yours at Soul Cosmos ✦`;
 
+  // 如果有卡片生成器，优先生成图片分享
+  if (typeof ShareCard !== 'undefined' && window._lastProfile) {
+    ShareCard.shareCard(window._lastProfile);
+    return;
+  }
+
   if (navigator.share) {
     navigator.share({ title: 'My Soul Profile', text });
   } else {
@@ -984,13 +1203,51 @@ function shareProfile() {
   }
 }
 
+function downloadCard() {
+  if (typeof ShareCard !== 'undefined' && window._lastProfile) {
+    ShareCard.downloadCard(window._lastProfile);
+  }
+}
+
 // ========== 初始化 ==========
 document.addEventListener('DOMContentLoaded', () => {
   initStarfield();
   loadCircle();
   initPhotoUpload();
   applyLang();
+  loadDailyFortune();
 });
+
+// ========== 每日运势 ==========
+async function loadDailyFortune() {
+  try {
+    const token = typeof Auth !== 'undefined' ? Auth.getToken() : null;
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const lang = currentLang || 'zh';
+    const res = await fetch(`/api/daily/today?lang=${lang}`, { headers });
+    const data = await res.json();
+    if (!data.success) return;
+
+    const { almanac, personalNote } = data;
+    const dateEl = document.getElementById('dailyDate');
+    const gzEl = document.getElementById('dailyGanZhi');
+    const elEl = document.getElementById('dailyElement');
+    const yiEl = document.getElementById('dailyYi');
+    const jiEl = document.getElementById('dailyJi');
+    const luckyEl = document.getElementById('dailyLucky');
+    const personalEl = document.getElementById('dailyPersonal');
+
+    if (dateEl) dateEl.textContent = new Date(almanac.date).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+    if (gzEl) gzEl.textContent = `${almanac.dayGanZhi}日 · 运势 ${almanac.score}分`;
+    if (elEl) elEl.textContent = `五行: ${almanac.dayElement} · 吉色: ${almanac.luckyColor} · 吉方: ${almanac.luckyDirection}`;
+    if (yiEl) yiEl.innerHTML = almanac.yi.map(y => `<span style="padding:4px 12px;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.2);border-radius:20px;font-size:12px;color:#34d399">宜 ${y}</span>`).join('');
+    if (jiEl) jiEl.textContent = `忌: ${almanac.ji.join(' · ')}`;
+    if (luckyEl) luckyEl.textContent = `吉时: ${almanac.luckyHours.join(' · ')}`;
+    if (personalEl && personalNote) personalEl.textContent = personalNote;
+  } catch (err) {
+    console.warn('Failed to load daily fortune:', err);
+  }
+}
 
 // ========== Phase 2: My Circle 关系圈 ==========
 let circlePeople = JSON.parse(localStorage.getItem('soul_circle') || '[]');
@@ -1027,16 +1284,30 @@ function addPersonToCircle() {
   document.getElementById('circleBirthDate').value = '';
 
   renderCircle();
+  updateNetworkGraph();
 }
 
 function removePersonFromCircle(id) {
   circlePeople = circlePeople.filter(p => p.id !== id);
   localStorage.setItem('soul_circle', JSON.stringify(circlePeople));
   renderCircle();
+  updateNetworkGraph();
 }
 
 function loadCircle() {
   renderCircle();
+  // 初始化关系网图谱
+  if (typeof RelationshipNetwork !== 'undefined' && document.getElementById('networkGraph')) {
+    RelationshipNetwork.init('networkGraph');
+    updateNetworkGraph();
+  }
+}
+
+function updateNetworkGraph() {
+  if (typeof RelationshipNetwork === 'undefined') return;
+  const userProfile = window._lastNatalChart ? { element: window._lastNatalChart.dominantElement || 'default' } : null;
+  RelationshipNetwork.setData(circlePeople, userProfile);
+  RelationshipNetwork.render();
 }
 
 function renderCircle() {

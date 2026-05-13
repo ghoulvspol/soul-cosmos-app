@@ -4,9 +4,9 @@
  */
 const express = require('express');
 const path = require('path');
-const http = require('http');
-const https = require('https');
 const { execSync } = require('child_process');
+const { optionalAuth } = require('./auth');
+const kepa = require('./kepa');
 
 const app = express();
 
@@ -30,12 +30,6 @@ function calculateBazi(birthDate, birthTime, gender) {
 }
 const PORT = 8066;
 
-// Mify 网关配置
-const MIFY_HOST = 'model.mify.ai.srv';
-const MIFY_PORT = 80;
-const MIFY_PATH = '/v1/chat/completions';
-const MIFY_MODEL = 'xiaomi/mimo-v2.5-pro';
-
 // 从环境变量读取 API Key
 const MIFY_API_KEY = process.env.MIFY_API_KEY;
 if (!MIFY_API_KEY) {
@@ -47,63 +41,23 @@ if (!MIFY_API_KEY) {
 app.use(express.static(path.join(__dirname, '..')));
 app.use(express.json());
 
+// 用户认证 & 数据路由
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/user', require('./routes/user'));
+app.use('/api/stripe', require('./routes/stripe'));
+app.use('/api/daily', require('./routes/daily'));
+app.use('/api/hardware', require('./routes/hardware'));
+
 // CORS
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
 
-/**
- * 调用 Mify 网关
- */
-function callMify(messages, maxTokens = 2000) {
-  return new Promise((resolve, reject) => {
-    const body = JSON.stringify({
-      model: MIFY_MODEL,
-      messages,
-      temperature: 0.8,
-      max_tokens: maxTokens,
-    });
-
-    const options = {
-      hostname: MIFY_HOST,
-      port: MIFY_PORT,
-      path: MIFY_PATH,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${MIFY_API_KEY}`,
-        'Content-Length': Buffer.byteLength(body),
-      },
-    };
-
-    const req = http.request(options, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          if (json.error) {
-            reject(new Error(json.error.message || JSON.stringify(json.error)));
-          } else {
-            const content = json.choices?.[0]?.message?.content || '';
-            resolve(content);
-          }
-        } catch (e) {
-          reject(new Error(`Parse error: ${data.slice(0, 200)}`));
-        }
-      });
-    });
-
-    req.on('error', reject);
-    req.setTimeout(60000, () => { req.destroy(); reject(new Error('Timeout')); });
-    req.write(body);
-    req.end();
-  });
-}
+const { callMify, MIFY_MODEL } = require('./mify');
 
 /**
  * 手动提取（JSON解析失败时的兜底）
@@ -134,9 +88,72 @@ function extractManually(text) {
 }
 
 /**
+ * 健壮 JSON 解析（4 级降级）
+ * Level 1: 直接解析
+ * Level 2: 提取 {...} + 修复尾逗号
+ * Level 3: 括号深度匹配 + 截断修复
+ * Level 4: 手动正则提取
+ */
+function parseProfileJSON(raw) {
+  // 预处理：去 markdown 代码块、BOM、控制字符
+  const cleaned = raw
+    .replace(/^```[\w]*\s*/gim, '')
+    .replace(/```\s*$/gim, '')
+    .replace(/^\s*[\uFEFF\u200B]+/g, '')
+    .trim();
+
+  // Level 1: 直接解析
+  try { return JSON.parse(cleaned); } catch {}
+
+  // Level 2: 提取 {...} + 修复
+  try {
+    const m = cleaned.match(/\{[\s\S]*\}/);
+    if (m) {
+      const fixed = m[0].replace(/,\s*([\]}])/g, '$1');
+      return JSON.parse(fixed);
+    }
+  } catch {}
+
+  // Level 3: 括号深度匹配 + 截断修复
+  try {
+    const start = cleaned.indexOf('{');
+    if (start >= 0) {
+      const partial = cleaned.slice(start);
+      let depth = 0, end = 0;
+      for (let i = 0; i < partial.length; i++) {
+        if (partial[i] === '{') depth++;
+        if (partial[i] === '}') { depth--; if (depth === 0) { end = i + 1; break; } }
+      }
+      if (end > 0) return JSON.parse(partial.slice(0, end));
+
+      // 截断修复：移除不完整字段 + 补齐括号
+      let t = partial
+        // 移除末尾不完整的 key-value（值被截断或为空）
+        .replace(/,?\s*"[^"]*":\s*"[^"]*$/, '')
+        // 移除末尾不完整的数组值
+        .replace(/,?\s*"[^"]*":\s*\[[^\]]*$/, '')
+        // 移除末尾不完整的对象值
+        .replace(/,?\s*"[^"]*":\s*\{[^}]*$/, '');
+      // 补齐缺失的括号
+      const ob = (t.match(/\{/g) || []).length, cb = (t.match(/\}/g) || []).length;
+      const obr = (t.match(/\[/g) || []).length, cbr = (t.match(/\]/g) || []).length;
+      for (let i = 0; i < obr - cbr; i++) t += ']';
+      for (let i = 0; i < ob - cb; i++) t += '}';
+      // 去除可能的尾逗号
+      t = t.replace(/,\s*([\]}])/g, '$1');
+      return JSON.parse(t);
+    }
+  } catch {}
+
+  // Level 4: 手动正则提取
+  console.warn('JSON parse failed, falling back to manual extraction');
+  return extractManually(raw);
+}
+
+/**
  * API: 生成灵魂画像
  */
-app.post('/api/generate-profile', async (req, res) => {
+app.post('/api/generate-profile', optionalAuth, async (req, res) => {
   try {
     const { natalChart, mbtiType, ziweiChart, iching, lang, gender } = req.body;
     const outputLang = lang === 'zh' ? 'Chinese (中文)' : 'English';
@@ -165,43 +182,44 @@ Your writing style:
 - Be honest about shadows, not just flattering
 - ALL OUTPUT MUST BE IN ${outputLang} — every word, every field, no exceptions
 
-You MUST respond with valid JSON in this exact format:
+You MUST respond with valid JSON. IMPORTANT: Keep reasoningSteps concise (1 sentence per reasoning field). Keep all text fields brief but specific.
+
 {
   "reasoningSteps": [
-    {"system": "BaZi (八字)", "icon": "📜", "input": "Four Pillars: XX XX XX XX", "reasoning": "Analyze each pillar's meaning and their interactions", "conclusion": "Core destiny pattern"},
-    {"system": "Western Astrology", "icon": "🌌", "input": "Sun/Moon/Rising signs", "reasoning": "How these signs interact with the BaZi profile", "conclusion": "Psychological archetype"},
-    {"system": "Zi Wei Dou Shu", "icon": "☯", "input": "Main Star + palaces", "reasoning": "What the star placements reveal", "conclusion": "Life pattern"},
-    {"system": "I Ching", "icon": "☯️", "input": "Hexagram", "reasoning": "What the hexagram says about this person's energy", "conclusion": "Life energy"},
-    {"system": "MBTI", "icon": "🧠", "input": "Type", "reasoning": "How cognitive functions map to the astrological profile", "conclusion": "Decision style"},
-    {"system": "Fusion", "icon": "✦", "input": "Cross-validation", "reasoning": "How all systems converge on one unified portrait", "conclusion": "Final archetype name"}
+    {"system": "BaZi (八字)", "icon": "📜", "input": "四柱: XX XX XX XX", "reasoning": "One concise sentence about the BaZi reading", "conclusion": "Key insight"},
+    {"system": "Western Astrology", "icon": "🌌", "input": "Sun/Moon/Rising", "reasoning": "One sentence on how signs interact", "conclusion": "Archetype"},
+    {"system": "Zi Wei Dou Shu", "icon": "☯", "input": "Main Star", "reasoning": "One sentence on star meaning", "conclusion": "Pattern"},
+    {"system": "I Ching", "icon": "☯️", "input": "Hexagram", "reasoning": "One sentence on hexagram energy", "conclusion": "Guidance"},
+    {"system": "MBTI", "icon": "🧠", "input": "Type", "reasoning": "One sentence on cognitive functions", "conclusion": "Style"},
+    {"system": "Fusion", "icon": "✦", "input": "Cross-validation", "reasoning": "One sentence on convergence", "conclusion": "Final archetype"}
   ],
   "soulKeywords": ["keyword1", "keyword2", "keyword3", "keyword4"],
-  "oneSentencePortrait": "A deeply personal, specific, poetic sentence — must reference at least 2 different systems (BaZi + Astrology or MBTI)",
+  "oneSentencePortrait": "A poetic sentence referencing 2+ systems",
   "coreTraits": [
-    {"trait": "Trait Name", "description": "Detailed 3-4 sentence explanation with specific BaZi/Astrology references. Example: '丙火日主赋予你阳光般的感染力...加上ENFJ的Fe功能...'"}
+    {"trait": "Name", "description": "2-3 sentences with specific references"}
   ],
   "shadows": [
-    {"challenge": "Challenge Name", "description": "Honest 2-3 sentence analysis of the shadow side, with specific element/star references and practical advice"}
+    {"challenge": "Name", "description": "2 sentences with element references"}
   ],
-  "lifeTheme": "3-4 sentences describing the overarching life narrative — must reference the person's specific elemental balance and destiny pattern",
+  "lifeTheme": "2-3 sentences on the overarching life narrative",
   "lifePhases": {
-    "early": "0-30 years: What challenges and lessons define early life? (2-3 sentences, reference BaZi大运)",
-    "middle": "30-50 years: When does fortune turn? What opportunities arise? (2-3 sentences)",
-    "later": "50+ years: What does the later life look like? (2-3 sentences)"
+    "early": "1-2 sentences on early life",
+    "middle": "1-2 sentences on mid life",
+    "later": "1-2 sentences on later life"
   },
   "strengthsAndWarnings": {
-    "strengths": ["strength1: detailed explanation", "strength2: detailed explanation", "strength3: detailed explanation"],
-    "warnings": ["warning1: specific actionable advice", "warning2: specific actionable advice"]
+    "strengths": ["strength1", "strength2", "strength3"],
+    "warnings": ["warning1", "warning2"]
   },
-  "selfImprovement": "3-4 sentences of practical self-improvement advice based on the person's elemental weaknesses. Example: '命局缺金，建议多接触理性思维、理财、规则感强的圈子...'",
-  "dailyInsight": "A personalized daily insight, 2-3 sentences, referencing today's planetary transits or BaZi flow",
-  "marriageFortune": "Detailed 3-4 sentence marriage/romance analysis — attachment style, giving patterns, what kind of partner suits them, timing guidance",
-  "careerGuidance": "Detailed 3-4 sentence career analysis — ideal industries, work style, leadership potential, specific role recommendations",
-  "healthAdvice": "2-3 sentences about physical constitution based on five elements, specific vulnerabilities, wellness tips",
-  "annualFortune": "2-3 sentences about this year's trend — opportunities, challenges, key months to watch",
-  "futureDestiny": "3-4 sentences about life trajectory — major turning points, long-term outlook, what the destiny pattern predicts",
-  "childrenFortune": "2-3 sentences about children fortune — parenting style, relationship quality",
-  "relationshipStyle": "2-3 sentences about how this person behaves in love and friendships",
+  "selfImprovement": "2-3 sentences of practical advice",
+  "dailyInsight": "2 sentences, personalized for today",
+  "marriageFortune": "2-3 sentences on marriage/romance",
+  "careerGuidance": "2-3 sentences on career path",
+  "healthAdvice": "2 sentences on health based on five elements",
+  "annualFortune": "2 sentences on this year's trend",
+  "futureDestiny": "2-3 sentences on life trajectory",
+  "childrenFortune": "2 sentences on children fortune",
+  "relationshipStyle": "2 sentences on love/friendship style",
   "luckyElements": {
     "colors": ["color1", "color2"],
     "numbers": ["number1", "number2"],
@@ -241,76 +259,16 @@ ${iching ? `I CHING (易经) HEXAGRAM:
 - Keywords: ${iching.keywords?.join(', ') || ''}
 - Personality: ${iching.personality || ''}` : ''}
 
-Create a deeply personal, specific soul portrait. Fuse ALL systems into ONE coherent description — do NOT list each system separately. Make the person feel "this is SO me."`;
+Create a deeply personal, specific soul portrait. Fuse ALL systems into ONE coherent description — do NOT list each system separately. Make the person feel "this is SO me."
+${req.user ? kepa.getFusionStrategy(req.user.id) : ''}`;
 
     const rawResponse = await callMify([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
-    ], 2500);
+    ], 4000);
 
-    // 解析 JSON（健壮版）
-    let profile;
-    try {
-      // 清理响应：去掉 markdown 代码块、BOM、控制字符
-      let cleaned = rawResponse
-        .replace(/^```[\w]*\s*/gim, '')  // 去掉开头的 ```json
-        .replace(/```\s*$/gim, '')       // 去掉结尾的 ```
-        .replace(/^\s*[\uFEFF\u200B]+/g, '')
-        .trim();
-
-      // 尝试直接解析
-      profile = JSON.parse(cleaned);
-    } catch (e1) {
-      try {
-        // 尝试提取第一个 JSON 对象（贪婪匹配到最后一个 }）
-        const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          let fixed = jsonMatch[0]
-            .replace(/,\s*([\]}])/g, '$1')  // 去尾逗号
-            .replace(/'/g, '"');  // 单引号→双引号
-          profile = JSON.parse(fixed);
-        } else {
-          throw new Error('No JSON found');
-        }
-      } catch (e2) {
-        try {
-          // 尝试截取到 reasoningSteps 结束后的位置
-          const startIdx = rawResponse.indexOf('{');
-          if (startIdx >= 0) {
-            let partial = rawResponse.slice(startIdx);
-            // 尝试逐字符找到有效的 JSON 结尾
-            let depth = 0; let endIdx = 0;
-            for (let i = 0; i < partial.length; i++) {
-              if (partial[i] === '{') depth++;
-              if (partial[i] === '}') { depth--; if (depth === 0) { endIdx = i + 1; break; } }
-            }
-            if (endIdx > 0) {
-              profile = JSON.parse(partial.slice(0, endIdx));
-            } else {
-              // 截断了——在最后一个完整字段后闭合
-              let truncated = partial;
-              // 移除未完成的字段
-              truncated = truncated.replace(/,\s*"[^"]*":\s*"[^"]*$/, '');
-              truncated = truncated.replace(/,\s*"[^"]*":\s*\[[^\]]*$/, '');
-              truncated = truncated.replace(/,\s*"[^"]*":\s*\{[^}]*$/, '');
-              // 补齐缺失的括号
-              const openBrace = (truncated.match(/\{/g) || []).length;
-              const closeBrace = (truncated.match(/\}/g) || []).length;
-              const openBracket = (truncated.match(/\[/g) || []).length;
-              const closeBracket = (truncated.match(/\]/g) || []).length;
-              for (let i = 0; i < openBracket - closeBracket; i++) truncated += ']';
-              for (let i = 0; i < openBrace - closeBrace; i++) truncated += '}';
-              profile = JSON.parse(truncated);
-            }
-          } else {
-            throw new Error('No JSON start found');
-          }
-        } catch (e3) {
-          console.warn('All JSON parse attempts failed. Raw:', rawResponse.slice(0, 500));
-          profile = extractManually(rawResponse);
-        }
-      }
-    }
+    // 解析 JSON（健壮版 — 4 级降级）
+    let profile = parseProfileJSON(rawResponse);
 
     // 补全缺失字段的默认值
     const isZh = lang === 'zh';
@@ -414,6 +372,118 @@ Create a deeply personal, specific soul portrait. Fuse ALL systems into ONE cohe
     res.status(500).json({ error: err.message });
   }
 });
+
+/**
+ * API: Multi-Agent Harness — 两阶段返回
+ * 阶段 1 (即时): 本地分析 reasoningSteps (0ms)
+ * 阶段 2 (异步): AI 融合 profile (/api/fusion/:requestId)
+ */
+const fusionCache = new Map(); // requestId → { status, profile }
+
+// 缓存清理（每 10 分钟清理过期条目）
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, val] of fusionCache) {
+    if (key.startsWith('cache_')) continue; // 持久缓存不清理
+    if (val.createdAt && now - val.createdAt > 300000) fusionCache.delete(key); // 5 分钟过期
+  }
+}, 600000);
+
+app.post('/api/harness-profile', optionalAuth, async (req, res) => {
+  try {
+    const { natalChart, mbtiType, ziweiChart, iching, lang, gender, birthDate, birthTime } = req.body;
+    const bazi = calculateBazi(birthDate, birthTime, gender);
+    const input = { natalChart, mbtiType, ziweiChart, iching, bazi, lang, gender, birthDate };
+
+    // Phase 1: 本地分析（即时返回）
+    const { generateLocalAnalysis } = require('./local-analysis');
+    const reasoningSteps = generateLocalAnalysis(input);
+
+    // 检查缓存（相同输入直接返回完整结果）
+    const cacheKey = `${birthDate}_${birthTime}_${mbtiType}_${natalChart?.sun?.name}_${ziweiChart?.mainStar}_${lang}`;
+    const cached = fusionCache.get('cache_' + cacheKey);
+    if (cached && cached.status === 'ready') {
+      return res.json({
+        success: true, mode: 'fast', requestId: null,
+        reasoningSteps, bazi, cached: true, profile: cached.profile,
+      });
+    }
+
+    const requestId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+    // Phase 2: 异步 AI 融合
+    fusionCache.set(requestId, { status: 'loading', profile: null });
+    const agentSummaries = reasoningSteps.map(s => `[${s.system}] ${s.reasoning}`).join('\n');
+    const L = lang === 'zh' ? 'Chinese' : 'English';
+
+    const isZh = lang === 'zh';
+    const fusionPrompt = isZh
+      ? `你是一个人格分析师。将以下多维分析融合成一个灵魂画像。
+重要：所有字段必须用中文输出。不要用英文。
+只输出JSON，不要其他内容：
+{"soulKeywords":["关键词1","关键词2","关键词3","关键词4"],"oneSentencePortrait":"诗意的一句话画像","coreTraits":[{"trait":"特质名","description":"2句话描述"}],"shadows":[{"challenge":"挑战名","description":"2句话描述"}],"lifeTheme":"2句话人生主题","dailyInsight":"2句话每日洞察","marriageFortune":"2句话感情运","careerGuidance":"2句话事业运","healthAdvice":"2句话健康建议","annualFortune":"2句话年度运势","luckyElements":{"colors":["颜色1","颜色2"],"numbers":[1,2],"direction":"方位","day":"星期几"}}`
+      : `You are a personality analyst. Fuse these analyses into a soul portrait.
+Reply in English. Keep each field 1-2 sentences. Output ONLY valid JSON:
+{"soulKeywords":["k1","k2","k3","k4"],"oneSentencePortrait":"poetic","coreTraits":[{"trait":"Name","description":"2 sentences"}],"shadows":[{"challenge":"Name","description":"2 sentences"}],"lifeTheme":"2 sentences","dailyInsight":"2 sentences","marriageFortune":"2 sentences","careerGuidance":"2 sentences","healthAdvice":"2 sentences","annualFortune":"2 sentences","luckyElements":{"colors":[],"numbers":[],"direction":"","day":""}}`;
+
+    callMify([
+      { role: 'system', content: fusionPrompt },
+      { role: 'user', content: `Analyses:\n${agentSummaries}\n\nFuse into one soul portrait.` },
+    ], 4000).then(raw => {
+      const profile = parseFusionJSON(raw);
+      fusionCache.set(requestId, { status: 'ready', profile });
+      // 缓存结果（相同输入直接返回）
+      if (profile) fusionCache.set('cache_' + cacheKey, { status: 'ready', profile });
+    }).catch(err => {
+      console.warn('Fusion failed:', err.message);
+      fusionCache.set(requestId, { status: 'failed', profile: null });
+    });
+
+    // 立即返回本地结果 + requestId
+    res.json({
+      success: true,
+      mode: 'fast',
+      requestId,
+      reasoningSteps,
+      bazi,
+      model: 'xiaomi/mimo-v2.5-pro',
+    });
+  } catch (err) {
+    console.error('Harness error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * API: 轮询 AI 融合结果
+ */
+app.get('/api/fusion/:requestId', (req, res) => {
+  const result = fusionCache.get(req.params.requestId);
+  if (!result) return res.json({ status: 'not_found' });
+  if (result.status === 'ready') fusionCache.delete(req.params.requestId); // 清理
+  res.json(result);
+});
+
+/**
+ * JSON 解析（融合结果）
+ */
+function parseFusionJSON(raw) {
+  const cleaned = raw.replace(/^```[\w]*\s*/gim, '').replace(/```\s*$/gim, '').trim();
+  try { return JSON.parse(cleaned); } catch {}
+  try { const m = cleaned.match(/\{[\s\S]*\}/); if (m) return JSON.parse(m[0].replace(/,\s*([\]}])/g, '$1')); } catch {}
+  try {
+    const start = cleaned.indexOf('{');
+    if (start >= 0) {
+      let t = cleaned.slice(start).replace(/,?\s*"[^"]*":\s*"[^"]*$/, '').replace(/,?\s*"[^"]*":\s*\[[^\]]*$/, '');
+      const ob=(t.match(/\{/g)||[]).length, cb=(t.match(/\}/g)||[]).length;
+      const obr=(t.match(/\[/g)||[]).length, cbr=(t.match(/\]/g)||[]).length;
+      for(let i=0;i<obr-cbr;i++) t+=']';
+      for(let i=0;i<ob-cb;i++) t+='}';
+      return JSON.parse(t.replace(/,\s*([\]}])/g,'$1'));
+    }
+  } catch {}
+  return null;
+}
 
 /**
  * API: 生成每日洞察

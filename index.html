@@ -23,6 +23,11 @@
       <a href="#scenes" style="font-size:12px" data-i18n="nav.scenes">Scenes</a>
       <button class="btn-nav" onclick="scrollToSection('try')" data-i18n="nav.try">Try Free</button>
       <button class="btn-lang" id="langToggle" onclick="toggleLang()">中/EN</button>
+      <button id="authLoginBtn" class="btn-nav" onclick="Auth.showAuthModal('login')" style="font-size:12px">Login</button>
+      <div id="authUserMenu" style="display:none;align-items:center;gap:8px">
+        <span id="authUserName" style="color:#a78bfa;font-size:12px;font-weight:500"></span>
+        <button class="btn-lang" onclick="Auth.logout()" style="font-size:11px">Logout</button>
+      </div>
     </div>
   </nav>
 
@@ -145,6 +150,28 @@
         <p data-i18n="how.s4.desc">Receive your Soul Profile: keywords, core traits, shadow side, life theme, and daily personalized insights.</p>
       </div>
     </div>
+  </section>
+
+  <!-- 每日运势卡片 -->
+  <section id="dailyFortune" style="padding:40px 20px;max-width:600px;margin:0 auto">
+    <div id="dailyCard" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;text-align:center">
+      <div style="font-size:13px;color:#5a5a6a;margin-bottom:8px" id="dailyDate"></div>
+      <div style="font-size:28px;font-weight:700;color:#a78bfa;margin-bottom:4px" id="dailyGanZhi"></div>
+      <div style="font-size:14px;color:#94a3b8;margin-bottom:16px" id="dailyElement"></div>
+      <div style="display:flex;justify-content:center;gap:8px;margin-bottom:16px;flex-wrap:wrap" id="dailyYi"></div>
+      <div style="font-size:12px;color:#5a5a6a;margin-bottom:8px" id="dailyJi"></div>
+      <div style="font-size:12px;color:#5a5a6a" id="dailyLucky"></div>
+      <div style="font-size:13px;color:#60a5fa;margin-top:12px;font-style:italic" id="dailyPersonal"></div>
+    </div>
+  </section>
+
+  <!-- My Profiles (登录后可见) -->
+  <section id="myProfilesSection" style="display:none;padding:60px 20px;max-width:720px;margin:0 auto">
+    <div class="section-header">
+      <h2 style="font-size:1.5rem;color:#e2e8f0">✦ My Soul Profiles</h2>
+      <p style="color:#5a5a6a;font-size:13px;margin-top:4px">你的历史灵魂画像</p>
+    </div>
+    <div id="profileHistory"></div>
   </section>
 
   <!-- Try It Section -->
@@ -304,12 +331,18 @@
               <div id="premiumBadge" style="display:none;padding:8px 16px;background:linear-gradient(135deg,#d4a574,#b8860b);border-radius:20px;font-size:12px;color:#0a0a1a;font-weight:600;margin-bottom:16px;display:inline-block">
                 ✦ PREMIUM MEMBER — Full Access
               </div>
-              <button class="btn-primary" id="unlockBtn" onclick="scrollToSection('pricing')">
-                Unlock Full Analysis — $9.99/mo
+              <button class="btn-primary" id="unlockBtn" onclick="Auth.checkout('monthly')">
+                Unlock Full Analysis — $3.99/mo
+              </button>
+              <button class="btn-ghost" id="manageSubBtn" onclick="Auth.openPortal()" style="display:none;margin-left:8px;font-size:12px">
+                Manage Subscription
               </button>
               <p class="cta-sub" id="ctaSub">Or share your free profile with friends</p>
               <button class="btn-ghost" onclick="shareProfile()">
                 ✦ Share Soul Profile
+              </button>
+              <button class="btn-ghost" onclick="downloadCard()" style="margin-left:8px;font-size:12px">
+                ↓ Download Card
               </button>
 
               <!-- 反馈系统 -->
@@ -353,30 +386,30 @@
       <div class="price-card price-card-featured">
         <div class="price-badge">Most Popular</div>
         <div class="price-name">Premium</div>
-        <div class="price-amount">$9.99</div>
+        <div class="price-amount">$3.99</div>
         <div class="price-period">/month</div>
         <ul class="price-features">
           <li data-i18n="price.prem.f1">✦ Full 6-dimension analysis</li>
           <li data-i18n="price.prem.f2">✦ Unlimited compatibility reports</li>
           <li data-i18n="price.prem.f3">✦ Daily personalized insights</li>
           <li data-i18n="price.prem.f4">✦ Deep natal chart reading</li>
-          <li data-i18n="price.prem.f5">✦ AI palm & face reading (v2)</li>
-          <li data-i18n="price.prem.f6">✦ Zi Wei Dou Shu analysis (v2)</li>
+          <li data-i18n="price.prem.f5">✦ AI palm & face reading</li>
+          <li data-i18n="price.prem.f6">✦ Zi Wei Dou Shu analysis</li>
           <li data-i18n="price.prem.f7">✦ Priority AI responses</li>
         </ul>
-        <button class="btn-primary">Start 7-Day Free Trial</button>
+        <button class="btn-primary" onclick="Auth.checkout('monthly')">Subscribe Now</button>
       </div>
       <div class="price-card">
         <div class="price-name">Annual</div>
-        <div class="price-amount">$59.99</div>
-        <div class="price-period">/year (save 50%)</div>
+        <div class="price-amount">$29.99</div>
+        <div class="price-period">/year (save 37%)</div>
         <ul class="price-features">
           <li data-i18n="price.ann.f1">✦ Everything in Premium</li>
           <li data-i18n="price.ann.f2">✦ Yearly soul evolution report</li>
           <li data-i18n="price.ann.f3">✦ Exclusive content</li>
           <li data-i18n="price.ann.f4">✦ Early access to new features</li>
         </ul>
-        <button class="btn-outline">Start 7-Day Free Trial</button>
+        <button class="btn-outline" onclick="Auth.checkout('yearly')">Subscribe Annual</button>
       </div>
     </div>
   </section>
@@ -387,6 +420,10 @@
       <h2 data-i18n="circle.title">🔮 My Circle — Relationship Intelligence</h2>
       <p data-i18n="circle.subtitle">Add the people around you. Get weekly insights on how to navigate every relationship.</p>
     </div>
+
+    <!-- 关系网图谱 -->
+    <div id="networkGraph" style="max-width:600px;margin:0 auto 24px"></div>
+    <div id="networkDetail" style="max-width:600px;margin:0 auto"></div>
 
     <div class="circle-container">
       <!-- 添加关系人 -->
@@ -656,6 +693,9 @@
   <script src="js/astrology.js"></script>
   <script src="js/iching.js"></script>
   <script src="js/profile.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/share.js"></script>
+  <script src="js/network.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
