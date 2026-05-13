@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide Your Life — Personality Discovery</title>
+<meta name="description" content="AI-powered personality discovery blending psychology, astrology, and Eastern wisdom. For self-awareness and personal growth.">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#0A0A0A;--paper:#F5F0E8;--paper-dim:rgba(245,240,232,0.5);--paper-ghost:rgba(245,240,232,0.15);
+  --gold:#B8860B;--gold-light:#D4AF37;--gold-dim:rgba(184,134,11,0.12);
+  --burgundy:#6B1A2A;--burgundy-light:#8B2252;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'Cormorant Garamond',Georgia,serif;background:var(--ink);color:var(--paper);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ===== Noise Texture Overlay ===== */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:0.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ===== Canvas ===== */
+#canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ===== Animations ===== */
+@keyframes fade-up{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+@keyframes slide-right{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes draw-line{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes glow{0%,100%{opacity:0.4}50%{opacity:0.7}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+
+/* ===== Editorial Hero ===== */
+.hero{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:80px 0;overflow:hidden}
+.hero-inner{max-width:1200px;margin:0 auto;padding:0 40px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+@media(max-width:900px){.hero-inner{grid-template-columns:1fr;gap:40px;padding:0 24px}}
+
+.hero-left{position:relative}
+.hero-issue{font-family:var(--mono);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.hero-issue::before{content:'';width:40px;height:1px;background:var(--gold)}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(3rem,7vw,5.5rem);font-weight:900;line-height:0.95;margin-bottom:32px;letter-spacing:-0.02em}
+.hero-title .italic{font-style:italic;font-weight:400}
+.hero-title .gold{color:var(--gold-light)}
+.hero-sub{font-size:1.15rem;font-weight:300;line-height:1.9;color:var(--paper-dim);max-width:440px;margin-bottom:40px}
+.hero-cta{display:flex;gap:16px;flex-wrap:wrap}
+.btn-gold{padding:14px 32px;background:var(--gold);border:none;color:var(--ink);font-family:'Cormorant Garamond',serif;font-size:0.95rem;font-weight:600;letter-spacing:0.04em;cursor:pointer;transition:all 0.4s}
+.btn-gold:hover{background:var(--gold-light);transform:translateY(-2px);box-shadow:0 12px 40px rgba(184,134,11,0.2)}
+.btn-outline{padding:14px 32px;background:transparent;border:1px solid var(--paper-ghost);color:var(--paper);font-family:'Cormorant Garamond',serif;font-size:0.95rem;letter-spacing:0.04em;cursor:pointer;transition:all 0.4s}
+.btn-outline:hover{border-color:var(--paper-dim);background:rgba(245,240,232,0.03)}
+
+/* Hero right: editorial image placeholder */
+.hero-right{position:relative;display:flex;align-items:center;justify-content:center}
+.hero-visual{position:relative;width:100%;max-width:400px;aspect-ratio:3/4}
+.hero-visual-frame{position:absolute;inset:0;border:1px solid rgba(184,134,11,0.15)}
+.hero-visual-frame::before{content:'';position:absolute;top:12px;left:12px;right:-12px;bottom:-12px;border:1px solid rgba(184,134,11,0.06)}
+.hero-visual-inner{position:absolute;inset:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(180deg,rgba(184,134,11,0.03),rgba(107,26,42,0.03))}
+.hero-visual-sigil{font-size:4rem;margin-bottom:20px;animation:float 6s ease-in-out infinite;filter:drop-shadow(0 0 30px rgba(184,134,11,0.3))}
+.hero-visual-text{font-family:'Playfair Display',serif;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);opacity:0.5}
+.hero-visual-data{font-family:var(--mono);font-size:0.6rem;color:var(--paper-ghost);margin-top:20px;line-height:2}
+
+/* ===== Editorial Divider ===== */
+.divider{position:relative;z-index:10;padding:60px 0;display:flex;align-items:center;justify-content:center}
+.divider-line{width:120px;height:1px;background:var(--gold);opacity:0.2}
+.divider-text{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);opacity:0.3;padding:0 24px}
+
+/* ===== Editorial Pull Quote ===== */
+.pull-quote{position:relative;z-index:10;max-width:900px;margin:0 auto;padding:80px 40px;text-align:center}
+.pull-quote-text{font-family:'Playfair Display',serif;font-size:clamp(1.5rem,3.5vw,2.5rem);font-style:italic;font-weight:400;line-height:1.5;color:var(--paper)}
+.pull-quote-attr{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-top:24px;opacity:0.5}
+
+/* ===== Section Layout ===== */
+.section{position:relative;z-index:10;padding:100px 0}
+.section-inner{max-width:1200px;margin:0 auto;padding:0 40px}
+@media(max-width:768px){.section-inner{padding:0 24px}}
+
+/* Editorial section header */
+.section-head{margin-bottom:64px}
+.section-head .num{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);opacity:0.4;margin-bottom:16px}
+.section-head h2{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;line-height:1.1;margin-bottom:16px}
+.section-head p{font-size:1.05rem;font-weight:300;color:var(--paper-dim);max-width:500px;line-height:1.8}
+
+/* ===== Editorial Grid: Three Pillars ===== */
+.pillars{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:rgba(184,134,11,0.06)}
+@media(max-width:900px){.pillars{grid-template-columns:1fr}}
+.pillar{background:var(--ink);padding:48px 36px;position:relative;transition:all 0.5s}
+.pillar:hover{background:rgba(184,134,11,0.02)}
+.pillar-num{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.2em;color:var(--gold);opacity:0.3;margin-bottom:20px}
+.pillar-icon{font-size:2rem;margin-bottom:16px;filter:drop-shadow(0 0 15px rgba(184,134,11,0.15))}
+.pillar-name{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:600;margin-bottom:4px}
+.pillar-sub{font-family:var(--mono);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);opacity:0.4;margin-bottom:20px}
+.pillar-items{list-style:none;padding:0}
+.pillar-items li{font-size:0.92rem;color:var(--paper-dim);padding:6px 0;border-bottom:1px solid rgba(245,240,232,0.04);font-weight:400}
+.pillar-items li:last-child{border-bottom:none}
+
+/* ===== Editorial Feature Grid ===== */
+.features{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(184,134,11,0.04)}
+@media(max-width:768px){.features{grid-template-columns:1fr}}
+.feature{background:var(--ink);padding:48px 36px;position:relative;transition:all 0.5s}
+.feature:hover{background:rgba(184,134,11,0.015)}
+.feature-num{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;color:var(--gold);opacity:0.1;margin-bottom:12px}
+.feature-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;margin-bottom:10px}
+.feature-desc{font-size:0.92rem;color:var(--paper-dim);line-height:1.8;font-weight:300}
+
+/* ===== Steps: Horizontal Editorial ===== */
+.steps-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(184,134,11,0.04)}
+@media(max-width:768px){.steps-row{grid-template-columns:1fr 1fr}}
+.step{background:var(--ink);padding:40px 24px;text-align:center;position:relative}
+.step-num{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:900;color:var(--gold);opacity:0.15;line-height:1;margin-bottom:8px}
+.step-title{font-family:'Playfair Display',serif;font-size:0.95rem;font-weight:600;margin-bottom:8px}
+.step-desc{font-size:0.82rem;color:var(--paper-dim);line-height:1.7;font-weight:300}
+
+/* ===== Testimonial: Magazine Style ===== */
+.testimonial-wrap{max-width:700px;margin:0 auto;padding:80px 40px;text-align:center}
+.testimonial-mark{font-family:'Playfair Display',serif;font-size:6rem;color:var(--gold);opacity:0.1;line-height:0.5;margin-bottom:16px}
+.testimonial-text{font-family:'Playfair Display',serif;font-size:1.4rem;font-style:italic;font-weight:400;line-height:1.7;color:var(--paper);margin-bottom:24px}
+.testimonial-author{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);opacity:0.4}
+
+/* ===== Pricing: Editorial Cards ===== */
+.pricing-row{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(184,134,11,0.06);max-width:700px;margin:0 auto}
+@media(max-width:500px){.pricing-row{grid-template-columns:1fr}}
+.price{background:var(--ink);padding:48px 36px;text-align:center;position:relative}
+.price.featured{background:rgba(184,134,11,0.02)}
+.price.featured::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold)}
+.price-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;margin-bottom:8px}
+.price-amount{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;color:var(--gold);line-height:1}
+.price-period{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;color:var(--paper-dim);margin-bottom:24px}
+.price-features{list-style:none;padding:0;margin-bottom:28px;text-align:left}
+.price-features li{font-size:0.88rem;color:var(--paper-dim);padding:7px 0;border-bottom:1px solid rgba(245,240,232,0.03);font-weight:400}
+.price-features li::before{content:'—';margin-right:10px;color:var(--gold);opacity:0.3}
+
+/* ===== FAQ: Minimal Editorial ===== */
+.faq-list{max-width:680px;margin:0 auto}
+.faq{border-bottom:1px solid rgba(245,240,232,0.05);cursor:pointer;transition:all 0.3s}
+.faq:hover{padding-left:12px}
+.faq-q{padding:20px 0;font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:500;display:flex;justify-content:space-between;align-items:center}
+.faq-q::after{content:'+';font-family:var(--mono);font-size:0.8rem;color:var(--gold);transition:transform 0.3s}
+.faq.open .faq-q::after{transform:rotate(45deg)}
+.faq-a{font-size:0.92rem;color:var(--paper-dim);line-height:1.9;max-height:0;overflow:hidden;transition:max-height 0.4s;font-weight:300;padding:0 0 0 0}
+.faq.open .faq-a{max-height:200px;padding:0 0 20px 0}
+
+/* ===== Footer ===== */
+footer{position:relative;z-index:10;padding:60px 40px;border-top:1px solid rgba(245,240,232,0.04)}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:40px}
+.footer-brand{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--paper)}
+.footer-links{display:flex;gap:32px}
+.footer-links a{font-size:0.82rem;color:var(--paper-dim);text-decoration:none;transition:color 0.3s}
+.footer-links a:hover{color:var(--gold)}
+.footer-legal{width:100%;margin-top:32px;padding-top:24px;border-top:1px solid rgba(245,240,232,0.03)}
+.footer-legal p{font-size:0.72rem;color:var(--paper-ghost);line-height:1.8;max-width:600px}
+.footer-copy{font-family:var(--mono);font-size:0.55rem;color:var(--paper-ghost);margin-top:12px;letter-spacing:0.05em}
+
+/* ===== Reveal Animation ===== */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 0.8s cubic-bezier(0.25,0.46,0.45,0.94),transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.r1{transition-delay:0.1s}.r2{transition-delay:0.2s}.r3{transition-delay:0.3s}.r4{transition-delay:0.4s}.r5{transition-delay:0.5s}
+
+/* ===== Decorative: Horizontal Rule ===== */
+.gold-rule{width:60px;height:1px;background:var(--gold);opacity:0.2;margin:24px 0}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-left reveal">
+      <div class="hero-issue">Issue No. 01 — Personality Discovery</div>
+      <h1 class="hero-title">
+        The <span class="italic">Science</span><br>
+        of <span class="gold">Knowing</span><br>
+        Yourself
+      </h1>
+      <p class="hero-sub">
+        Six systems of human understanding — modern psychology,
+        celestial patterns, and ancient Eastern wisdom — fused by AI
+        into one unified portrait of who you truly are.
+      </p>
+      <div class="hero-cta">
+        <button class="btn-gold" onclick="window.location.href='index.html'">Begin Your Discovery</button>
+        <button class="btn-outline" onclick="document.getElementById('method').scrollIntoView({behavior:'smooth'})">Read More</button>
+      </div>
+    </div>
+    <div class="hero-right reveal r2">
+      <div class="hero-visual">
+        <div class="hero-visual-frame"></div>
+        <div class="hero-visual-inner">
+          <div class="hero-visual-sigil">✦</div>
+          <div class="hero-visual-text">Your Constellation Awaits</div>
+          <div class="hero-visual-data">
+            ☉ GEMINI · ☽ SCORPIO · ↑ LEO<br>
+            MBTI: INFJ · ELEMENT: AIR<br>
+            HEXAGRAM: THE CREATIVE
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DIVIDER ===== -->
+<div class="divider"><div class="divider-line"></div><div class="divider-text">Est. 2026</div><div class="divider-line"></div></div>
+
+<!-- ===== PULL QUOTE ===== -->
+<div class="pull-quote reveal">
+  <div class="pull-quote-text">"The unexamined life is not worth living. But the examined life — cross-validated across six ancient and modern systems — is extraordinary."</div>
+  <div class="pull-quote-attr">— Guide Your Life Philosophy</div>
+</div>
+
+<!-- ===== METHODOLOGY ===== -->
+<section class="section" id="method">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div class="num">01 — Methodology</div>
+      <h2>Three Traditions,<br><span style="font-style:italic;font-weight:400">One Portrait</span></h2>
+      <p>We don't rely on a single system. We cross-validate insights from psychology, celestial patterns, and Eastern wisdom traditions.</p>
+    </div>
+    <div class="pillars reveal r1">
+      <div class="pillar">
+        <div class="pillar-num">I</div>
+        <div class="pillar-icon">🧠</div>
+        <div class="pillar-name">Modern Psychology</div>
+        <div class="pillar-sub">The Science</div>
+        <ul class="pillar-items">
+          <li>MBTI cognitive function mapping</li>
+          <li>Big Five personality traits</li>
+          <li>Attachment style analysis</li>
+          <li>CBT-based growth strategies</li>
+        </ul>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">II</div>
+        <div class="pillar-icon">🌌</div>
+        <div class="pillar-name">Celestial Patterns</div>
+        <div class="pillar-sub">The Cosmos</div>
+        <ul class="pillar-items">
+          <li>Sun, Moon & Rising sign synthesis</li>
+          <li>Elemental balance analysis</li>
+          <li>House placement interpretation</li>
+          <li>Relational compatibility mapping</li>
+        </ul>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">III</div>
+        <div class="pillar-icon">☯</div>
+        <div class="pillar-name">Eastern Wisdom</div>
+        <div class="pillar-sub">The Tradition</div>
+        <ul class="pillar-items">
+          <li>Zi Wei Dou Shu star chart</li>
+          <li>I Ching hexagram guidance</li>
+          <li>Five elements harmony</li>
+          <li>Lifestyle & wellness alignment</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DIVIDER ===== -->
+<div class="divider"><div class="divider-line"></div><div class="divider-text">✦</div><div class="divider-line"></div></div>
+
+<!-- ===== FEATURES ===== -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div class="num">02 — Capabilities</div>
+      <h2>Beyond the<br><span style="font-style:italic;font-weight:400">Personality Quiz</span></h2>
+    </div>
+    <div class="features reveal r1">
+      <div class="feature">
+        <div class="feature-num">01</div>
+        <div class="feature-title">Multi-System Portrait</div>
+        <div class="feature-desc">Not a single quiz result — six dimensions cross-validated by AI into one coherent portrait of your personality, strengths, and growth edges.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-num">02</div>
+        <div class="feature-title">Daily Guidance</div>
+        <div class="feature-desc">Personalized daily insights aligned with your unique profile and celestial rhythms. Not generic horoscopes — specific, actionable guidance.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-num">03</div>
+        <div class="feature-title">Relationship Intelligence</div>
+        <div class="feature-desc">Map your social constellation. Understand compatibility patterns, communication styles, and how to navigate every relationship in your life.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-num">04</div>
+        <div class="feature-title">Growth Tracking</div>
+        <div class="feature-desc">Your self-awareness journey, visualized. Track how your understanding of yourself deepens over time through repeated engagement.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DIVIDER ===== -->
+<div class="divider"><div class="divider-line"></div><div class="divider-text">Process</div><div class="divider-line"></div></div>
+
+<!-- ===== STEPS ===== -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div class="num">03 — The Process</div>
+      <h2>Four Steps to<br><span style="font-style:italic;font-weight:400">Self-Discovery</span></h2>
+    </div>
+    <div class="steps-row reveal r1">
+      <div class="step">
+        <div class="step-num">I</div>
+        <div class="step-title">Birth Details</div>
+        <div class="step-desc">Your celestial coordinates — date, time, and place of origin</div>
+      </div>
+      <div class="step">
+        <div class="step-num">II</div>
+        <div class="step-title">Personality Type</div>
+        <div class="step-desc">MBTI selection for cognitive function mapping</div>
+      </div>
+      <div class="step">
+        <div class="step-num">III</div>
+        <div class="step-title">AI Fusion</div>
+        <div class="step-desc">Multi-system cross-validation into one coherent portrait</div>
+      </div>
+      <div class="step">
+        <div class="step-num">IV</div>
+        <div class="step-title">Your Portrait</div>
+        <div class="step-desc">Actionable insights for growth and self-awareness</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DIVIDER ===== -->
+<div class="divider"><div class="divider-line"></div><div class="divider-text">✦</div><div class="divider-line"></div></div>
+
+<!-- ===== TESTIMONIAL ===== -->
+<section class="section">
+  <div class="testimonial-wrap reveal">
+    <div class="testimonial-mark">"</div>
+    <div class="testimonial-text">I've taken every personality quiz that exists. Guide Your Life is the first one that felt like it truly saw me — not just one facet, but the whole constellation of who I am.</div>
+    <div class="testimonial-author">— Early User, San Francisco</div>
+  </div>
+</section>
+
+<!-- ===== DIVIDER ===== -->
+<div class="divider"><div class="divider-line"></div><div class="divider-text">Offering</div><div class="divider-line"></div></div>
+
+<!-- ===== PRICING ===== -->
+<section class="section" id="pricing">
+  <div class="section-inner">
+    <div class="section-head" style="text-align:center;margin-bottom:48px">
+      <div class="num" style="text-align:center">04 — Investment</div>
+      <h2 style="text-align:center">Start Free,<br><span style="font-style:italic;font-weight:400">Go Deeper</span></h2>
+    </div>
+    <div class="pricing-row reveal">
+      <div class="price">
+        <div class="price-name">Seeker</div>
+        <div class="price-amount">$0</div>
+        <div class="price-period">forever</div>
+        <ul class="price-features">
+          <li>Basic personality portrait</li>
+          <li>Daily celestial insight</li>
+          <li>Share with friends</li>
+        </ul>
+        <button class="btn-outline" style="width:100%" onclick="window.location.href='index.html'">Begin</button>
+      </div>
+      <div class="price featured">
+        <div class="price-name">Adept</div>
+        <div class="price-amount">$3.99</div>
+        <div class="price-period">/month</div>
+        <ul class="price-features">
+          <li>Full 6-dimension analysis</li>
+          <li>Unlimited compatibility readings</li>
+          <li>Weekly personalized guidance</li>
+          <li>Deep celestial chart reading</li>
+          <li>Relationship intelligence</li>
+          <li>Priority AI responses</li>
+        </ul>
+        <button class="btn-gold" style="width:100%">Subscribe via App</button>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:20px;font-family:var(--mono);font-size:0.6rem;color:var(--paper-ghost);letter-spacing:0.05em">Managed through Apple App Store · Cancel anytime</p>
+  </div>
+</section>
+
+<!-- ===== DIVIDER ===== -->
+<div class="divider"><div class="divider-line"></div><div class="divider-text">Questions</div><div class="divider-line"></div></div>
+
+<!-- ===== FAQ ===== -->
+<section class="section" id="faq">
+  <div class="section-inner">
+    <div class="section-head reveal" style="text-align:center">
+      <div class="num" style="text-align:center">05 — Questions</div>
+      <h2 style="text-align:center">Common<br><span style="font-style:italic;font-weight:400">Questions</span></h2>
+    </div>
+    <div class="faq-list reveal r1">
+      <div class="faq" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Is this fortune telling?</div>
+        <div class="faq-a">No. Guide Your Life is a personality modeling tool that combines modern psychology with pattern recognition from celestial traditions. It's designed for self-reflection and personal growth, not prediction of future events.</div>
+      </div>
+      <div class="faq" onclick="this.classList.toggle('open')">
+        <div class="faq-q">How accurate is it?</div>
+        <div class="faq-a">Our AI cross-validates insights from multiple independent systems. Users report strong resonance with their portrait. This is a tool for self-reflection, not a substitute for professional advice.</div>
+      </div>
+      <div class="faq" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Is my data private?</div>
+        <div class="faq-a">Absolutely. We never sell personal data. Your birth information and personality profile are encrypted and stored securely. You can delete your account and all data at any time.</div>
+      </div>
+      <div class="faq" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Can I cancel my subscription?</div>
+        <div class="faq-a">Yes. Manage your subscription through Apple App Store settings. Cancel anytime — you'll keep access until the end of your billing period.</div>
+      </div>
+      <div class="faq" onclick="this.classList.toggle('open')">
+        <div class="faq-q">What systems do you use?</div>
+        <div class="faq-a">We blend MBTI personality typing, Western astrology (sun/moon/rising), Eastern star chart analysis (Zi Wei Dou Shu), I Ching wisdom, and evidence-based psychology — all cross-validated by our AI engine.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Guide Your Life</div>
+    <div class="footer-links">
+      <a href="#method">Method</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="index.html">Try Free</a>
+    </div>
+    <div class="footer-legal">
+      <p>Disclaimer: Guide Your Life is designed for entertainment and self-reflection purposes only. It is not a substitute for professional medical, psychological, financial, or legal advice. Results are generated by AI algorithms and should not be used as the sole basis for important life decisions.</p>
+      <div class="footer-copy">© 2026 GUIDE YOUR LIFE · ALL RIGHTS RESERVED</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ===== Canvas: Minimal Starfield =====
+const c=document.getElementById('canvas'),ctx=c.getContext('2d');
+let W,H,stars=[];
+function init(){
+  W=c.width=window.innerWidth;H=c.height=window.innerHeight;
+  stars=[];
+  for(let i=0;i<100;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*0.8+0.2,a:Math.random(),d:Math.random()*0.002+0.001,s:Math.random()*0.3+0.1});
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  stars.forEach(s=>{
+    s.a+=s.d*s.s;if(s.a>1||s.a<0)s.d*=-1;
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(184,134,11,${s.a*0.3})`;ctx.fill();
+  });
+  // Subtle constellation lines
+  ctx.lineWidth=0.2;
+  for(let i=0;i<stars.length;i++){for(let j=i+1;j<stars.length;j++){
+    const dx=stars[i].x-stars[j].x,dy=stars[i].y-stars[j].y,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<80){ctx.strokeStyle=`rgba(184,134,11,${(1-dist/80)*0.04})`;ctx.beginPath();ctx.moveTo(stars[i].x,stars[i].y);ctx.lineTo(stars[j].x,stars[j].y);ctx.stroke()}
+  }}
+  requestAnimationFrame(draw);
+}
+init();draw();
+window.addEventListener('resize',init);
+
+// ===== Scroll Reveal =====
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible')})},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+
+</body>
+</html>
