@@ -22,11 +22,19 @@ if [ -f .env ]; then
   export $(grep -v '^#' .env | xargs)
 fi
 
-# 检查 API Key
+# 检查环境变量
 check_env() {
-  if [ -z "$MIFY_API_KEY" ]; then
-    echo -e "${RED}❌ 缺少 MIFY_API_KEY${NC}"
-    echo "请执行: cp .env.example .env && 编辑 .env 填入 API Key"
+  if [ -z "$OPENAI_API_KEY" ] && [ -z "$DEEPSEEK_API_KEY" ] && [ -z "$DASHSCOPE_API_KEY" ]; then
+    echo -e "${RED}❌ 未配置任何 AI Provider API Key${NC}"
+    echo "请执行: cp .env.example .env && 编辑 .env 填入至少一个 API Key"
+    echo "  OPENAI_API_KEY=sk-...  (OpenAI)"
+    echo "  DEEPSEEK_API_KEY=sk-...(DeepSeek)"
+    echo "  DASHSCOPE_API_KEY=sk-...(Qwen)"
+    exit 1
+  fi
+  if [ -z "$JWT_SECRET" ]; then
+    echo -e "${RED}❌ 缺少 JWT_SECRET${NC}"
+    echo "请在 .env 中添加: JWT_SECRET=$(openssl rand -hex 32)"
     exit 1
   fi
 }

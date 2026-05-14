@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>灵凤暗薇 · Soul Cosmos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Noto+Serif+SC:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050508;--bg2:#0A0A10;
+  --white:#F0EDE6;--white-dim:rgba(240,237,230,0.6);
+  --gold:#C9A961;--gold-bright:#E8D48B;--gold-dim:rgba(201,169,97,0.12);
+  --rose:#1A0A12;--rose-accent:#8B2252;--rose-light:#C4678A;--rose-dim:rgba(139,34,82,0.15);
+  --phoenix:#E8DCC8;--phoenix-glow:rgba(232,220,200,0.15);
+  --purple:#4A2D6B;--purple-light:#7B5EA7;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter','Noto Serif SC',sans-serif;background:var(--bg);color:var(--white);overflow-x:hidden;line-height:1.7}
+
+/* ===== Canvas ===== */
+#canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ===== Hexagram Overlay ===== */
+.hex-overlay{position:fixed;inset:0;z-index:1;pointer-events:none;display:flex;align-items:center;justify-content:center;opacity:0.03}
+.hex-overlay svg{width:min(90vw,90vh);height:min(90vw,90vh)}
+
+/* ===== Floating Feathers ===== */
+@keyframes feather-fall{0%{transform:translateY(-10vh) rotate(0deg) translateX(0);opacity:0}10%{opacity:0.6}90%{opacity:0.6}100%{transform:translateY(110vh) rotate(360deg) translateX(80px);opacity:0}}
+@keyframes feather-fall-2{0%{transform:translateY(-10vh) rotate(0deg) translateX(0);opacity:0}10%{opacity:0.4}90%{opacity:0.4}100%{transform:translateY(110vh) rotate(-270deg) translateX(-60px);opacity:0}}
+.feather{position:fixed;z-index:2;pointer-events:none;font-size:1.2rem;opacity:0}
+.feather:nth-child(1){left:10%;animation:feather-fall 12s linear infinite;animation-delay:0s}
+.feather:nth-child(2){left:30%;animation:feather-fall-2 15s linear infinite;animation-delay:3s}
+.feather:nth-child(3){left:55%;animation:feather-fall 18s linear infinite;animation-delay:6s}
+.feather:nth-child(4){left:75%;animation:feather-fall-2 14s linear infinite;animation-delay:9s}
+.feather:nth-child(5){left:90%;animation:feather-fall 16s linear infinite;animation-delay:2s}
+
+/* ===== Animations ===== */
+@keyframes glow-pulse{0%,100%{filter:drop-shadow(0 0 20px rgba(201,169,97,0.2))}50%{filter:drop-shadow(0 0 40px rgba(201,169,97,0.4))}}
+@keyframes phoenix-breathe{0%,100%{opacity:0.08;transform:scale(1)}50%{opacity:0.12;transform:scale(1.03)}}
+@keyframes rose-bloom{0%,100%{opacity:0.06;transform:rotate(0deg) scale(1)}50%{opacity:0.1;transform:rotate(5deg) scale(1.05)}}
+@keyframes hex-rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes hex-counter{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes fade-in-up{from{opacity:0;transform:translateY(30px);filter:blur(3px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes text-glow{0%,100%{text-shadow:0 0 10px rgba(201,169,97,0.2)}50%{text-shadow:0 0 25px rgba(201,169,97,0.5)}}
+
+/* ===== Decorative Elements ===== */
+.deco-phoenix{position:fixed;top:10%;right:5%;width:300px;height:300px;pointer-events:none;z-index:1;opacity:0.08;animation:phoenix-breathe 8s ease-in-out infinite}
+.deco-rose{position:fixed;bottom:10%;left:5%;width:250px;height:250px;pointer-events:none;z-index:1;opacity:0.06;animation:rose-bloom 10s ease-in-out infinite}
+.deco-hex{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(80vw,80vh);height:min(80vw,80vh);pointer-events:none;z-index:1;opacity:0.025}
+.deco-hex-inner{width:100%;height:100%;animation:hex-rotate 200s linear infinite}
+.deco-hex-outer{position:absolute;inset:10%;animation:hex-counter 150s linear infinite}
+
+/* ===== Navigation ===== */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(5,5,8,0.88);backdrop-filter:blur(30px);border-bottom:1px solid rgba(201,169,97,0.06)}
+.nav-inner{max-width:1100px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;letter-spacing:0.15em;color:var(--gold)}
+.nav-logo .cn{font-family:'Noto Serif SC',serif;font-size:0.85rem;margin-left:8px;color:var(--white-dim);font-weight:400}
+.nav-links{display:flex;gap:20px;align-items:center}
+.nav-links a{color:rgba(240,237,230,0.35);text-decoration:none;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;transition:all 0.4s;font-family:'Cinzel',serif}
+.nav-links a:hover{color:var(--gold)}
+.btn-nav{padding:8px 20px;background:transparent;border:1px solid rgba(201,169,97,0.2);color:var(--gold);font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.4s}
+.btn-nav:hover{background:rgba(201,169,97,0.06);border-color:var(--gold);box-shadow:0 0 30px rgba(201,169,97,0.1)}
+
+/* ===== Hero ===== */
+.hero{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px}
+
+/* Phoenix Sigil */
+.phoenix-sigil{position:relative;width:120px;height:120px;margin-bottom:40px}
+.phoenix-sigil svg{width:100%;height:100%;filter:drop-shadow(0 0 30px rgba(201,169,97,0.3));animation:glow-pulse 4s ease-in-out infinite}
+.phoenix-ring{position:absolute;inset:-20px;border:1px solid rgba(201,169,97,0.1);border-radius:50%;animation:hex-rotate 30s linear infinite}
+.phoenix-ring::before{content:'';position:absolute;top:-2px;left:50%;width:4px;height:4px;background:var(--gold);border-radius:50%;transform:translateX(-50%)}
+.phoenix-ring-2{position:absolute;inset:-40px;border:1px solid rgba(139,34,82,0.08);border-radius:50%;animation:hex-counter 40s linear infinite}
+.phoenix-ring-2::before{content:'';position:absolute;bottom:-2px;right:20%;width:3px;height:3px;background:var(--rose-accent);border-radius:50%}
+
+.hero-eyebrow{font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:28px;opacity:0.7}
+.hero h1{font-family:'Cinzel',serif;font-size:clamp(2.2rem,5vw,4rem);font-weight:900;line-height:1.15;margin-bottom:8px;letter-spacing:0.06em}
+.hero h1 .gold{color:var(--gold);text-shadow:0 0 30px rgba(201,169,97,0.25)}
+.hero h1 .rose{color:var(--rose-light);text-shadow:0 0 20px rgba(139,34,82,0.3)}
+.hero h1 .line{display:block;height:1px;background:linear-gradient(90deg,transparent,rgba(139,34,82,0.3),rgba(201,169,97,0.3),transparent);margin:16px auto;width:50%}
+.hero-sub{font-size:0.88rem;color:var(--white-dim);max-width:480px;line-height:1.9;margin-bottom:40px;font-weight:300}
+.hero-cta{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.btn-phoenix{padding:14px 36px;background:linear-gradient(135deg,var(--gold),#A08030);border:none;color:var(--bg);font-family:'Cinzel',serif;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.4s;position:relative;overflow:hidden}
+.btn-phoenix::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);transform:translateX(-100%);transition:transform 0.6s}
+.btn-phoenix:hover::after{transform:translateX(100%)}
+.btn-phoenix:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(201,169,97,0.25),0 0 60px rgba(201,169,97,0.1)}
+.btn-rose{padding:14px 36px;background:transparent;border:1px solid rgba(139,34,82,0.3);color:var(--rose-light);font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.4s}
+.btn-rose:hover{border-color:var(--rose-accent);background:rgba(139,34,82,0.06);box-shadow:0 0 30px rgba(139,34,82,0.1)}
+.hero-disclaimer{margin-top:28px;font-size:0.58rem;color:var(--white-dim);opacity:0.35;letter-spacing:0.02em}
+
+/* ===== Sections ===== */
+.section{position:relative;z-index:10;padding:100px 24px;max-width:1100px;margin:0 auto}
+.section-header{text-align:center;margin-bottom:56px}
+.section-header .num{font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.25em;text-transform:uppercase;margin-bottom:12px}
+.section-header .num.gold{color:var(--gold);opacity:0.6}
+.section-header .num.rose{color:var(--rose-accent);opacity:0.6}
+.section-header h2{font-family:'Cinzel','Noto Serif SC',serif;font-size:1.8rem;font-weight:700;margin-bottom:12px;letter-spacing:0.04em}
+.section-header p{color:var(--white-dim);font-size:0.82rem;max-width:460px;margin:0 auto;line-height:1.8}
+.divider{height:1px;background:linear-gradient(90deg,transparent 5%,rgba(139,34,82,0.15) 30%,rgba(201,169,97,0.15) 70%,transparent 95%);position:relative;z-index:10}
+.divider::before{content:'✦';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--gold);font-size:0.4rem;opacity:0.3;background:var(--bg);padding:0 16px}
+
+/* ===== Cards ===== */
+.card{background:rgba(10,10,16,0.9);border:1px solid rgba(201,169,97,0.06);border-radius:2px;overflow:hidden;position:relative;transition:all 0.5s}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(139,34,82,0.3),rgba(201,169,97,0.3),transparent);opacity:0;transition:opacity 0.5s}
+.card:hover{border-color:rgba(201,169,97,0.12);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,0.3),0 0 30px rgba(139,34,82,0.05)}
+.card:hover::before{opacity:1}
+/* Rose corner */
+.card .rc{position:absolute;width:16px;height:16px}
+.card .rc.tl{top:0;left:0;border-top:1px solid var(--rose-accent);border-left:1px solid var(--rose-accent);opacity:0.2}
+.card .rc.br{bottom:0;right:0;border-bottom:1px solid var(--rose-accent);border-right:1px solid var(--rose-accent);opacity:0.2}
+/* Gold corner */
+.card .gc{position:absolute;width:16px;height:16px}
+.card .gc.tr{top:0;right:0;border-top:1px solid var(--gold);border-right:1px solid var(--gold);opacity:0.15}
+.card .gc.bl{bottom:0;left:0;border-bottom:1px solid var(--gold);border-left:1px solid var(--gold);opacity:0.15}
+
+/* ===== Duality Section ===== */
+.duality-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:768px){.duality-grid{grid-template-columns:1fr}}
+.duality-card{padding:32px 28px;text-align:center}
+.duality-icon{font-size:2.8rem;margin-bottom:16px}
+.duality-name{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;margin-bottom:4px;letter-spacing:0.06em}
+.duality-name.gold{color:var(--gold)}
+.duality-name.rose{color:var(--rose-light)}
+.duality-sub{font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:16px}
+.duality-sub.gold{color:var(--gold);opacity:0.5}
+.duality-sub.rose{color:var(--rose-accent);opacity:0.5}
+.duality-items{list-style:none;padding:0}
+.duality-items li{font-size:0.78rem;color:var(--white-dim);padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.duality-items li:last-child{border-bottom:none}
+
+/* ===== Hexagram Feature Grid ===== */
+.hex-features{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:768px){.hex-features{grid-template-columns:1fr}}
+.hex-card{padding:28px 24px;text-align:center}
+.hex-card-icon{font-size:1.6rem;margin-bottom:14px;filter:drop-shadow(0 0 8px rgba(201,169,97,0.15))}
+.hex-card-title{font-family:'Cinzel',serif;font-size:0.85rem;font-weight:600;margin-bottom:8px;letter-spacing:0.03em}
+.hex-card-desc{font-size:0.75rem;color:var(--white-dim);line-height:1.8}
+
+/* ===== Steps ===== */
+.hex-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+@media(max-width:768px){.hex-steps{grid-template-columns:1fr 1fr}}
+.hex-step{padding:28px 16px;text-align:center}
+.hex-step-num{font-family:'Cinzel',serif;font-size:2rem;font-weight:900;margin-bottom:10px}
+.hex-step-num.gold{color:var(--gold);text-shadow:0 0 15px rgba(201,169,97,0.2)}
+.hex-step-num.rose{color:var(--rose-light);text-shadow:0 0 15px rgba(139,34,82,0.2)}
+.hex-step-title{font-size:0.8rem;font-weight:600;margin-bottom:6px}
+.hex-step-desc{font-size:0.68rem;color:var(--white-dim);line-height:1.6}
+
+/* ===== Testimonial ===== */
+.testimonial{text-align:center;max-width:560px;margin:0 auto;padding:48px 24px}
+.testimonial-quote{font-family:'Noto Serif SC',serif;font-size:1.1rem;font-style:italic;color:var(--white);line-height:2;margin-bottom:20px;position:relative}
+.testimonial-quote::before{content:'"';font-family:'Cinzel',serif;font-size:5rem;position:absolute;top:-30px;left:-15px;opacity:0.1;background:linear-gradient(135deg,var(--rose-accent),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.testimonial-author{font-size:0.7rem;color:var(--white-dim);letter-spacing:0.05em}
+
+/* ===== Pricing ===== */
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:600px;margin:0 auto}
+@media(max-width:500px){.pricing-grid{grid-template-columns:1fr}}
+.price-card{padding:32px 24px;text-align:center}
+.price-card.featured{border-color:rgba(139,34,82,0.2)}
+.price-card.featured::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--rose-accent),var(--gold),transparent)}
+.price-name{font-family:'Cinzel',serif;font-size:0.88rem;margin-bottom:6px;letter-spacing:0.08em}
+.price-name.gold{color:var(--gold)}
+.price-name.rose{color:var(--rose-light)}
+.price-amount{font-family:'Cinzel',serif;font-size:2.4rem;font-weight:900;margin-bottom:2px}
+.price-amount.gold{color:var(--gold);text-shadow:0 0 25px rgba(201,169,97,0.2)}
+.price-amount.rose{color:var(--rose-light);text-shadow:0 0 25px rgba(139,34,82,0.2)}
+.price-period{font-size:0.65rem;color:var(--white-dim);margin-bottom:20px}
+.price-features{list-style:none;padding:0;margin-bottom:24px;text-align:left}
+.price-features li{font-size:0.75rem;color:var(--white-dim);padding:6px 0;padding-left:20px;position:relative;border-bottom:1px solid rgba(255,255,255,0.03)}
+.price-features li::before{content:'◆';position:absolute;left:0;font-size:0.4rem;top:9px}
+.price-features li::before.gold{color:var(--gold)}
+.price-features li::before.rose{color:var(--rose-accent)}
+
+/* ===== FAQ ===== */
+.faq-item{padding:18px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:all 0.3s}
+.faq-item:hover{padding-left:8px}
+.faq-q{font-weight:600;font-size:0.88rem;display:flex;justify-content:space-between;align-items:center}
+.faq-q::after{content:'+';color:var(--gold);font-size:1.1rem;transition:transform 0.3s;font-weight:300}
+.faq-item.open .faq-q::after{transform:rotate(45deg);color:var(--rose-accent)}
+.faq-a{font-size:0.78rem;color:var(--white-dim);line-height:1.9;max-height:0;overflow:hidden;transition:max-height 0.4s}
+.faq-item.open .faq-a{max-height:200px}
+
+/* ===== Footer ===== */
+footer{position:relative;z-index:10;text-align:center;padding:48px 24px;border-top:1px solid rgba(201,169,97,0.04)}
+footer .logo{font-family:'Cinzel',serif;font-size:0.9rem;color:var(--gold);letter-spacing:0.1em;margin-bottom:8px}
+footer p{font-size:0.62rem;color:var(--white-dim);line-height:1.8}
+footer .disclaimer{margin-top:14px;font-size:0.55rem;color:var(--white-dim);opacity:0.3;max-width:520px;margin-left:auto;margin-right:auto}
+
+/* ===== Reveal ===== */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 0.8s,transform 0.8s}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-d1{transition-delay:0.1s}.reveal-d2{transition-delay:0.2s}.reveal-d3{transition-delay:0.3s}.reveal-d4{transition-delay:0.4s}
+
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- Canvas -->
+<canvas id="canvas"></canvas>
+
+<!-- Hexagram Overlay -->
+<div class="hex-overlay">
+  <svg viewBox="0 0 400 400" fill="none" stroke="rgba(201,169,97,0.4)" stroke-width="0.5">
+    <!-- Outer hexagram -->
+    <polygon points="200,20 370,110 370,290 200,380 30,290 30,110"/>
+    <!-- Inner hexagram (inverted) -->
+    <polygon points="200,100 310,170 310,310 200,350 90,310 90,170"/>
+    <!-- Center circle -->
+    <circle cx="200" cy="200" r="60"/>
+    <circle cx="200" cy="200" r="30"/>
+    <!-- Cross lines -->
+    <line x1="200" y1="20" x2="200" y2="380"/>
+    <line x1="30" y1="200" x2="370" y2="200"/>
+    <line x1="80" y1="60" x2="320" y2="340"/>
+    <line x1="320" y1="60" x2="80" y2="340"/>
+  </svg>
+</div>
+
+<!-- Feathers -->
+<div class="feather">🪶</div>
+<div class="feather">🪶</div>
+<div class="feather">🪶</div>
+<div class="feather">🪶</div>
+<div class="feather">🪶</div>
+
+<!-- Decorative: Phoenix -->
+<div class="deco-phoenix">
+  <svg viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M150 30 C120 60 80 80 60 120 C40 160 50 200 80 230 C100 250 130 260 150 270 C170 260 200 250 220 230 C250 200 260 160 240 120 C220 80 180 60 150 30Z" stroke="rgba(201,169,97,0.3)" stroke-width="1" fill="none"/>
+    <path d="M150 60 C135 80 110 95 100 120 C90 145 95 170 110 190 C125 205 140 210 150 215 C160 210 175 205 190 190 C205 170 210 145 200 120 C190 95 165 80 150 60Z" stroke="rgba(232,220,200,0.2)" stroke-width="0.5" fill="none"/>
+    <!-- Wings -->
+    <path d="M60 120 C30 100 10 130 20 160 C30 180 50 170 60 160" stroke="rgba(201,169,97,0.2)" stroke-width="0.8" fill="none"/>
+    <path d="M240 120 C270 100 290 130 280 160 C270 180 250 170 240 160" stroke="rgba(201,169,97,0.2)" stroke-width="0.8" fill="none"/>
+    <!-- Tail -->
+    <path d="M150 270 C140 290 130 300 120 290" stroke="rgba(139,34,82,0.2)" stroke-width="0.8" fill="none"/>
+    <path d="M150 270 C160 290 170 300 180 290" stroke="rgba(139,34,82,0.2)" stroke-width="0.8" fill="none"/>
+    <path d="M150 270 C150 295 148 305 150 295" stroke="rgba(201,169,97,0.2)" stroke-width="0.8" fill="none"/>
+  </svg>
+</div>
+
+<!-- Decorative: Black Rose -->
+<div class="deco-rose">
+  <svg viewBox="0 0 250 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="125" cy="125" r="40" stroke="rgba(139,34,82,0.3)" stroke-width="1" fill="none"/>
+    <circle cx="125" cy="125" r="55" stroke="rgba(139,34,82,0.15)" stroke-width="0.5" fill="none"/>
+    <circle cx="125" cy="125" r="70" stroke="rgba(139,34,82,0.08)" stroke-width="0.5" fill="none"/>
+    <!-- Petals -->
+    <path d="M125 85 C140 95 145 115 125 125 C105 115 110 95 125 85Z" stroke="rgba(139,34,82,0.25)" stroke-width="0.8" fill="none"/>
+    <path d="M165 125 C155 140 135 145 125 125 C135 105 155 110 165 125Z" stroke="rgba(139,34,82,0.25)" stroke-width="0.8" fill="none"/>
+    <path d="M125 165 C110 155 105 135 125 125 C145 135 140 155 125 165Z" stroke="rgba(139,34,82,0.25)" stroke-width="0.8" fill="none"/>
+    <path d="M85 125 C95 110 115 105 125 125 C115 145 95 140 85 125Z" stroke="rgba(139,34,82,0.25)" stroke-width="0.8" fill="none"/>
+    <!-- Diagonal petals -->
+    <path d="M150 100 C155 115 145 130 125 125 C135 105 150 105 150 100Z" stroke="rgba(139,34,82,0.15)" stroke-width="0.5" fill="none"/>
+    <path d="M150 150 C135 155 120 145 125 125 C145 135 145 150 150 150Z" stroke="rgba(139,34,82,0.15)" stroke-width="0.5" fill="none"/>
+    <path d="M100 150 C95 135 105 120 125 125 C115 145 100 145 100 150Z" stroke="rgba(139,34,82,0.15)" stroke-width="0.5" fill="none"/>
+    <path d="M100 100 C115 95 130 105 125 125 C105 115 105 100 100 100Z" stroke="rgba(139,34,82,0.15)" stroke-width="0.5" fill="none"/>
+    <!-- Stem -->
+    <path d="M125 165 C125 190 130 210 125 230" stroke="rgba(139,34,82,0.2)" stroke-width="1" fill="none"/>
+    <path d="M125 190 C140 185 148 175 145 170" stroke="rgba(139,34,82,0.15)" stroke-width="0.5" fill="none"/>
+  </svg>
+</div>
+
+<!-- Decorative: Large Hexagram -->
+<div class="deco-hex">
+  <div class="deco-hex-inner">
+    <svg viewBox="0 0 400 400" fill="none" stroke="rgba(201,169,97,0.15)" stroke-width="0.5">
+      <polygon points="200,30 360,110 360,290 200,370 40,290 40,110"/>
+      <circle cx="200" cy="200" r="140"/>
+      <circle cx="200" cy="200" r="100"/>
+    </svg>
+  </div>
+  <div class="deco-hex-outer">
+    <svg viewBox="0 0 400 400" fill="none" stroke="rgba(139,34,82,0.1)" stroke-width="0.5">
+      <polygon points="200,60 330,130 330,270 200,340 70,270 70,130"/>
+      <circle cx="200" cy="200" r="80"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">PHOENIX ROSE <span class="cn">灵凤暗薇</span></div>
+    <div class="nav-links">
+      <a href="#duality">Duality</a>
+      <a href="#wisdom">Wisdom</a>
+      <a href="#pricing">Offering</a>
+      <a href="#faq">Questions</a>
+      <button class="btn-nav" onclick="document.getElementById('begin').scrollIntoView({behavior:'smooth'})">Enter</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="phoenix-sigil">
+    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Hexagram -->
+      <polygon points="60,8 108,35 108,85 60,112 12,85 12,35" stroke="rgba(201,169,97,0.6)" stroke-width="1"/>
+      <polygon points="60,28 92,45 92,75 60,92 28,75 28,45" stroke="rgba(139,34,82,0.4)" stroke-width="0.8"/>
+      <!-- Phoenix silhouette -->
+      <path d="M60 20 C50 35 35 45 30 60 C25 75 30 85 45 95 C52 100 58 102 60 105 C62 102 68 100 75 95 C90 85 95 75 90 60 C85 45 70 35 60 20Z" stroke="rgba(232,220,200,0.5)" stroke-width="0.8" fill="rgba(232,220,200,0.03)"/>
+      <!-- Center eye -->
+      <circle cx="60" cy="60" r="8" stroke="rgba(201,169,97,0.5)" stroke-width="0.8"/>
+      <circle cx="60" cy="60" r="3" fill="rgba(201,169,97,0.4)"/>
+    </svg>
+    <div class="phoenix-ring"></div>
+    <div class="phoenix-ring-2"></div>
+  </div>
+
+  <div class="hero-eyebrow">White Phoenix · Black Rose · Hexagram</div>
+  <h1>
+    <span class="gold">Between Light</span>
+    <span class="line"></span>
+    <span class="rose">and Shadow</span>
+  </h1>
+  <p class="hero-sub">
+    凤凰涅槃于光明，蔷薇绽放于暗夜，六芒星连接天地<br>
+    在对立中寻找统一，在混沌中发现秩序
+  </p>
+  <div class="hero-cta">
+    <button class="btn-phoenix" onclick="document.getElementById('begin').scrollIntoView({behavior:'smooth'})">✦ 探索你的灵魂</button>
+    <button class="btn-rose" onclick="document.getElementById('duality').scrollIntoView({behavior:'smooth'})">了解更多</button>
+  </div>
+  <p class="hero-disclaimer">For entertainment and self-reflection purposes only</p>
+</section>
+
+<div class="divider"></div>
+
+<!-- Duality -->
+<section class="section" id="duality">
+  <div class="section-header reveal">
+    <div class="num gold">The Duality</div>
+    <h2>光明与暗影</h2>
+    <p>凤凰代表重生与光明，蔷薇象征神秘与深度</p>
+  </div>
+  <div class="duality-grid">
+    <div class="card duality-card reveal reveal-d1">
+      <div class="rc tl"></div><div class="rc br"></div><div class="gc tr"></div><div class="gc bl"></div>
+      <div class="duality-icon">🪶</div>
+      <div class="duality-name gold">White Phoenix</div>
+      <div class="duality-sub gold">白凤凰 · 光明之道</div>
+      <ul class="duality-items">
+        <li>涅槃重生 — 在困境中蜕变</li>
+        <li>光明驱散 — 用洞察照亮盲区</li>
+        <li>高飞远瞩 — 超越当下视角</li>
+        <li>纯净之心 — 回归本真自我</li>
+      </ul>
+    </div>
+    <div class="card duality-card reveal reveal-d2">
+      <div class="rc tl"></div><div class="rc br"></div><div class="gc tr"></div><div class="gc bl"></div>
+      <div class="duality-icon">🥀</div>
+      <div class="duality-name rose">Black Rose</div>
+      <div class="duality-sub rose">黑蔷薇 · 暗影之术</div>
+      <ul class="duality-items">
+        <li>暗夜绽放 — 在逆境中找到力量</li>
+        <li>深度探索 — 看见表象之下的真相</li>
+        <li>神秘魅力 — 拥抱独特与不同</li>
+        <li>坚韧之美 — 黑暗中的不屈之花</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Wisdom (6-point star = 6 systems) -->
+<section class="section" id="wisdom">
+  <div class="section-header reveal">
+    <div class="num rose">The Hexagram</div>
+    <h2>六芒星 · 六维智慧</h2>
+    <p>六个独立体系，交汇于一个中心点</p>
+  </div>
+  <div class="hex-features">
+    <div class="card hex-card reveal reveal-d1">
+      <div class="rc tl"></div><div class="rc br"></div>
+      <div class="hex-card-icon">🧠</div>
+      <div class="hex-card-title">心理学</div>
+      <div class="hex-card-desc">MBTI 认知功能、依恋理论、CBT 认知行为</div>
+    </div>
+    <div class="card hex-card reveal reveal-d2">
+      <div class="rc tl"></div><div class="rc br"></div>
+      <div class="hex-card-icon">🌌</div>
+      <div class="hex-card-title">星盘</div>
+      <div class="hex-card-desc">太阳/月亮/上升星座、元素平衡、宫位解析</div>
+    </div>
+    <div class="card hex-card reveal reveal-d3">
+      <div class="rc tl"></div><div class="rc br"></div>
+      <div class="hex-card-icon">☯</div>
+      <div class="hex-card-title">紫微斗数</div>
+      <div class="hex-card-desc">十四主星、十二宫位、命理格局</div>
+    </div>
+    <div class="card hex-card reveal reveal-d1">
+      <div class="rc tl"></div><div class="rc br"></div>
+      <div class="hex-card-icon">☯️</div>
+      <div class="hex-card-title">易经</div>
+      <div class="hex-card-desc">六十四卦、卦象智慧、变爻指引</div>
+    </div>
+    <div class="card hex-card reveal reveal-d2">
+      <div class="rc tl"></div><div class="rc br"></div>
+      <div class="hex-card-icon">📜</div>
+      <div class="hex-card-title">八字</div>
+      <div class="hex-card-desc">四柱排盘、五行生克、格局分析</div>
+    </div>
+    <div class="card hex-card reveal reveal-d3">
+      <div class="rc tl"></div><div class="rc br"></div>
+      <div class="hex-card-icon">✦</div>
+      <div class="hex-card-title">AI 融合</div>
+      <div class="hex-card-desc">多维交叉验证、置信度加权、统一画像</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Process -->
+<section class="section">
+  <div class="section-header reveal">
+    <div class="num gold">The Ritual</div>
+    <h2>四步仪式</h2>
+  </div>
+  <div class="hex-steps">
+    <div class="card hex-step reveal reveal-d1">
+      <div class="rc tl"></div><div class="rc br"></div>
+      <div class="hex-step-num gold">I</div>
+      <div class="hex-step-title">献上坐标</div>
+      <div class="hex-step-desc">你的出生时间与地点<br>是星辰为你绘制的地图</div>
+    </div>
+    <div class="card hex-step reveal reveal-d2">
+      <div class="rc tl"></div><div class="rc br"></div>
+      <div class="hex-step-num rose">II</div>
+      <div class="hex-step-title">选择面具</div>
+      <div class="hex-step-desc">MBTI 人格类型<br>是你与世界交互的界面</div>
+    </div>
+    <div class="card hex-step reveal reveal-d3">
+      <div class="rc tl"></div><div class="rc br"></div>
+      <div class="hex-step-num gold">III</div>
+      <div class="hex-step-title">六芒融合</div>
+      <div class="hex-step-desc">AI 交叉验证六个体系<br>在对立中寻找统一</div>
+    </div>
+    <div class="card hex-step reveal reveal-d4">
+      <div class="rc tl"></div><div class="rc br"></div>
+      <div class="hex-step-num rose">IV</div>
+      <div class="hex-step-title">灵魂画像</div>
+      <div class="hex-step-desc">看见完整的自己<br>光明与暗影并存</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Begin -->
+<section class="section" id="begin">
+  <div class="section-header reveal">
+    <div class="num gold">Begin</div>
+    <h2>踏入灵境</h2>
+    <p>无需注册，即刻探索你的多维灵魂</p>
+  </div>
+  <div style="text-align:center;padding:40px 0" class="reveal">
+    <button class="btn-phoenix" style="font-size:0.82rem;padding:18px 48px" onclick="window.location.href='index.html'">
+      ✦ 进入灵魂解读
+    </button>
+    <p style="margin-top:20px;font-size:0.65rem;color:var(--white-dim);opacity:0.5">免费基础画像 · 无需信用卡 · 无需注册</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Pricing -->
+<section class="section" id="pricing">
+  <div class="section-header reveal">
+    <div class="num rose">Offering</div>
+    <h2>选择你的深度</h2>
+  </div>
+  <div class="pricing-grid">
+    <div class="card price-card reveal reveal-d1">
+      <div class="rc tl"></div><div class="rc tr"></div><div class="rc bl"></div><div class="rc br"></div>
+      <div class="price-name gold">Seeker</div>
+      <div class="price-amount gold">$0</div>
+      <div class="price-period">永久</div>
+      <ul class="price-features">
+        <li><span style="color:var(--gold);font-size:0.4rem;margin-right:4px">◆</span>基础灵魂画像</li>
+        <li><span style="color:var(--gold);font-size:0.4rem;margin-right:4px">◆</span>每日运势指引</li>
+        <li><span style="color:var(--gold);font-size:0.4rem;margin-right:4px">◆</span>社交分享</li>
+      </ul>
+      <button class="btn-rose" style="width:100%" onclick="window.location.href='index.html'">开始探索</button>
+    </div>
+    <div class="card price-card featured reveal reveal-d2">
+      <div class="rc tl"></div><div class="rc tr"></div><div class="rc bl"></div><div class="rc br"></div>
+      <div class="price-name rose">Adept</div>
+      <div class="price-amount rose">$3.99</div>
+      <div class="price-period">/月</div>
+      <ul class="price-features">
+        <li><span style="color:var(--rose-accent);font-size:0.4rem;margin-right:4px">◆</span>六维深度融合画像</li>
+        <li><span style="color:var(--rose-accent);font-size:0.4rem;margin-right:4px">◆</span>无限配对分析</li>
+        <li><span style="color:var(--rose-accent);font-size:0.4rem;margin-right:4px">◆</span>每周个性化指引</li>
+        <li><span style="color:var(--rose-accent);font-size:0.4rem;margin-right:4px">◆</span>深度星盘解读</li>
+        <li><span style="color:var(--rose-accent);font-size:0.4rem;margin-right:4px">◆</span>关系智慧</li>
+        <li><span style="color:var(--rose-accent);font-size:0.4rem;margin-right:4px">◆</span>优先 AI 响应</li>
+      </ul>
+      <button class="btn-phoenix" style="width:100%">通过 App 订阅</button>
+    </div>
+  </div>
+  <p style="text-align:center;margin-top:20px;font-size:0.62rem;color:var(--white-dim);opacity:0.4">通过 Apple App Store 管理 · 随时取消</p>
+</section>
+
+<div class="divider"></div>
+
+<!-- Testimonial -->
+<section class="section">
+  <div class="testimonial reveal">
+    <div class="testimonial-quote">在光明与暗影之间，我第一次看见了完整的自己。不是非黑即白，而是两者共存的真实。</div>
+    <div class="testimonial-author">— 早期用户，旧金山</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="section-header reveal">
+    <div class="num gold">Questions</div>
+    <h2>常见问题</h2>
+  </div>
+  <div style="max-width:580px;margin:0 auto">
+    <div class="faq-item reveal" onclick="this.classList.toggle('open')">
+      <div class="faq-q">这是算命吗？</div>
+      <div class="faq-a">不是。灵凤暗薇是一个人格建模工具，融合现代心理学与古老智慧传统，用于自我反思和个人成长，而非预测未来。</div>
+    </div>
+    <div class="faq-item reveal" onclick="this.classList.toggle('open')">
+      <div class="faq-q">准确度如何？</div>
+      <div class="faq-a">我们的 AI 交叉验证多个独立体系的洞察。用户反馈高度共鸣。但请记住——这是用于自我反思，而非专业建议。</div>
+    </div>
+    <div class="faq-item reveal" onclick="this.classList.toggle('open')">
+      <div class="faq-q">我的数据安全吗？</div>
+      <div class="faq-a">绝对安全。我们从不出售个人数据。您的信息经过加密存储，随时可以删除账号和所有数据。</div>
+    </div>
+    <div class="faq-item reveal" onclick="this.classList.toggle('open')">
+      <div class="faq-q">可以随时取消订阅吗？</div>
+      <div class="faq-a">可以。通过 Apple App Store 设置管理订阅，随时取消——在计费周期结束前仍可使用。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="logo">✦ PHOENIX ROSE · 灵凤暗薇</div>
+  <p>Between Light and Shadow — AI-Powered Personality Discovery</p>
+  <p class="disclaimer">灵凤暗薇仅供娱乐和自我反思之用，不构成专业医疗、心理、财务或法律建议。</p>
+  <p style="margin-top:10px;font-size:0.52rem;color:var(--white-dim);opacity:0.3">© 2026 Soul Cosmos. All rights reserved.</p>
+</footer>
+
+<script>
+// ===== Unified Canvas (stars + nebula + dust) =====
+const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
+let W,H;
+const stars=[],dust=[],nebulae=[];
+
+function init(){
+  W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;
+  stars.length=0;dust.length=0;nebulae.length=0;
+  // Stars
+  for(let i=0;i<180;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.3+0.2,a:Math.random(),d:Math.random()*0.003+0.001,s:Math.random()*0.4+0.3,c:Math.random()>0.7?'rose':'gold'});
+  // Dust
+  for(let i=0;i<40;i++)dust.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.2,vy:(Math.random()-0.5)*0.15-0.08,r:Math.random()*1.5+0.5,a:Math.random()*0.3+0.05,life:Math.random()*200+100,age:0,c:Math.random()>0.5?'rose':'gold'});
+  // Nebulae
+  nebulae.push({x:W*0.2,y:H*0.3,r:300,c:'107,63,160',a:0.025});
+  nebulae.push({x:W*0.8,y:H*0.6,r:250,c:'139,34,82',a:0.02});
+  nebulae.push({x:W*0.5,y:H*0.8,r:350,c:'201,169,97',a:0.012});
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+
+  // Nebulae
+  nebulae.forEach(n=>{
+    const g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
+    g.addColorStop(0,`rgba(${n.c},${n.a})`);g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;ctx.fillRect(n.x-n.r,n.y-n.r,n.r*2,n.r*2);
+  });
+
+  // Stars
+  stars.forEach(s=>{
+    s.a+=s.d*s.s;if(s.a>1||s.a<0)s.d*=-1;
+    const col=s.c==='rose'?`rgba(196,103,138,${s.a*0.5})`:`rgba(201,169,97,${s.a*0.5})`;
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+  });
+
+  // Constellation lines
+  ctx.lineWidth=0.4;
+  for(let i=0;i<stars.length;i++){
+    for(let j=i+1;j<stars.length;j++){
+      const dx=stars[i].x-stars[j].x,dy=stars[i].y-stars[j].y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<120){
+        const alpha=(1-dist/120)*0.08;
+        ctx.strokeStyle=stars[i].c==='rose'?`rgba(139,34,82,${alpha})`:`rgba(201,169,97,${alpha})`;
+        ctx.beginPath();ctx.moveTo(stars[i].x,stars[i].y);ctx.lineTo(stars[j].x,stars[j].y);ctx.stroke();
+      }
+    }
+  }
+
+  // Dust
+  dust.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.age++;
+    if(p.age>p.life||p.x<0||p.x>W||p.y<0||p.y>H){p.x=Math.random()*W;p.y=H+10;p.age=0}
+    const fade=p.age<20?p.age/20:p.age>p.life-20?(p.life-p.age)/20:1;
+    const col=p.c==='rose'?`rgba(139,34,82,${p.a*fade})`:`rgba(201,169,97,${p.a*fade})`;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+  });
+
+  requestAnimationFrame(draw);
+}
+
+init();draw();
+window.addEventListener('resize',init);
+
+// ===== Scroll Reveal =====
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible')})},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+<script>
+(function(){
+  var k='sc_visitor_id',id=localStorage.getItem(k);
+  if(!id){id='v_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,id)}
+  var d=JSON.stringify({page:'phoenix-rose.html',visitor_id:id});
+  if(navigator.sendBeacon){navigator.sendBeacon('/api/analytics/track',new Blob([d],{type:'application/json'}))}
+  else{fetch('/api/analytics/track',{method:'POST',headers:{'Content-Type':'application/json'},body:d,keepalive:true})}
+})();
+</script>
+
+</body>
+</html>

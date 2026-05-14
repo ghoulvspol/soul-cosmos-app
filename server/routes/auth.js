@@ -13,14 +13,14 @@ const { signToken, requireAuth } = require('../auth');
 const router = express.Router();
 
 // 注册
-router.post('/register', (req, res) => {
+router.post('/register', async (req, res) => {
   const { email, password, nickname } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ success: false, error: 'Email and password required' });
   }
-  if (password.length < 6) {
-    return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
+  if (password.length < 8) {
+    return res.status(400).json({ success: false, error: 'Password must be at least 8 characters' });
   }
 
   const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
@@ -28,7 +28,7 @@ router.post('/register', (req, res) => {
     return res.status(409).json({ success: false, error: 'Email already registered' });
   }
 
-  const passwordHash = bcrypt.hashSync(password, 10);
+  const passwordHash = await bcrypt.hash(password, 10);
   const result = db.prepare(
     'INSERT INTO users (email, password_hash, nickname) VALUES (?, ?, ?)'
   ).run(email, passwordHash, nickname || email.split('@')[0]);

@@ -1,8 +1,33 @@
+# Dependencies
 node_modules/
 server/node_modules/
-server/data/
+
+# Environment
 .env
-.server.pid
+.env.local
+.env.*.local
+
+# Database
+server/data/
+
+# Logs
 server.log
 *.log
+
+# PID files
+.server.pid
+*.pid
+
+# OS
 .DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc

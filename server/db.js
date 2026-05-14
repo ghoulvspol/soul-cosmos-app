@@ -123,6 +123,21 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_analyses_type ON analyses(user_id, type);
   CREATE INDEX IF NOT EXISTS idx_feedback_user ON feedback_memory(user_id);
   CREATE INDEX IF NOT EXISTS idx_circle_user ON circle_members(user_id);
+
+  -- 页面访问监控
+  CREATE TABLE IF NOT EXISTS page_views (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    page TEXT NOT NULL,
+    visitor_id TEXT,
+    user_agent TEXT,
+    referer TEXT,
+    ip TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_page_views_page ON page_views(page);
+  CREATE INDEX IF NOT EXISTS idx_page_views_time ON page_views(created_at);
+  CREATE INDEX IF NOT EXISTS idx_page_views_visitor ON page_views(visitor_id);
 `);
 
 module.exports = db;

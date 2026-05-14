@@ -474,23 +474,51 @@ function loadScenes() {
   })
     .then(r => r.json())
     .then(data => {
-      if (data.scenes) {
-        container.innerHTML = data.scenes.map(s => `
-          <div class="scene-card">
-            <div class="scene-card-header">
-              <span class="scene-card-icon">${s.icon || '🔮'}</span>
-              <span class="scene-card-title">${s.title}</span>
-              <span class="scene-card-tag" style="background:${s.tagColor || 'rgba(139,92,246,0.1)'};color:${s.tagTextColor || '#a78bfa'}">${s.tag || ''}</span>
-            </div>
-            <div class="scene-card-body">${s.body || ''}</div>
-            ${s.advice ? `<div class="scene-card-advice"><strong>🎯 Action:</strong> ${s.advice}</div>` : ''}
-          </div>
-        `).join('');
+      // Phase 1: 立即显示本地场景（0ms）
+      const scenes = data.scenes || [];
+      renderScenes(container, scenes, data.dateRange);
+
+      // Phase 2: 轮询 AI 增强场景
+      if (data.requestId) {
+        pollScenes(data.requestId, container, data.dateRange);
       }
     })
     .catch(() => {
       container.innerHTML = '<div style="color:#f28b82;text-align:center;padding:20px">Failed to load scenes.</div>';
     });
+}
+
+function renderScenes(container, scenes, dateRange) {
+  const dateHTML = dateRange ? `<div style="text-align:center;font-size:0.72rem;color:#5a5a6a;margin-bottom:16px;letter-spacing:0.05em">${dateRange}</div>` : '';
+  container.innerHTML = dateHTML + scenes.map(s => `
+    <div class="scene-card">
+      <div class="scene-card-header">
+        <span class="scene-card-icon">${s.icon || '🔮'}</span>
+        <span class="scene-card-title">${s.title}</span>
+        <span class="scene-card-tag" style="background:${s.tagColor || 'rgba(139,92,246,0.1)'};color:${s.tagTextColor || '#a78bfa'}">${s.tag || ''}</span>
+      </div>
+      <div class="scene-card-body">${s.body || ''}</div>
+      ${s.advice ? `<div class="scene-card-advice"><strong>🎯 Action:</strong> ${s.advice}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function pollScenes(requestId, container, dateRange) {
+  let attempts = 0;
+  const poll = setInterval(async () => {
+    attempts++;
+    if (attempts > 15) { clearInterval(poll); return; }
+    try {
+      const res = await fetch(`/api/fusion/${requestId}`);
+      const data = await res.json();
+      if (data.status === 'ready' && data.scenes) {
+        clearInterval(poll);
+        renderScenes(container, data.scenes, dateRange);
+      } else if (data.status === 'failed') {
+        clearInterval(poll);
+      }
+    } catch {}
+  }, 2000);
 }
 
 function applyLang() {

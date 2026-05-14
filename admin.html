@@ -70,6 +70,26 @@
     .log-ok{color:#34d399}
     .log-err{color:#f87171}
     .log-info{color:#94a3b8}
+    .visitor-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+    .visitor-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px;text-align:center}
+    .visitor-value{font-size:22px;font-weight:700;color:#a78bfa}
+    .visitor-label{font-size:11px;color:#64748b;margin-top:2px}
+    .chart-bar{display:flex;align-items:flex-end;gap:6px;height:140px;padding:8px 0;margin-bottom:8px}
+    .chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+    .chart-fill{width:100%;border-radius:4px 4px 0 0;min-height:2px;transition:height .4s ease}
+    .chart-day{font-size:10px;color:#64748b}
+    .chart-count{font-size:10px;color:#a78bfa;font-weight:600}
+    .page-table{width:100%;border-collapse:collapse;font-size:13px}
+    .page-table th{text-align:left;padding:8px 12px;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(255,255,255,0.06)}
+    .page-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.03);color:#e2e8f0}
+    .page-table tr:hover td{background:rgba(255,255,255,0.02)}
+    .page-name{font-family:monospace;color:#a78bfa}
+    .bar-bg{height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;width:100px;display:inline-block;vertical-align:middle;margin-left:8px}
+    .bar-fill{height:100%;background:linear-gradient(90deg,#6366f1,#a78bfa);border-radius:3px}
+    .hourly-bar{display:flex;align-items:flex-end;gap:2px;height:80px;padding:4px 0}
+    .hourly-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+    .hourly-fill{width:100%;border-radius:2px 2px 0 0;min-height:1px;background:#6366f1}
+    .hourly-label{font-size:8px;color:#475569}
   </style>
 </head>
 <body>
@@ -88,53 +108,21 @@
     <div class="tab" onclick="switchTab('features')">⚡ 功能开关</div>
     <div class="tab" onclick="switchTab('prompts')">📝 Prompt 模板</div>
     <div class="tab" onclick="switchTab('stats')">📊 数据统计</div>
+    <div class="tab" onclick="switchTab('visitors')">👁️ 访问监控</div>
     <div class="tab" onclick="switchTab('logs')">📋 运行日志</div>
   </div>
 
   <!-- Panel: AI 配置 -->
   <div class="panel active" id="panel-ai">
     <div class="card">
-      <div class="card-title">🤖 AI 模型选择</div>
-      <div id="modelList">
-        <div class="model-card selected" onclick="selectModel(this,'xiaomi/mimo-v2.5-pro')">
-          <div class="model-radio"></div>
-          <div>
-            <div class="model-name">MiMo v2.5 Pro</div>
-            <div class="model-desc">小米最强模型，1T参数，推理能力强</div>
-          </div>
-          <div class="model-badge badge-strong">推荐</div>
-        </div>
-        <div class="model-card" onclick="selectModel(this,'xiaomi/mimo-v2-flash')">
-          <div class="model-radio"></div>
-          <div>
-            <div class="model-name">MiMo v2 Flash</div>
-            <div class="model-desc">轻量快速版，响应速度快3-5倍</div>
-          </div>
-          <div class="model-badge badge-fast">快速</div>
-        </div>
-        <div class="model-card" onclick="selectModel(this,'xiaomi/mimo-v2-pro')">
-          <div class="model-radio"></div>
-          <div>
-            <div class="model-name">MiMo v2 Pro</div>
-            <div class="model-desc">上一代旗舰，性价比高</div>
-          </div>
-          <div class="model-badge badge-cheap">经济</div>
-        </div>
-        <div class="model-card" onclick="selectModel(this,'xiaomi/mimo-v2.5')">
-          <div class="model-radio"></div>
-          <div>
-            <div class="model-name">MiMo v2.5</div>
-            <div class="model-desc">v2.5标准版，平衡速度和质量</div>
-          </div>
-          <div class="model-badge badge-fast">均衡</div>
-        </div>
-      </div>
+      <div class="card-title">🤖 AI 模型选择 <span id="activeModelLabel" style="font-size:11px;color:#64748b;font-weight:400;margin-left:8px"></span></div>
+      <div id="modelList" style="color:#64748b;font-size:13px;padding:12px">加载中...</div>
     </div>
 
     <div class="card">
       <div class="card-title">🔑 API 配置</div>
       <div class="form-group">
-        <label>Mify API Key</label>
+        <label>API Key</label>
         <input type="password" id="apiKey" placeholder="sk-..." value="">
       </div>
       <div class="form-row">
@@ -291,6 +279,68 @@ Fuse ALL systems into ONE coherent description. Make the person feel "this is SO
     </div>
   </div>
 
+  <!-- Panel: 访问监控 -->
+  <div class="panel" id="panel-visitors">
+    <div class="visitor-grid">
+      <div class="visitor-card">
+        <div class="visitor-value" id="pvTotal">-</div>
+        <div class="visitor-label">总访问量</div>
+      </div>
+      <div class="visitor-card">
+        <div class="visitor-value" id="pvToday">-</div>
+        <div class="visitor-label">今日访问</div>
+      </div>
+      <div class="visitor-card">
+        <div class="visitor-value" id="pvWeek">-</div>
+        <div class="visitor-label">近 7 天</div>
+      </div>
+      <div class="visitor-card">
+        <div class="visitor-value" id="pvUnique">-</div>
+        <div class="visitor-label">独立访客</div>
+      </div>
+      <div class="visitor-card">
+        <div class="visitor-value" id="pvUniqueToday">-</div>
+        <div class="visitor-label">今日访客</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 近 7 天趋势</div>
+      <div id="pvTrendChart" class="chart-bar"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🕐 24 小时分布</div>
+      <div id="pvHourlyChart" class="hourly-bar"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📄 各页面访问详情</div>
+      <table class="page-table">
+        <thead>
+          <tr>
+            <th>页面</th>
+            <th>总访问</th>
+            <th>今日</th>
+            <th>独立访客</th>
+            <th>最近访问</th>
+          </tr>
+        </thead>
+        <tbody id="pvPageList">
+          <tr><td colspan="5" style="color:#64748b;text-align:center;padding:20px">加载中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔧 数据管理</div>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-sm" onclick="refreshVisitors()">🔄 刷新数据</button>
+        <button class="btn btn-danger btn-sm" onclick="clearVisitors()">🗑️ 清除访问数据</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Panel: 运行日志 -->
   <div class="panel" id="panel-logs">
     <div class="card">
@@ -308,7 +358,8 @@ Fuse ALL systems into ONE coherent description. Make the person feel "this is SO
 
 <script>
 const API = window.location.origin;
-let currentModel = 'xiaomi/mimo-v2.5-pro';
+let currentProvider = 'openai';
+let currentModel = '';
 let logs = [];
 
 // ========== Tab 切换 ==========
@@ -319,6 +370,7 @@ function switchTab(name) {
   document.getElementById('panel-' + name).classList.add('active');
 
   if (name === 'stats') loadStats();
+  if (name === 'visitors') refreshVisitors();
   if (name === 'logs') refreshLogs();
 }
 
@@ -332,9 +384,58 @@ function toast(msg, type = 'ok') {
 }
 
 // ========== AI 配置 ==========
-function selectModel(el, model) {
+async function loadModels() {
+  try {
+    const res = await fetch(API + '/api/models');
+    const data = await res.json();
+    if (!data.success) throw new Error('Failed to load models');
+
+    currentProvider = data.active.provider;
+    currentModel = data.active.model;
+
+    // 渲染 provider 分组
+    const container = document.getElementById('modelList');
+    let html = '';
+    for (const provider of data.providers) {
+      const available = provider.available;
+      html += `<div style="margin-bottom:16px">
+        <div style="font-size:12px;color:${available ? '#a78bfa' : '#4a4560'};font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+          ${provider.name}
+          ${available ? '<span style="font-size:10px;color:#34d399">● 可用</span>' : '<span style="font-size:10px;color:#f87171">● 未配置</span>'}
+        </div>`;
+      for (const model of provider.models) {
+        const isActive = provider.id === currentProvider && model.id === currentModel;
+        const disabled = !available;
+        html += `<div class="model-card${isActive ? ' selected' : ''}" onclick="${disabled ? '' : `selectModel(this,'${provider.id}','${model.id}')`}" style="${disabled ? 'opacity:0.4;cursor:not-allowed' : ''}">
+          <div class="model-radio"></div>
+          <div>
+            <div class="model-name">${model.name}</div>
+            <div class="model-desc">${model.desc}</div>
+          </div>
+          ${model.badge ? `<div class="model-badge badge-${model.badge === '推荐' ? 'strong' : model.badge === '快速' ? 'fast' : 'cheap'}">${model.badge}</div>` : ''}
+        </div>`;
+      }
+      html += '</div>';
+    }
+    container.innerHTML = html;
+
+    // 显示当前活跃模型
+    const activeLabel = document.getElementById('activeModelLabel');
+    if (activeLabel) activeLabel.textContent = `当前: ${currentProvider}/${currentModel}`;
+
+    // 填充配置表单
+    document.getElementById('temperature').value = data.active.temperature;
+    document.getElementById('maxTokens').value = data.active.maxTokens;
+
+  } catch (e) {
+    document.getElementById('modelList').innerHTML = '<div style="color:#f87171">加载失败: ' + e.message + '</div>';
+  }
+}
+
+function selectModel(el, provider, model) {
   document.querySelectorAll('.model-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
+  currentProvider = provider;
   currentModel = model;
 }
 
@@ -343,7 +444,7 @@ async function testConnection() {
     const res = await fetch(API + '/api/health');
     const data = await res.json();
     if (data.status === 'ok') {
-      toast('✅ 连接成功！模型: ' + data.model);
+      toast('✅ 连接成功！' + (data.provider || '') + '/' + (data.model || ''));
       document.getElementById('statusBadge').className = 'status-badge status-ok';
       document.getElementById('statusBadge').textContent = '● 已连接';
     }
@@ -354,15 +455,30 @@ async function testConnection() {
   }
 }
 
-function saveAIConfig() {
-  const config = {
-    model: currentModel,
-    maxTokens: parseInt(document.getElementById('maxTokens').value),
-    temperature: parseFloat(document.getElementById('temperature').value),
-  };
-  localStorage.setItem('admin_ai_config', JSON.stringify(config));
-  toast('✅ AI 配置已保存');
-  addLog('AI config saved: ' + config.model);
+async function saveAIConfig() {
+  try {
+    const res = await fetch(API + '/api/models/select', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        provider: currentProvider,
+        model: currentModel,
+        temperature: parseFloat(document.getElementById('temperature').value),
+        maxTokens: parseInt(document.getElementById('maxTokens').value),
+      }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      toast('✅ 模型配置已保存到服务端');
+      addLog('Model switched: ' + data.active.provider + '/' + data.active.model);
+      const activeLabel = document.getElementById('activeModelLabel');
+      if (activeLabel) activeLabel.textContent = `当前: ${data.active.provider}/${data.active.model}`;
+    } else {
+      toast('❌ ' + data.error, 'err');
+    }
+  } catch (e) {
+    toast('❌ 保存失败: ' + e.message, 'err');
+  }
 }
 
 // ========== 功能开关 ==========
@@ -517,20 +633,129 @@ function clearLogs() {
   renderLogs();
 }
 
+// ========== 访问监控 ==========
+async function refreshVisitors() {
+  try {
+    const [statsRes, pagesRes] = await Promise.all([
+      fetch(API + '/api/analytics/stats'),
+      fetch(API + '/api/analytics/pages'),
+    ]);
+    const statsData = await statsRes.json();
+    const pagesData = await pagesRes.json();
+
+    if (statsData.success) {
+      const s = statsData.data;
+      document.getElementById('pvTotal').textContent = s.total;
+      document.getElementById('pvToday').textContent = s.today;
+      document.getElementById('pvWeek').textContent = s.week;
+      document.getElementById('pvUnique').textContent = s.uniqueVisitors;
+      document.getElementById('pvUniqueToday').textContent = s.uniqueToday;
+
+      // 7-day trend chart
+      renderTrendChart(s.trend);
+      // Hourly chart
+      renderHourlyChart(s.hourly);
+    }
+
+    if (pagesData.success) {
+      renderPageTable(pagesData.data);
+    }
+    addLog('Visitor data refreshed', 'ok');
+  } catch (e) {
+    addLog('Failed to load visitor data: ' + e.message, 'err');
+    toast('加载访问数据失败', 'err');
+  }
+}
+
+function renderTrendChart(trend) {
+  const el = document.getElementById('pvTrendChart');
+  if (!trend || trend.length === 0) {
+    el.innerHTML = '<div style="width:100%;text-align:center;color:#64748b;font-size:12px;line-height:140px">暂无数据</div>';
+    return;
+  }
+  const max = Math.max(...trend.map(t => t.views), 1);
+  // Fill in missing days
+  const days = [];
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const found = trend.find(t => t.day === key);
+    days.push({
+      day: key.slice(5),
+      views: found ? found.views : 0,
+      visitors: found ? found.visitors : 0,
+    });
+  }
+  el.innerHTML = days.map(d => {
+    const h = Math.max(2, (d.views / max) * 120);
+    return `<div class="chart-col">
+      <div class="chart-count">${d.views}</div>
+      <div class="chart-fill" style="height:${h}px;background:linear-gradient(180deg,#a78bfa,#6366f1)"></div>
+      <div class="chart-day">${d.day}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderHourlyChart(hourly) {
+  const el = document.getElementById('pvHourlyChart');
+  if (!hourly || hourly.length === 0) {
+    el.innerHTML = '<div style="width:100%;text-align:center;color:#64748b;font-size:12px;line-height:80px">暂无数据</div>';
+    return;
+  }
+  const hourMap = {};
+  hourly.forEach(h => { hourMap[parseInt(h.hour)] = h.count; });
+  const max = Math.max(...Object.values(hourMap), 1);
+  const hours = [];
+  for (let i = 0; i < 24; i++) {
+    const count = hourMap[i] || 0;
+    const h = Math.max(1, (count / max) * 70);
+    hours.push(`<div class="hourly-col">
+      <div class="chart-count" style="font-size:8px">${count || ''}</div>
+      <div class="hourly-fill" style="height:${h}px"></div>
+      <div class="hourly-label">${String(i).padStart(2,'0')}</div>
+    </div>`);
+  }
+  el.innerHTML = hours.join('');
+}
+
+function renderPageTable(pages) {
+  const el = document.getElementById('pvPageList');
+  if (!pages || pages.length === 0) {
+    el.innerHTML = '<tr><td colspan="5" style="color:#64748b;text-align:center;padding:20px">暂无访问数据</td></tr>';
+    return;
+  }
+  const maxTotal = Math.max(...pages.map(p => p.total), 1);
+  el.innerHTML = pages.map(p => {
+    const pct = Math.round((p.total / maxTotal) * 100);
+    const lastVisit = p.last_visit ? new Date(p.last_visit).toLocaleString('zh-CN', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) : '-';
+    return `<tr>
+      <td><span class="page-name">${p.page}</span></td>
+      <td>${p.total} <span class="bar-bg"><span class="bar-fill" style="width:${pct}%"></span></span></td>
+      <td>${p.today}</td>
+      <td>${p.unique_visitors}</td>
+      <td style="font-size:12px;color:#64748b">${lastVisit}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function clearVisitors() {
+  if (!confirm('确定清除所有访问数据？此操作不可撤销。')) return;
+  try {
+    await fetch(API + '/api/analytics/clear', { method: 'DELETE' });
+    refreshVisitors();
+    toast('✅ 访问数据已清除');
+    addLog('Visitor data cleared');
+  } catch (e) {
+    toast('清除失败', 'err');
+  }
+}
+
 // ========== 初始化 ==========
 (function init() {
-  // 加载保存的配置
-  try {
-    const cfg = JSON.parse(localStorage.getItem('admin_ai_config') || '{}');
-    if (cfg.model) {
-      currentModel = cfg.model;
-      document.querySelectorAll('.model-card').forEach(c => {
-        c.classList.toggle('selected', c.onclick?.toString().includes(cfg.model));
-      });
-    }
-    if (cfg.maxTokens) document.getElementById('maxTokens').value = cfg.maxTokens;
-    if (cfg.temperature) document.getElementById('temperature').value = cfg.temperature;
-  } catch {}
+  // 从服务端加载模型配置
+  loadModels();
 
   loadFeatures();
 
@@ -552,6 +777,15 @@ function clearLogs() {
   // 检测连接
   testConnection();
   addLog('Admin dashboard loaded', 'ok');
+})();
+</script>
+<script>
+(function(){
+  var k='sc_visitor_id',id=localStorage.getItem(k);
+  if(!id){id='v_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,id)}
+  var d=JSON.stringify({page:'admin.html',visitor_id:id});
+  if(navigator.sendBeacon){navigator.sendBeacon('/api/analytics/track',new Blob([d],{type:'application/json'}))}
+  else{fetch('/api/analytics/track',{method:'POST',headers:{'Content-Type':'application/json'},body:d,keepalive:true})}
 })();
 </script>
 </body>

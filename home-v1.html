@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soul Cosmos — Discover Your Multi-Dimensional Self</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:#050510;color:#e2e8f0;overflow-x:hidden;line-height:1.6}
+    h1,h2,h3{font-family:'Playfair Display',serif;font-weight:600}
+
+    /* === Cosmic Background === */
+    #cosmicBg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+    /* === Nav === */
+    .nav{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:20px 48px;
+      background:transparent;transition:all .4s;
+    }
+    .nav.scrolled{background:rgba(5,5,16,0.9);backdrop-filter:blur(24px);padding:14px 48px;border-bottom:1px solid rgba(255,255,255,0.04)}
+    .nav-logo{font-family:'Playfair Display',serif;font-size:22px;color:#d4a574;font-weight:700;letter-spacing:1px}
+    .nav-links{display:flex;gap:28px;align-items:center}
+    .nav-links a{color:rgba(255,255,255,0.5);text-decoration:none;font-size:13px;font-weight:500;transition:color .2s;letter-spacing:0.5px}
+    .nav-links a:hover{color:#e2e8f0}
+    .btn-nav{
+      padding:10px 24px;background:linear-gradient(135deg,#d4a574,#b8860b);
+      border:none;border-radius:24px;color:#050510;font-size:13px;font-weight:700;cursor:pointer;
+      letter-spacing:0.5px;transition:all .3s;
+    }
+    .btn-nav:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(212,165,116,0.35)}
+    .btn-lang{
+      padding:8px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+      border-radius:20px;color:rgba(255,255,255,0.5);font-size:12px;font-weight:600;cursor:pointer;
+      transition:all .2s;letter-spacing:1px;
+    }
+    .btn-lang:hover{background:rgba(255,255,255,0.12);color:#e2e8f0}
+
+    /* === Hero: Full-Screen Cosmic Portal === */
+    .hero{
+      position:relative;z-index:1;
+      min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;text-align:center;
+      padding:120px 24px 60px;
+    }
+    .hero-orbit-ring{
+      position:absolute;width:600px;height:600px;border-radius:50%;
+      border:1px solid rgba(139,92,246,0.08);animation:orbit-spin 40s linear infinite;
+    }
+    .hero-orbit-ring:nth-child(2){width:450px;height:450px;animation-duration:30s;animation-direction:reverse;border-color:rgba(212,165,116,0.08)}
+    .hero-orbit-ring:nth-child(3){width:300px;height:300px;animation-duration:20s;border-color:rgba(34,211,238,0.08)}
+    @keyframes orbit-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    .orbit-node{
+      position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+      width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+      font-size:12px;background:rgba(139,92,246,0.15);border-radius:50%;
+      border:1px solid rgba(139,92,246,0.3);
+    }
+
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 20px;
+      background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);
+      border-radius:24px;font-size:12px;color:#a78bfa;margin-bottom:32px;
+      letter-spacing:1px;font-weight:500;
+    }
+    .hero-badge-dot{width:6px;height:6px;background:#a78bfa;border-radius:50%;animation:pulse-dot 2s infinite}
+    @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:0.3}}
+    .hero-title{
+      font-size:clamp(42px,6vw,72px);line-height:1.1;
+      color:#f8fafc;margin-bottom:24px;letter-spacing:-1px;
+    }
+    .gradient-text{
+      background:linear-gradient(135deg,#d4a574 0%,#f59e0b 30%,#a78bfa 60%,#22d3ee 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      background-size:200% 200%;animation:gradient-shift 6s ease infinite;
+    }
+    @keyframes gradient-shift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    .hero-desc{
+      font-size:18px;color:rgba(255,255,255,0.45);line-height:1.8;
+      max-width:560px;margin:0 auto 48px;font-weight:300;
+    }
+
+    /* === Inline Form (the star of the page) === */
+    .hero-form{
+      width:100%;max-width:480px;
+      background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+      border-radius:28px;padding:36px;position:relative;overflow:hidden;
+    }
+    .hero-form::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(212,165,116,0.4),transparent);
+    }
+    .form-step{display:none;animation:step-in .4s ease}
+    .form-step.active{display:block}
+    @keyframes step-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .form-step h3{font-size:20px;color:#f8fafc;margin-bottom:6px;font-family:'Inter',sans-serif;font-weight:600}
+    .form-step p{font-size:13px;color:rgba(255,255,255,0.35);margin-bottom:24px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .form-group{margin-bottom:14px}
+    .form-group label{display:block;font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
+    .form-group input,.form-group select{
+      width:100%;padding:14px 16px;
+      background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+      border-radius:14px;color:#e2e8f0;font-size:15px;outline:none;
+      transition:border-color .2s;font-family:'Inter',sans-serif;
+    }
+    .form-group input:focus,.form-group select:focus{border-color:rgba(139,92,246,0.5);background:rgba(139,92,246,0.04)}
+    .form-group select option{background:#1a1a2e;color:#e2e8f0}
+
+    /* MBTI Grid */
+    .mbti-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+    .mbti-btn{
+      padding:14px 8px;background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.08);border-radius:14px;
+      color:#e2e8f0;font-size:15px;font-weight:700;cursor:pointer;
+      transition:all .25s;text-align:center;font-family:'Inter',sans-serif;
+    }
+    .mbti-btn small{display:block;font-weight:400;font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px}
+    .mbti-btn:hover{border-color:rgba(139,92,246,0.4);background:rgba(139,92,246,0.08);transform:translateY(-2px)}
+    .mbti-btn.selected{border-color:#d4a574;background:rgba(212,165,116,0.12);color:#d4a574;box-shadow:0 0 24px rgba(212,165,116,0.15)}
+
+    .btn-continue{
+      width:100%;padding:16px;
+      background:linear-gradient(135deg,#d4a574,#b8860b);
+      border:none;border-radius:16px;color:#050510;
+      font-size:15px;font-weight:700;cursor:pointer;
+      transition:all .3s;font-family:'Inter',sans-serif;letter-spacing:0.5px;
+    }
+    .btn-continue:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(212,165,116,0.3)}
+    .btn-continue:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+    .btn-back{
+      padding:12px 20px;background:transparent;border:1px solid rgba(255,255,255,0.1);
+      border-radius:14px;color:rgba(255,255,255,0.4);font-size:13px;cursor:pointer;
+      transition:all .2s;font-family:'Inter',sans-serif;
+    }
+    .btn-back:hover{border-color:rgba(255,255,255,0.25);color:#e2e8f0}
+    .form-actions{display:flex;gap:12px;margin-top:20px}
+    .form-actions .btn-continue{flex:1}
+
+    /* Loading */
+    .loading-overlay{
+      display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(5,5,16,0.95);z-index:200;
+      align-items:center;justify-content:center;flex-direction:column;
+    }
+    .loading-overlay.active{display:flex}
+    .loading-ring{
+      width:80px;height:80px;border-radius:50%;position:relative;
+      border:2px solid rgba(139,92,246,0.1);animation:loading-rotate 2s linear infinite;
+    }
+    .loading-ring::before{
+      content:'';position:absolute;top:-2px;left:-2px;right:-2px;bottom:-2px;
+      border-radius:50%;border:2px solid transparent;border-top-color:#a78bfa;
+      animation:loading-rotate 1.5s linear infinite;
+    }
+    @keyframes loading-rotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    .loading-text{margin-top:24px;font-size:14px;color:rgba(255,255,255,0.4);letter-spacing:1px}
+    .loading-bar{width:200px;height:2px;background:rgba(255,255,255,0.06);border-radius:1px;margin-top:16px;overflow:hidden}
+    .loading-bar-fill{height:100%;background:linear-gradient(90deg,#a78bfa,#d4a574);border-radius:1px;width:0%;transition:width .4s}
+
+    /* === Stats Bar === */
+    .stats-bar{
+      display:flex;justify-content:center;gap:64px;padding:48px 24px;
+      position:relative;z-index:1;
+    }
+    .stat-item{text-align:center}
+    .stat-num{display:block;font-size:32px;font-weight:700;color:#d4a574;font-family:'Playfair Display',serif}
+    .stat-label{font-size:11px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+
+    /* === Section Styles === */
+    .section{position:relative;z-index:1;padding:100px 24px;max-width:1100px;margin:0 auto}
+    .section-header{text-align:center;margin-bottom:56px}
+    .section-header h2{font-size:clamp(28px,4vw,42px);color:#f8fafc;margin-bottom:12px;letter-spacing:-0.5px}
+    .section-header p{font-size:16px;color:rgba(255,255,255,0.35);max-width:500px;margin:0 auto}
+
+    /* === Features: Floating Cards === */
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    .feature-card{
+      background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);
+      border-radius:24px;padding:32px;transition:all .4s;position:relative;overflow:hidden;
+    }
+    .feature-card::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(139,92,246,0.2),transparent);
+      opacity:0;transition:opacity .4s;
+    }
+    .feature-card:hover{background:rgba(255,255,255,0.04);transform:translateY(-4px);border-color:rgba(139,92,246,0.15)}
+    .feature-card:hover::before{opacity:1}
+    .feature-icon{font-size:36px;margin-bottom:16px;display:block}
+    .feature-card h3{font-size:17px;color:#f8fafc;margin-bottom:8px;font-family:'Inter',sans-serif;font-weight:600}
+    .feature-card p{font-size:13px;color:rgba(255,255,255,0.35);line-height:1.7}
+    .feature-tag{
+      display:inline-block;margin-top:14px;padding:4px 12px;
+      background:rgba(139,92,246,0.08);border-radius:8px;
+      font-size:11px;color:#a78bfa;font-weight:500;
+    }
+
+    /* === How It Works: Horizontal Timeline === */
+    .timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative}
+    .timeline::before{
+      content:'';position:absolute;top:28px;left:12.5%;right:12.5%;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(139,92,246,0.2),rgba(212,165,116,0.2),transparent);
+    }
+    .timeline-step{text-align:center;position:relative}
+    .timeline-dot{
+      width:56px;height:56px;border-radius:50%;margin:0 auto 20px;
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Playfair Display',serif;font-size:20px;font-weight:700;
+      color:#d4a574;background:rgba(212,165,116,0.06);border:1px solid rgba(212,165,116,0.15);
+      position:relative;z-index:1;
+    }
+    .timeline-step h3{font-size:15px;color:#f8fafc;margin-bottom:6px;font-family:'Inter',sans-serif;font-weight:600}
+    .timeline-step p{font-size:13px;color:rgba(255,255,255,0.3);line-height:1.6}
+
+    /* === Testimonials === */
+    .testimonials{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .testimonial{
+      background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);
+      border-radius:24px;padding:28px;
+    }
+    .testimonial-stars{color:#d4a574;font-size:14px;margin-bottom:12px;letter-spacing:2px}
+    .testimonial-text{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:16px;font-style:italic}
+    .testimonial-author{display:flex;align-items:center;gap:12px}
+    .testimonial-avatar{
+      width:40px;height:40px;border-radius:50%;
+      background:linear-gradient(135deg,#8b5cf6,#d4a574);
+      display:flex;align-items:center;justify-content:center;font-size:16px;
+    }
+    .testimonial-name{font-size:13px;font-weight:600;color:#f8fafc}
+    .testimonial-type{font-size:11px;color:rgba(255,255,255,0.3)}
+
+    /* === Pricing === */
+    .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+    .price-card{
+      background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);
+      border-radius:28px;padding:36px;text-align:center;position:relative;transition:all .3s;
+    }
+    .price-card:hover{transform:translateY(-4px);border-color:rgba(139,92,246,0.15)}
+    .price-card-featured{
+      border-color:rgba(212,165,116,0.3);background:rgba(212,165,116,0.03);
+      transform:scale(1.04);
+    }
+    .price-card-featured:hover{transform:scale(1.04) translateY(-4px)}
+    .price-badge{
+      position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+      padding:6px 20px;background:linear-gradient(135deg,#d4a574,#b8860b);
+      border-radius:20px;font-size:11px;font-weight:700;color:#050510;
+      letter-spacing:1px;text-transform:uppercase;
+    }
+    .price-name{font-size:13px;color:rgba(255,255,255,0.35);margin-bottom:8px;text-transform:uppercase;letter-spacing:3px;font-weight:600}
+    .price-amount{font-size:48px;font-weight:700;color:#f8fafc;font-family:'Playfair Display',serif}
+    .price-period{font-size:13px;color:rgba(255,255,255,0.25);margin-bottom:28px}
+    .price-features{list-style:none;text-align:left;margin-bottom:28px}
+    .price-features li{font-size:13px;color:rgba(255,255,255,0.45);padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .price-features li::before{content:'✦ ';color:#a78bfa}
+    .btn-price{
+      width:100%;padding:16px;border-radius:16px;font-size:14px;font-weight:700;
+      cursor:pointer;transition:all .3s;font-family:'Inter',sans-serif;letter-spacing:0.5px;
+    }
+    .btn-price-primary{
+      background:linear-gradient(135deg,#d4a574,#b8860b);border:none;color:#050510;
+    }
+    .btn-price-primary:hover{box-shadow:0 8px 32px rgba(212,165,116,0.3)}
+    .btn-price-outline{
+      background:transparent;border:1px solid rgba(255,255,255,0.15);color:#e2e8f0;
+    }
+    .btn-price-outline:hover{border-color:rgba(255,255,255,0.3)}
+
+    /* === CTA Section === */
+    .cta-section{
+      text-align:center;padding:100px 24px;position:relative;z-index:1;
+    }
+    .cta-section h2{font-size:clamp(32px,5vw,52px);color:#f8fafc;margin-bottom:16px}
+    .cta-section p{font-size:16px;color:rgba(255,255,255,0.35);margin-bottom:40px}
+    .cta-section .btn-nav{font-size:16px;padding:18px 48px}
+
+    /* === Footer === */
+    .footer{
+      position:relative;z-index:1;padding:60px 24px;text-align:center;
+      border-top:1px solid rgba(255,255,255,0.04);
+    }
+    .footer-logo{font-family:'Playfair Display',serif;font-size:20px;color:#d4a574;margin-bottom:8px}
+    .footer p{font-size:13px;color:rgba(255,255,255,0.2);margin-bottom:16px}
+    .footer-links{display:flex;justify-content:center;gap:24px;margin-bottom:16px}
+    .footer-links a{color:rgba(255,255,255,0.3);text-decoration:none;font-size:13px}
+    .footer-copy{font-size:11px;color:rgba(255,255,255,0.1)}
+
+    /* === Responsive === */
+    @media(max-width:768px){
+      .nav{padding:14px 20px}
+      .nav-links a{display:none}
+      .hero{padding:100px 20px 40px}
+      .hero-orbit-ring{display:none}
+      .stats-bar{gap:32px;flex-wrap:wrap}
+      .features-grid{grid-template-columns:1fr}
+      .timeline{grid-template-columns:1fr 1fr}
+      .timeline::before{display:none}
+      .testimonials{grid-template-columns:1fr}
+      .pricing-grid{grid-template-columns:1fr}
+      .price-card-featured{transform:none}
+      .form-row{grid-template-columns:1fr}
+      .mbti-grid{grid-template-columns:repeat(4,1fr)}
+    }
+  </style>
+</head>
+<body>
+  <!-- Cosmic Background -->
+  <canvas id="cosmicBg"></canvas>
+
+  <!-- Nav -->
+  <nav class="nav" id="nav">
+    <div class="nav-logo">✦ Soul Cosmos</div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How It Works</a>
+      <a href="#pricing">Pricing</a>
+      <button class="btn-lang" onclick="toggleLang()" id="langBtn">中/EN</button>
+      <button class="btn-nav" onclick="document.getElementById('heroForm').scrollIntoView({behavior:'smooth'})">Try Free</button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-orbit-ring"><div class="orbit-node">♈</div></div>
+    <div class="hero-orbit-ring"><div class="orbit-node">☯</div></div>
+    <div class="hero-orbit-ring"><div class="orbit-node">🧠</div></div>
+
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      <span id="badgeText">The World's First East-Meets-West Personality AI</span>
+    </div>
+    <h1 class="hero-title">
+      <span id="titleLine1">Discover Your</span><br>
+      <span class="gradient-text" id="titleLine2">Multi-Dimensional</span><br>
+      <span id="titleLine3">Soul Profile</span>
+    </h1>
+    <p class="hero-desc" id="heroDesc">
+      We fuse Western Astrology, Eastern Zi Wei Dou Shu, I Ching, MBTI, Palm Reading,
+      Blood Type theory, and Social Psychology into one unified portrait of who you truly are.
+    </p>
+
+    <!-- Inline Form -->
+    <div class="hero-form" id="heroForm">
+      <!-- Step 1 -->
+      <div class="form-step active" id="fStep1">
+        <h3 id="fStep1Title">When were you born?</h3>
+        <p id="fStep1Desc">We need this to calculate your natal chart, BaZi, and Zi Wei chart.</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label id="lblBirth">Birth Date</label>
+            <input type="date" id="birthDate" value="1995-06-15">
+          </div>
+          <div class="form-group">
+            <label id="lblTime">Birth Time</label>
+            <input type="time" id="birthTime" value="14:30">
+          </div>
+        </div>
+        <div class="form-group">
+          <label id="lblCity">Birth City</label>
+          <select id="birthCity">
+            <option value="new_york">New York, USA</option>
+            <option value="los_angeles">Los Angeles, USA</option>
+            <option value="london">London, UK</option>
+            <option value="tokyo">Tokyo, Japan</option>
+            <option value="shanghai">Shanghai, China</option>
+            <option value="beijing">Beijing, China</option>
+            <option value="guangzhou">Guangzhou, China</option>
+            <option value="shenzhen">Shenzhen, China</option>
+            <option value="seoul">Seoul, Korea</option>
+            <option value="sydney">Sydney, Australia</option>
+            <option value="toronto">Toronto, Canada</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label id="lblGender">Gender</label>
+          <select id="birthGender">
+            <option value="unknown">Prefer not to say</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="nonbinary">Non-binary</option>
+          </select>
+        </div>
+        <button class="btn-continue" onclick="goStep(2)" id="btnContinue1">Continue →</button>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="form-step" id="fStep2">
+        <h3 id="fStep2Title">What's your MBTI type?</h3>
+        <p id="fStep2Desc">Select your type to fuse with your astrological profile.</p>
+        <div class="mbti-grid">
+          <button class="mbti-btn" data-type="INTJ">INTJ<small>Architect</small></button>
+          <button class="mbti-btn" data-type="INTP">INTP<small>Logician</small></button>
+          <button class="mbti-btn" data-type="ENTJ">ENTJ<small>Commander</small></button>
+          <button class="mbti-btn" data-type="ENTP">ENTP<small>Debater</small></button>
+          <button class="mbti-btn" data-type="INFJ">INFJ<small>Advocate</small></button>
+          <button class="mbti-btn" data-type="INFP">INFP<small>Mediator</small></button>
+          <button class="mbti-btn" data-type="ENFJ">ENFJ<small>Protagonist</small></button>
+          <button class="mbti-btn" data-type="ENFP">ENFP<small>Campaigner</small></button>
+          <button class="mbti-btn" data-type="ISTJ">ISTJ<small>Logistician</small></button>
+          <button class="mbti-btn" data-type="ISFJ">ISFJ<small>Defender</small></button>
+          <button class="mbti-btn" data-type="ESTJ">ESTJ<small>Executive</small></button>
+          <button class="mbti-btn" data-type="ESFJ">ESFJ<small>Consul</small></button>
+          <button class="mbti-btn" data-type="ISTP">ISTP<small>Virtuoso</small></button>
+          <button class="mbti-btn" data-type="ISFP">ISFP<small>Adventurer</small></button>
+          <button class="mbti-btn" data-type="ESTP">ESTP<small>Entrepreneur</small></button>
+          <button class="mbti-btn" data-type="ESFP">ESFP<small>Entertainer</small></button>
+        </div>
+        <div class="form-actions">
+          <button class="btn-back" onclick="goStep(1)">← Back</button>
+          <button class="btn-continue" id="btnGenerate" disabled onclick="generateProfile()">Select your type first</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-item"><span class="stat-num">7</span><div class="stat-label">Wisdom Systems</div></div>
+    <div class="stat-item"><span class="stat-num">AI</span><div class="stat-label">Fusion Engine</div></div>
+    <div class="stat-item"><span class="stat-num">∞</span><div class="stat-label">Unique Profiles</div></div>
+    <div class="stat-item"><span class="stat-num">60s</span><div class="stat-label">To Insight</div></div>
+  </div>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="section-header">
+      <h2>Seven Dimensions of Self</h2>
+      <p>Most apps give you one lens. We give you the full spectrum.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🌌</span>
+        <h3>Western Astrology</h3>
+        <p>Sun, Moon, Rising signs. Planetary aspects. House placements. The classic natal chart, deeply interpreted.</p>
+        <span class="feature-tag">Co-Star level depth</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">☯</span>
+        <h3>Zi Wei Dou Shu</h3>
+        <p>The Emperor's Astrology — 1,400 years of Chinese star mapping. Your life palace, career palace, and 14 main stars.</p>
+        <span class="feature-tag">Eastern wisdom</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🧠</span>
+        <h3>MBTI Integration</h3>
+        <p>Your cognitive function stack fused with your astrological profile. Not two separate reports — one unified insight.</p>
+        <span class="feature-tag">Psychology + Stars</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🖐️</span>
+        <h3>AI Palm & Face Reading</h3>
+        <p>Upload a photo. Our CV model reads your palm lines and facial structure. Ancient art meets modern AI.</p>
+        <span class="feature-tag">AI-powered</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🩸</span>
+        <h3>Blood Type Personality</h3>
+        <p>Japanese and Korean personality theory based on blood type. A surprisingly accurate behavioral predictor.</p>
+        <span class="feature-tag">East Asian science</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🧬</span>
+        <h3>Social Psychology</h3>
+        <p>Big Five traits, attachment style, love language. Scientific frameworks fused with mystical ones.</p>
+        <span class="feature-tag">Evidence-based</span>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">☯️</span>
+        <h3>I Ching</h3>
+        <p>5,000 years of Chinese wisdom. 64 hexagrams revealing your life archetype, inner truth, and path forward.</p>
+        <span class="feature-tag">Ancient wisdom</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="section" id="how">
+    <div class="section-header">
+      <h2>How It Works</h2>
+      <p>From input to insight in 60 seconds.</p>
+    </div>
+    <div class="timeline">
+      <div class="timeline-step">
+        <div class="timeline-dot">01</div>
+        <h3>Enter Birth Info</h3>
+        <p>Date, time, gender, and location. That's all we need.</p>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-dot">02</div>
+        <h3>Select MBTI Type</h3>
+        <p>Choose your type or take a quick 5-question quiz.</p>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-dot">03</div>
+        <h3>AI Fuses Everything</h3>
+        <p>Our AI synthesizes 7 systems into one coherent portrait.</p>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-dot">04</div>
+        <h3>Meet Your Soul</h3>
+        <p>Receive keywords, traits, shadows, and daily insights.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="section">
+    <div class="section-header">
+      <h2>What People Say</h2>
+      <p>Join thousands who've discovered their multi-dimensional self.</p>
+    </div>
+    <div class="testimonials">
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"I've tried Co-Star, The Pattern, and Sanctuary. Soul Cosmos is the first app that actually felt like it KNEW me — not just my sun sign."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">🌙</div>
+          <div><div class="testimonial-name">Sarah K.</div><div class="testimonial-type">INFJ · Scorpio</div></div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"The fusion of MBTI and astrology blew my mind. It explained contradictions I've felt my whole life — my Virgo precision vs my ENFP chaos."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">☀️</div>
+          <div><div class="testimonial-name">Alex M.</div><div class="testimonial-type">ENFP · Virgo</div></div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"As someone who grew up with 紫微斗数, seeing it fused with Western astrology and MBTI is genuinely innovative. Finally an app that respects both traditions."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">☯️</div>
+          <div><div class="testimonial-name">Wei L.</div><div class="testimonial-type">INTJ · Capricorn</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="section" id="pricing">
+    <div class="section-header">
+      <h2>Choose Your Depth</h2>
+      <p>Start free. Go deeper when you're ready.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Free</div>
+        <div class="price-amount">$0</div>
+        <div class="price-period">forever</div>
+        <ul class="price-features">
+          <li>Basic Soul Profile (3 keywords)</li>
+          <li>One-sentence portrait</li>
+          <li>1 daily insight</li>
+          <li>Share with friends</li>
+        </ul>
+        <button class="btn-price btn-price-outline" onclick="document.getElementById('heroForm').scrollIntoView({behavior:'smooth'})">Get Started</button>
+      </div>
+      <div class="price-card price-card-featured">
+        <div class="price-badge">Most Popular</div>
+        <div class="price-name">Premium</div>
+        <div class="price-amount">$3.99</div>
+        <div class="price-period">/month</div>
+        <ul class="price-features">
+          <li>Full 7-dimension analysis</li>
+          <li>Unlimited compatibility reports</li>
+          <li>Daily personalized insights</li>
+          <li>Deep natal chart reading</li>
+          <li>AI palm & face reading</li>
+          <li>Zi Wei Dou Shu analysis</li>
+          <li>Priority AI responses</li>
+        </ul>
+        <button class="btn-price btn-price-primary">Subscribe Now</button>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Annual</div>
+        <div class="price-amount">$29.99</div>
+        <div class="price-period">/year (save 37%)</div>
+        <ul class="price-features">
+          <li>Everything in Premium</li>
+          <li>Yearly soul evolution report</li>
+          <li>Exclusive content</li>
+          <li>Early access to new features</li>
+        </ul>
+        <button class="btn-price btn-price-outline">Subscribe Annual</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Ready to Meet Your Soul?</h2>
+    <p>Free. No signup. Takes 2 minutes. Your multi-dimensional self is waiting.</p>
+    <button class="btn-nav" onclick="document.getElementById('heroForm').scrollIntoView({behavior:'smooth'})">✦ Generate My Soul Profile</button>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-logo">✦ Soul Cosmos</div>
+    <p>The world's first East-meets-West personality AI.</p>
+    <div class="footer-links">
+      <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a>
+    </div>
+    <p class="footer-copy">© 2026 Soul Cosmos. Built with stardust.</p>
+  </footer>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-ring"></div>
+    <div class="loading-text">Fusing 7 dimensions of your soul...</div>
+    <div class="loading-bar"><div class="loading-bar-fill" id="loadingFill"></div></div>
+  </div>
+
+  <script>
+    // === Cosmic Background ===
+    const canvas = document.getElementById('cosmicBg');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    function resizeBg(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+    function createStars(){stars=[];for(let i=0;i<250;i++)stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5+0.3,a:Math.random()*0.7+0.1,s:Math.random()*0.015+0.003})}
+    function drawBg(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      stars.forEach(s=>{s.a+=Math.sin(Date.now()*s.s)*0.008;s.a=Math.max(0.05,Math.min(0.9,s.a));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${s.a})`;ctx.fill()});
+      requestAnimationFrame(drawBg);
+    }
+    resizeBg();createStars();drawBg();
+    window.addEventListener('resize',()=>{resizeBg();createStars()});
+
+    // === Nav Scroll ===
+    window.addEventListener('scroll',()=>{
+      document.getElementById('nav').classList.toggle('scrolled',window.scrollY>60);
+    });
+
+    // === MBTI Selection ===
+    let selectedMBTI=null;
+    document.querySelectorAll('.mbti-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.mbti-btn').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedMBTI=btn.dataset.type;
+        const genBtn=document.getElementById('btnGenerate');
+        genBtn.disabled=false;
+        genBtn.textContent='✦ Generate Soul Profile →';
+      });
+    });
+
+    // === Step Navigation ===
+    function goStep(n){
+      document.querySelectorAll('.form-step').forEach(s=>s.classList.remove('active'));
+      document.getElementById('fStep'+n).classList.add('active');
+    }
+
+    // === Generate Profile ===
+    function generateProfile(){
+      if(!selectedMBTI)return;
+      const overlay=document.getElementById('loadingOverlay');
+      overlay.classList.add('active');
+      let progress=0;
+      const fill=document.getElementById('loadingFill');
+      const interval=setInterval(()=>{
+        progress+=Math.random()*12+4;
+        if(progress>90)progress=90;
+        fill.style.width=progress+'%';
+      },300);
+      setTimeout(()=>{
+        clearInterval(interval);
+        fill.style.width='100%';
+        setTimeout(()=>{
+          overlay.classList.remove('active');
+          fill.style.width='0%';
+          alert('Profile generated! In production, this shows the full Soul Profile result page.');
+        },500);
+      },2500);
+    }
+
+    // === i18n ===
+    let isZh=false;
+    function toggleLang(){
+      isZh=!isZh;
+      document.getElementById('langBtn').textContent=isZh?'EN':'中/EN';
+      document.getElementById('badgeText').textContent=isZh?'✦ 全球首个东西方命理融合 AI':'The World\'s First East-Meets-West Personality AI';
+      document.getElementById('titleLine1').textContent=isZh?'发现你的':'Discover Your';
+      document.getElementById('titleLine2').textContent=isZh?'多维度':'Multi-Dimensional';
+      document.getElementById('titleLine3').textContent=isZh?'灵魂画像':'Soul Profile';
+      document.getElementById('heroDesc').textContent=isZh?'我们将西方星盘、东方紫微斗数、易经、MBTI、面相手相、血型和社会心理学融合成一个统一的人格画像。':'We fuse Western Astrology, Eastern Zi Wei Dou Shu, I Ching, MBTI, Palm Reading, Blood Type theory, and Social Psychology into one unified portrait of who you truly are.';
+      document.getElementById('fStep1Title').textContent=isZh?'你是什么时候出生的？':'When were you born?';
+      document.getElementById('fStep1Desc').textContent=isZh?'我们需要这些来计算你的星盘、八字和紫微命盘。':'We need this to calculate your natal chart, BaZi, and Zi Wei chart.';
+      document.getElementById('lblBirth').textContent=isZh?'出生日期':'Birth Date';
+      document.getElementById('lblTime').textContent=isZh?'出生时间':'Birth Time';
+      document.getElementById('lblCity').textContent=isZh?'出生城市':'Birth City';
+      document.getElementById('lblGender').textContent=isZh?'性别':'Gender';
+      document.getElementById('btnContinue1').textContent=isZh?'继续 →':'Continue →';
+      document.getElementById('fStep2Title').textContent=isZh?'你的 MBTI 类型是什么？':'What\'s your MBTI type?';
+      document.getElementById('fStep2Desc').textContent=isZh?'选择你的类型，与星盘融合分析。':'Select your type to fuse with your astrological profile.';
+    }
+  </script>
+  <script>
+  (function(){
+    var k='sc_visitor_id',id=localStorage.getItem(k);
+    if(!id){id='v_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,id)}
+    var d=JSON.stringify({page:'home-v1.html',visitor_id:id});
+    if(navigator.sendBeacon){navigator.sendBeacon('/api/analytics/track',new Blob([d],{type:'application/json'}))}
+    else{fetch('/api/analytics/track',{method:'POST',headers:{'Content-Type':'application/json'},body:d,keepalive:true})}
+  })();
+  </script>
+</body>
+</html>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Soul Cosmos — Discover Your Multi-Dimensional Self</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -71,12 +71,12 @@
   </section>
 
   <!-- Features Section -->
-  <section class="features" id="features">
+  <section class="features reveal" id="features">
     <div class="section-header">
       <h2 data-i18n="feat.title">Seven Dimensions of Self</h2>
       <p data-i18n="feat.subtitle">Most apps give you one lens. We give you the full spectrum.</p>
     </div>
-    <div class="features-grid">
+    <div class="features-grid reveal-stagger">
       <div class="feature-card">
         <div class="feature-icon">🌌</div>
         <h3 data-i18n="feat.astro">Western Astrology</h3>
@@ -123,12 +123,12 @@
   </section>
 
   <!-- How It Works -->
-  <section class="how-it-works" id="how">
+  <section class="how-it-works reveal" id="how">
     <div class="section-header">
       <h2 data-i18n="how.title">How It Works</h2>
       <p data-i18n="how.subtitle">From input to insight in 60 seconds.</p>
     </div>
-    <div class="steps">
+    <div class="steps reveal-stagger">
       <div class="step">
         <div class="step-num">01</div>
         <h3 data-i18n="how.s1.title">Enter Your Birth Info</h3>
@@ -365,12 +365,12 @@
   </section>
 
   <!-- Pricing -->
-  <section class="pricing" id="pricing">
+  <section class="pricing reveal" id="pricing">
     <div class="section-header">
       <h2 data-i18n="price.title">Choose Your Depth</h2>
       <p data-i18n="price.subtitle">Start free. Go deeper when you're ready.</p>
     </div>
-    <div class="pricing-grid">
+    <div class="pricing-grid reveal-stagger">
       <div class="price-card">
         <div class="price-name">Free</div>
         <div class="price-amount">$0</div>
@@ -415,7 +415,7 @@
   </section>
 
   <!-- Phase 2: My Circle 关系圈分析 -->
-  <section class="circle-section" id="circle">
+  <section class="circle-section reveal" id="circle">
     <div class="section-header">
       <h2 data-i18n="circle.title">🔮 My Circle — Relationship Intelligence</h2>
       <p data-i18n="circle.subtitle">Add the people around you. Get weekly insights on how to navigate every relationship.</p>
@@ -488,7 +488,7 @@
   </section>
 
   <!-- Phase 3: Feng Shui 风水分析 -->
-  <section class="fengshui-section" id="fengshui">
+  <section class="fengshui-section reveal" id="fengshui">
     <div class="section-header">
       <h2 data-i18n="fs.title">🏠 Feng Shui — Space Intelligence</h2>
       <p data-i18n="fs.subtitle">Analyze your home and office layout. Get personalized adjustments to improve energy flow.</p>
@@ -615,7 +615,7 @@
   </section>
 
   <!-- Phase 2.5: 面相/手相 AI 分析 -->
-  <section class="photo-upload-section" id="photos">
+  <section class="photo-upload-section reveal" id="photos">
     <div class="section-header">
       <h2 data-i18n="photo.title">🖐️ AI Face & Palm Reading</h2>
       <p data-i18n="photo.subtitle">Upload a photo. Our AI reads your facial features and palm lines. Ancient art meets modern technology.</p>
@@ -659,7 +659,7 @@
   </section>
 
   <!-- 场景建议（时间线驱动） -->
-  <section class="scene-section" id="scenes">
+  <section class="scene-section reveal" id="scenes">
     <div class="section-header">
       <h2 data-i18n="scene.title">📅 This Week's Life Scenes</h2>
       <p data-i18n="scene.subtitle">Dynamic advice for workplace, relationships, and personal growth — powered by your unique profile.</p>
@@ -697,5 +697,101 @@
   <script src="js/share.js"></script>
   <script src="js/network.js"></script>
   <script src="js/app.js"></script>
+  <script>
+  // Scroll-triggered reveal animations
+  (function() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => observer.observe(el));
+
+    // Nav scroll state
+    const nav = document.getElementById('nav');
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          nav.classList.toggle('scrolled', window.scrollY > 60);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+
+    // Enhanced starfield with nebula particles
+    const canvas = document.getElementById('starfield');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      let w, h, stars = [], nebulae = [];
+
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      }
+
+      function init() {
+        resize();
+        stars = Array.from({ length: 200 }, () => ({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 1.2 + 0.3,
+          a: Math.random(),
+          speed: Math.random() * 0.003 + 0.001,
+          phase: Math.random() * Math.PI * 2,
+        }));
+        nebulae = Array.from({ length: 3 }, () => ({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          r: Math.random() * 200 + 100,
+          hue: [260, 35, 240][Math.floor(Math.random() * 3)],
+          a: Math.random() * 0.015 + 0.005,
+        }));
+      }
+
+      function draw(t) {
+        ctx.clearRect(0, 0, w, h);
+
+        // Nebula glow
+        nebulae.forEach(n => {
+          const grd = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+          grd.addColorStop(0, `hsla(${n.hue}, 60%, 50%, ${n.a})`);
+          grd.addColorStop(1, 'transparent');
+          ctx.fillStyle = grd;
+          ctx.fillRect(n.x - n.r, n.y - n.r, n.r * 2, n.r * 2);
+        });
+
+        // Stars
+        stars.forEach(s => {
+          const twinkle = 0.5 + 0.5 * Math.sin(t * s.speed + s.phase);
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(220, 220, 255, ${s.a * twinkle})`;
+          ctx.fill();
+        });
+
+        requestAnimationFrame(draw);
+      }
+
+      init();
+      requestAnimationFrame(draw);
+      window.addEventListener('resize', resize);
+    }
+  })();
+  </script>
+  <script>
+  (function(){
+    var k='sc_visitor_id',id=localStorage.getItem(k);
+    if(!id){id='v_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,id)}
+    var d=JSON.stringify({page:'index.html',visitor_id:id});
+    if(navigator.sendBeacon){navigator.sendBeacon('/api/analytics/track',new Blob([d],{type:'application/json'}))}
+    else{fetch('/api/analytics/track',{method:'POST',headers:{'Content-Type':'application/json'},body:d,keepalive:true})}
+  })();
+  </script>
 </body>
 </html>

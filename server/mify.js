@@ -1,64 +1,31 @@
 /**
- * Soul Cosmos - Mify 网关调用模块
+ * Soul Cosmos - LLM 调用兼容层
+ * 保留 callMify 签名，内部委托给 providers.js
+ * 现有调用方零改动
  */
-const http = require('http');
-
-const MIFY_HOST = 'model.mify.ai.srv';
-const MIFY_PORT = 80;
-const MIFY_PATH = '/v1/chat/completions';
-const MIFY_MODEL = 'xiaomi/mimo-v2.5-pro';
-const MIFY_API_KEY = process.env.MIFY_API_KEY;
+const { callLLM } = require('./providers');
+const configStore = require('./config-store');
 
 /**
- * 调用 Mify 网关
+ * 调用 LLM（兼容旧接口）
+ * @param {Array} messages - [{role, content}]
+ * @param {number} maxTokens
+ * @returns {Promise<string>}
  */
 function callMify(messages, maxTokens = 2000) {
-  return new Promise((resolve, reject) => {
-    const body = JSON.stringify({
-      model: MIFY_MODEL,
-      messages,
-      temperature: 0.8,
-      max_tokens: maxTokens,
-    });
-
-    const options = {
-      hostname: MIFY_HOST,
-      port: MIFY_PORT,
-      path: MIFY_PATH,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${MIFY_API_KEY}`,
-        'Content-Length': Buffer.byteLength(body),
-      },
-    };
-
-    const req = http.request(options, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          if (json.error) {
-            reject(new Error(json.error.message || JSON.stringify(json.error)));
-          } else {
-            const content = json.choices?.[0]?.message?.content || '';
-            if (!content) {
-              console.warn('Mify empty response:', JSON.stringify(json).slice(0, 300));
-            }
-            resolve(content);
-          }
-        } catch (e) {
-          reject(new Error(`Parse error: ${data.slice(0, 200)}`));
-        }
-      });
-    });
-
-    req.on('error', reject);
-    req.setTimeout(60000, () => { req.destroy(); reject(new Error('Timeout')); });
-    req.write(body);
-    req.end();
+  const active = configStore.getActiveModel();
+  return callLLM(messages, maxTokens, {
+    provider: active.provider,
+    model: active.model,
+    temperature: active.temperature,
   });
 }
 
-module.exports = { callMify, MIFY_MODEL };
+/**
+ * 获取当前模型名（动态读取）
+ */
+function getMifyModel() {
+  return configStore.getActiveModel().model;
+}
+
+module.exports = { callMify, getMifyModel };

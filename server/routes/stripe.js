@@ -70,6 +70,9 @@ router.post('/checkout', requireAuth, async (req, res) => {
   }
 });
 
+// Webhook idempotency cache
+const processedWebhooks = new Map();
+
 // Stripe Webhook
 router.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
   const s = getStripe();
@@ -77,8 +80,13 @@ router.post('/webhook', express.raw({ type: 'application/json' }), (req, res) =>
 
   const sig = req.headers['stripe-signature'];
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  let event;
 
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET not configured');
+    return res.status(503).send('Webhook secret not configured');
+  }
+
+  let event;
   try {
     event = s.webhooks.constructEvent(req.body, sig, webhookSecret);
   } catch (err) {
@@ -86,10 +94,19 @@ router.post('/webhook', express.raw({ type: 'application/json' }), (req, res) =>
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
+  // Idempotency check — skip already-processed webhooks
+  if (processedWebhooks.has(event.id)) {
+    return res.json({ received: true, cached: true });
+  }
+
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object;
-      const userId = parseInt(session.metadata.userId);
+      const userId = parseInt(session.metadata.userId, 10);
+      if (!Number.isInteger(userId) || userId <= 0) {
+        console.error('Invalid userId in webhook:', session.metadata.userId);
+        return res.status(400).json({ error: 'Invalid userId' });
+      }
       const plan = session.metadata.plan;
       db.prepare(`
         INSERT INTO subscriptions (user_id, stripe_customer_id, stripe_subscription_id, plan, status)
@@ -112,6 +129,16 @@ router.post('/webhook', express.raw({ type: 'application/json' }), (req, res) =>
       db.prepare('UPDATE subscriptions SET status = ?, plan = ? WHERE stripe_customer_id = ?')
         .run('expired', 'free', sub.customer);
       break;
+    }
+  }
+
+  // Mark webhook as processed (idempotency)
+  processedWebhooks.set(event.id, Date.now());
+  // Cleanup old entries (>24h)
+  if (processedWebhooks.size > 1000) {
+    const cutoff = Date.now() - 86400000;
+    for (const [id, ts] of processedWebhooks) {
+      if (ts < cutoff) processedWebhooks.delete(id);
     }
   }
 

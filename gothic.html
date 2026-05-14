@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gothic Phoenix · 哥特凤凰</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700;900&family=Noto+Serif+SC:wght@400;600;700&family=EB+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#08060E;--bg2:#0C0A14;--bg3:#100E18;
+  --gold:#B8860B;--gold-light:#D4AF37;--gold-pale:#E8D48B;--gold-dim:rgba(184,134,11,0.12);
+  --crimson:#8B0000;--crimson-light:#C41E3A;--crimson-dim:rgba(136,0,0,0.15);
+  --ivory:#F5F0E8;--ivory-dim:rgba(245,240,232,0.5);--ivory-muted:rgba(245,240,232,0.25);
+  --purple:#2A1B3D;--purple-light:#4A2D6B;
+  --bone:#D4C5A9;
+}
+html{scroll-behavior:smooth}
+body{font-family:'EB Garamond','Noto Serif SC',serif;background:var(--bg);color:var(--ivory);overflow-x:hidden;line-height:1.8}
+
+/* ===== Canvas ===== */
+#canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ===== Gothic Arch Overlay ===== */
+.gothic-arch{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.gothic-arch::before,.gothic-arch::after{content:'';position:absolute;top:0;bottom:0;width:60px;background:linear-gradient(90deg,rgba(8,6,14,0.9),transparent)}
+.gothic-arch::before{left:0}
+.gothic-arch::after{right:0;transform:scaleX(-1)}
+.gothic-arch svg{position:absolute;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:1400px;height:100%}
+
+/* ===== Animations ===== */
+@keyframes breathe{0%,100%{opacity:0.6;transform:scale(1)}50%{opacity:1;transform:scale(1.02)}}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 15px rgba(184,134,11,0.2))}50%{filter:drop-shadow(0 0 35px rgba(184,134,11,0.5))}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes ember-rise{0%{transform:translateY(0) scale(1);opacity:0.8}100%{transform:translateY(-100vh) scale(0);opacity:0}}
+@keyframes fade-in{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
+@keyframes text-reveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes border-glow{0%,100%{box-shadow:inset 0 0 20px rgba(184,134,11,0.05),0 0 15px rgba(184,134,11,0.03)}50%{box-shadow:inset 0 0 30px rgba(184,134,11,0.1),0 0 25px rgba(184,134,11,0.06)}}
+
+/* ===== Ember Particles ===== */
+.ember{position:fixed;z-index:2;pointer-events:none;width:3px;height:3px;background:var(--gold-light);border-radius:50%;animation:ember-rise linear infinite;box-shadow:0 0 6px var(--gold)}
+
+/* ===== Navigation ===== */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(8,6,14,0.92);backdrop-filter:blur(30px);border-bottom:1px solid rgba(184,134,11,0.08)}
+.nav-inner{max-width:1000px;margin:0 auto;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:'Cinzel Decorative',serif;font-size:0.9rem;font-weight:700;color:var(--gold-light);letter-spacing:0.15em}
+.nav-links{display:flex;gap:20px;align-items:center}
+.nav-links a{color:var(--ivory-muted);text-decoration:none;font-family:'Cinzel',serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;transition:all 0.4s}
+.nav-links a:hover{color:var(--gold-light)}
+.btn-gothic{padding:7px 18px;background:transparent;border:1px solid rgba(184,134,11,0.2);color:var(--gold);font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.4s}
+.btn-gothic:hover{background:rgba(184,134,11,0.06);border-color:var(--gold);box-shadow:0 0 20px rgba(184,134,11,0.1)}
+
+/* ===== Hero with Phoenix ===== */
+.hero{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px}
+
+/* Phoenix Container */
+.phoenix-container{position:relative;width:min(500px,85vw);height:min(600px,70vh);margin-bottom:20px;animation:float 8s ease-in-out infinite}
+.phoenix-glow{position:absolute;inset:-40px;background:radial-gradient(ellipse at 50% 40%,rgba(184,134,11,0.08) 0%,transparent 60%);animation:breathe 4s ease-in-out infinite}
+.phoenix-svg{position:relative;width:100%;height:100%;filter:drop-shadow(0 0 30px rgba(184,134,11,0.2))}
+
+/* Gothic decorative frame around phoenix */
+.phoenix-frame{position:absolute;inset:-16px;pointer-events:none}
+.phoenix-frame svg{width:100%;height:100%}
+
+.hero-ornament{font-size:0.7rem;color:var(--gold);letter-spacing:0.3em;margin-bottom:24px;opacity:0.5}
+.hero h1{font-family:'Cinzel Decorative',serif;font-size:clamp(1.8rem,4.5vw,3.2rem);font-weight:900;line-height:1.2;margin-bottom:8px;letter-spacing:0.06em}
+.hero h1 .gold{color:var(--gold-light);text-shadow:0 0 25px rgba(184,134,11,0.3)}
+.hero h1 .crimson{color:var(--crimson-light);text-shadow:0 0 20px rgba(136,0,0,0.3)}
+.hero h1 .gothic-line{display:block;height:1px;background:linear-gradient(90deg,transparent,rgba(184,134,11,0.3),rgba(136,0,0,0.2),transparent);margin:14px auto;width:40%}
+.hero-sub{font-size:1rem;color:var(--ivory-dim);max-width:440px;line-height:2;margin-bottom:36px;font-weight:400;font-style:italic}
+.hero-cta{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.btn-phoenix{padding:14px 36px;background:linear-gradient(135deg,var(--gold),#8B6914);border:none;color:var(--bg);font-family:'Cinzel',serif;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.4s;position:relative;overflow:hidden}
+.btn-phoenix::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);transform:translateX(-100%);transition:transform 0.5s}
+.btn-phoenix:hover::after{transform:translateX(100%)}
+.btn-phoenix:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(184,134,11,0.25)}
+.btn-blood{padding:14px 36px;background:transparent;border:1px solid rgba(136,0,0,0.3);color:var(--crimson-light);font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.4s}
+.btn-blood:hover{border-color:var(--crimson);background:rgba(136,0,0,0.06)}
+
+/* ===== Section ===== */
+.section{position:relative;z-index:10;padding:80px 24px;max-width:1000px;margin:0 auto}
+.section-header{text-align:center;margin-bottom:48px}
+.section-header .ornament{font-size:0.65rem;color:var(--gold);letter-spacing:0.3em;margin-bottom:10px;opacity:0.4}
+.section-header h2{font-family:'Cinzel Decorative',serif;font-size:1.6rem;font-weight:700;margin-bottom:10px;letter-spacing:0.04em}
+.section-header p{color:var(--ivory-dim);font-size:0.88rem;max-width:420px;margin:0 auto;font-style:italic}
+
+/* Gothic divider */
+.divider{position:relative;z-index:10;height:40px;display:flex;align-items:center;justify-content:center}
+.divider::before{content:'';position:absolute;width:60%;height:1px;background:linear-gradient(90deg,transparent,rgba(184,134,11,0.2),rgba(136,0,0,0.15),rgba(184,134,11,0.2),transparent)}
+.divider-icon{position:relative;background:var(--bg);padding:0 16px;font-size:0.7rem;color:var(--gold);opacity:0.4;z-index:1}
+
+/* ===== Gothic Cards ===== */
+.gothic-card{background:linear-gradient(180deg,rgba(16,14,24,0.95),rgba(8,6,14,0.95));border:1px solid rgba(184,134,11,0.06);position:relative;transition:all 0.5s;overflow:hidden}
+.gothic-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity 0.5s}
+.gothic-card::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(184,134,11,0.02),transparent 30%);pointer-events:none;opacity:0;transition:opacity 0.5s}
+.gothic-card:hover{border-color:rgba(184,134,11,0.12);transform:translateY(-4px);box-shadow:0 15px 40px rgba(0,0,0,0.3)}
+.gothic-card:hover::before{opacity:0.5}
+.gothic-card:hover::after{opacity:1}
+/* Gothic corner ornaments */
+.gothic-card .corner{position:absolute;width:20px;height:20px;opacity:0.15;transition:opacity 0.5s}
+.gothic-card:hover .corner{opacity:0.3}
+.gothic-card .corner.tl{top:8px;left:8px;border-top:1px solid var(--gold);border-left:1px solid var(--gold)}
+.gothic-card .corner.tr{top:8px;right:8px;border-top:1px solid var(--gold);border-right:1px solid var(--gold)}
+.gothic-card .corner.bl{bottom:8px;left:8px;border-bottom:1px solid var(--gold);border-left:1px solid var(--gold)}
+.gothic-card .corner.br{bottom:8px;right:8px;border-bottom:1px solid var(--gold);border-right:1px solid var(--gold)}
+
+/* ===== Path Section ===== */
+.path-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:700px){.path-grid{grid-template-columns:1fr}}
+.path-card{padding:32px 28px;text-align:center}
+.path-icon{font-size:2.4rem;margin-bottom:16px;filter:drop-shadow(0 0 15px rgba(184,134,11,0.2))}
+.path-name{font-family:'Cinzel Decorative',serif;font-size:0.95rem;font-weight:700;margin-bottom:4px;letter-spacing:0.06em}
+.path-name.gold{color:var(--gold-light)}
+.path-name.crimson{color:var(--crimson-light)}
+.path-sub{font-family:'Cinzel',serif;font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:16px;opacity:0.4}
+.path-items{list-style:none;padding:0}
+.path-items li{font-size:0.82rem;color:var(--ivory-dim);padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.path-items li:last-child{border-bottom:none}
+
+/* ===== Six Pillars ===== */
+.pillars-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:700px){.pillars-grid{grid-template-columns:1fr 1fr}}
+.pillar-card{padding:24px 18px;text-align:center}
+.pillar-icon{font-size:1.4rem;margin-bottom:10px}
+.pillar-name{font-family:'Cinzel',serif;font-size:0.78rem;font-weight:600;margin-bottom:6px;letter-spacing:0.04em;color:var(--ivory)}
+.pillar-desc{font-size:0.72rem;color:var(--ivory-muted);line-height:1.7}
+
+/* ===== Steps ===== */
+.ritual-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:700px){.ritual-steps{grid-template-columns:1fr 1fr}}
+.ritual-step{padding:24px 14px;text-align:center}
+.ritual-num{font-family:'Cinzel Decorative',serif;font-size:1.8rem;font-weight:900;margin-bottom:8px}
+.ritual-num.gold{color:var(--gold-light);text-shadow:0 0 15px rgba(184,134,11,0.2)}
+.ritual-num.crimson{color:var(--crimson-light);text-shadow:0 0 15px rgba(136,0,0,0.2)}
+.ritual-title{font-family:'Cinzel',serif;font-size:0.78rem;font-weight:600;margin-bottom:4px;letter-spacing:0.03em}
+.ritual-desc{font-size:0.7rem;color:var(--ivory-muted);line-height:1.6}
+
+/* ===== Testimonial ===== */
+.testimonial{text-align:center;max-width:500px;margin:0 auto;padding:40px 24px}
+.testimonial-quote{font-family:'EB Garamond',serif;font-size:1.15rem;font-style:italic;color:var(--ivory);line-height:2;margin-bottom:16px;position:relative}
+.testimonial-quote::before{content:'❝';font-size:3rem;position:absolute;top:-15px;left:-5px;opacity:0.15;color:var(--gold)}
+.testimonial-author{font-family:'Cinzel',serif;font-size:0.68rem;color:var(--ivory-muted);letter-spacing:0.05em}
+
+/* ===== Pricing ===== */
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:560px;margin:0 auto}
+@media(max-width:500px){.pricing-grid{grid-template-columns:1fr}}
+.price-card{padding:28px 24px;text-align:center}
+.price-card.featured{border-color:rgba(136,0,0,0.15)}
+.price-card.featured::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--crimson),var(--gold),transparent)}
+.price-name{font-family:'Cinzel Decorative',serif;font-size:0.85rem;margin-bottom:6px;letter-spacing:0.06em}
+.price-name.gold{color:var(--gold-light)}
+.price-name.crimson{color:var(--crimson-light)}
+.price-amount{font-family:'Cinzel Decorative',serif;font-size:2.2rem;font-weight:900;margin-bottom:2px}
+.price-amount.gold{color:var(--gold-light);text-shadow:0 0 20px rgba(184,134,11,0.2)}
+.price-amount.crimson{color:var(--crimson-light);text-shadow:0 0 20px rgba(136,0,0,0.2)}
+.price-period{font-size:0.65rem;color:var(--ivory-muted);margin-bottom:16px}
+.price-features{list-style:none;padding:0;margin-bottom:20px;text-align:left}
+.price-features li{font-size:0.78rem;color:var(--ivory-dim);padding:5px 0;padding-left:18px;position:relative;border-bottom:1px solid rgba(255,255,255,0.02)}
+.price-features li::before{content:'✧';position:absolute;left:0;font-size:0.5rem;top:7px;color:var(--gold)}
+
+/* ===== FAQ ===== */
+.faq-item{padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:all 0.3s}
+.faq-item:hover{padding-left:8px}
+.faq-q{font-weight:600;font-size:0.88rem;display:flex;justify-content:space-between;align-items:center}
+.faq-q::after{content:'+';color:var(--gold);font-size:1rem;transition:transform 0.3s}
+.faq-item.open .faq-q::after{transform:rotate(45deg)}
+.faq-a{font-size:0.8rem;color:var(--ivory-dim);line-height:1.9;max-height:0;overflow:hidden;transition:max-height 0.4s}
+.faq-item.open .faq-a{max-height:180px}
+
+/* ===== Footer ===== */
+footer{position:relative;z-index:10;text-align:center;padding:40px 24px;border-top:1px solid rgba(184,134,11,0.04)}
+footer .logo{font-family:'Cinzel Decorative',serif;font-size:0.85rem;color:var(--gold-light);letter-spacing:0.1em;margin-bottom:8px}
+footer p{font-size:0.62rem;color:var(--ivory-muted);line-height:1.8}
+footer .disclaimer{margin-top:12px;font-size:0.55rem;color:var(--ivory-muted);opacity:0.3;max-width:480px;margin-left:auto;margin-right:auto}
+
+/* ===== Reveal ===== */
+.reveal{opacity:0;transform:translateY(25px);transition:opacity 0.7s,transform 0.7s}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.rd1{transition-delay:0.1s}.rd2{transition-delay:0.2s}.rd3{transition-delay:0.3s}.rd4{transition-delay:0.4s}
+
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<!-- Ember particles (generated by JS) -->
+<div id="embers"></div>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">GOTHIC PHOENIX</div>
+    <div class="nav-links">
+      <a href="#path">Path</a>
+      <a href="#wisdom">Wisdom</a>
+      <a href="#offering">Offering</a>
+      <a href="#faq">FAQ</a>
+      <button class="btn-gothic" onclick="window.location.href='index.html'">Enter</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero with Phoenix -->
+<section class="hero">
+  <!-- Phoenix Illustration -->
+  <div class="phoenix-container">
+    <div class="phoenix-glow"></div>
+    <div class="phoenix-svg">
+      <svg viewBox="0 0 500 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Fire/Halo behind -->
+        <ellipse cx="250" cy="240" rx="180" ry="200" fill="url(#fireGlow)" opacity="0.15"/>
+        <defs>
+          <radialGradient id="fireGlow" cx="50%" cy="40%">
+            <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.3"/>
+            <stop offset="50%" stop-color="#8B0000" stop-opacity="0.1"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+          <linearGradient id="phoenixGold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#E8D48B"/>
+            <stop offset="50%" stop-color="#D4AF37"/>
+            <stop offset="100%" stop-color="#B8860B"/>
+          </linearGradient>
+          <linearGradient id="phoenixCrimson" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#C41E3A"/>
+            <stop offset="100%" stop-color="#8B0000"/>
+          </linearGradient>
+          <linearGradient id="wingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.8"/>
+            <stop offset="40%" stop-color="#B8860B" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#8B0000" stop-opacity="0.4"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Tail feathers (long, flowing) -->
+        <path d="M250 420 C230 460 200 520 180 560 C190 540 210 490 230 450" stroke="url(#phoenixCrimson)" stroke-width="2" fill="none" opacity="0.7"/>
+        <path d="M250 420 C250 470 248 530 250 570" stroke="url(#phoenixGold)" stroke-width="2.5" fill="none" opacity="0.8"/>
+        <path d="M250 420 C270 460 300 520 320 560 C310 540 290 490 270 450" stroke="url(#phoenixCrimson)" stroke-width="2" fill="none" opacity="0.7"/>
+        <path d="M250 420 C220 480 180 540 150 570" stroke="#D4AF37" stroke-width="1" fill="none" opacity="0.4"/>
+        <path d="M250 420 C280 480 320 540 350 570" stroke="#D4AF37" stroke-width="1" fill="none" opacity="0.4"/>
+
+        <!-- Left Wing (spread) -->
+        <path d="M250 240 C200 200 120 160 60 130 C40 120 25 130 30 150 C35 170 60 180 80 190 C100 200 130 220 150 240 C170 260 200 280 220 300 C230 310 240 300 250 280" stroke="url(#phoenixGold)" stroke-width="1.5" fill="url(#wingGrad)" opacity="0.6"/>
+        <!-- Left wing detail feathers -->
+        <path d="M200 200 C160 180 100 160 60 150" stroke="#D4AF37" stroke-width="0.8" fill="none" opacity="0.4"/>
+        <path d="M190 220 C150 200 100 190 55 185" stroke="#D4AF37" stroke-width="0.6" fill="none" opacity="0.3"/>
+        <path d="M180 240 C140 230 100 225 60 220" stroke="#D4AF37" stroke-width="0.5" fill="none" opacity="0.25"/>
+        <!-- Left wing crimson accents -->
+        <path d="M120 170 C90 160 60 155 40 160" stroke="#C41E3A" stroke-width="1" fill="none" opacity="0.4"/>
+        <path d="M100 195 C70 190 50 195 40 200" stroke="#C41E3A" stroke-width="0.8" fill="none" opacity="0.3"/>
+
+        <!-- Right Wing (spread) -->
+        <path d="M250 240 C300 200 380 160 440 130 C460 120 475 130 470 150 C465 170 440 180 420 190 C400 200 370 220 350 240 C330 260 300 280 280 300 C270 310 260 300 250 280" stroke="url(#phoenixGold)" stroke-width="1.5" fill="url(#wingGrad)" opacity="0.6"/>
+        <!-- Right wing detail feathers -->
+        <path d="M300 200 C340 180 400 160 440 150" stroke="#D4AF37" stroke-width="0.8" fill="none" opacity="0.4"/>
+        <path d="M310 220 C350 200 400 190 445 185" stroke="#D4AF37" stroke-width="0.6" fill="none" opacity="0.3"/>
+        <path d="M320 240 C360 230 400 225 440 220" stroke="#D4AF37" stroke-width="0.5" fill="none" opacity="0.25"/>
+        <!-- Right wing crimson accents -->
+        <path d="M380 170 C410 160 440 155 460 160" stroke="#C41E3A" stroke-width="1" fill="none" opacity="0.4"/>
+        <path d="M400 195 C430 190 450 195 460 200" stroke="#C41E3A" stroke-width="0.8" fill="none" opacity="0.3"/>
+
+        <!-- Body -->
+        <path d="M250 180 C230 200 220 240 225 280 C230 320 240 360 250 400 C260 360 270 320 275 280 C280 240 270 200 250 180Z" fill="url(#phoenixGold)" opacity="0.5" stroke="#D4AF37" stroke-width="1"/>
+        <!-- Body detail lines -->
+        <path d="M250 200 C240 230 238 260 240 290" stroke="#E8D48B" stroke-width="0.5" fill="none" opacity="0.4"/>
+        <path d="M250 200 C260 230 262 260 260 290" stroke="#E8D48B" stroke-width="0.5" fill="none" opacity="0.4"/>
+
+        <!-- Neck -->
+        <path d="M250 180 C245 165 240 150 238 135" stroke="#D4AF37" stroke-width="1.5" fill="none"/>
+        <path d="M250 180 C255 165 260 150 262 135" stroke="#D4AF37" stroke-width="1.5" fill="none"/>
+
+        <!-- Head -->
+        <ellipse cx="250" cy="120" rx="18" ry="22" fill="url(#phoenixGold)" opacity="0.6" stroke="#D4AF37" stroke-width="1"/>
+        <!-- Eye -->
+        <circle cx="244" cy="115" r="3" fill="#E8D48B"/>
+        <circle cx="244" cy="115" r="1.5" fill="#08060E"/>
+        <!-- Beak -->
+        <path d="M238 120 L228 125 L238 128" stroke="#B8860B" stroke-width="1" fill="#B8860B" opacity="0.7"/>
+
+        <!-- Crown/Crest feathers -->
+        <path d="M250 100 C245 80 235 60 230 45" stroke="#D4AF37" stroke-width="1.5" fill="none" opacity="0.7"/>
+        <path d="M250 100 C250 75 250 55 250 35" stroke="#E8D48B" stroke-width="2" fill="none" opacity="0.8"/>
+        <path d="M250 100 C255 80 265 60 270 45" stroke="#D4AF37" stroke-width="1.5" fill="none" opacity="0.7"/>
+        <!-- Crest tips (fire) -->
+        <circle cx="230" cy="42" r="4" fill="#C41E3A" opacity="0.5"/>
+        <circle cx="250" cy="32" r="5" fill="#D4AF37" opacity="0.6"/>
+        <circle cx="270" cy="42" r="4" fill="#C41E3A" opacity="0.5"/>
+
+        <!-- Fire particles around body -->
+        <circle cx="220" cy="260" r="2" fill="#D4AF37" opacity="0.4">
+          <animate attributeName="cy" values="260;240;260" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.4;0.1;0.4" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="280" cy="280" r="1.5" fill="#C41E3A" opacity="0.3">
+          <animate attributeName="cy" values="280;255;280" dur="4s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.3;0.1;0.3" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="235" cy="320" r="2" fill="#E8D48B" opacity="0.3">
+          <animate attributeName="cy" values="320;295;320" dur="3.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.3;0.1;0.3" dur="3.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="265" cy="350" r="1.5" fill="#D4AF37" opacity="0.25">
+          <animate attributeName="cy" values="350;325;350" dur="4.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.25;0.05;0.25" dur="4.5s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </div>
+    <!-- Gothic frame around phoenix -->
+    <div class="phoenix-frame">
+      <svg viewBox="0 0 530 630" fill="none" stroke="rgba(184,134,11,0.12)" stroke-width="0.8">
+        <!-- Gothic arch top -->
+        <path d="M30 600 L30 200 Q30 30 265 30 Q500 30 500 200 L500 600"/>
+        <!-- Inner arch -->
+        <path d="M50 580 L50 210 Q50 60 265 60 Q480 60 480 210 L480 580" stroke-dasharray="4,4" opacity="0.5"/>
+        <!-- Corner ornaments -->
+        <path d="M30 600 L10 600 L10 580" opacity="0.3"/>
+        <path d="M500 600 L520 600 L520 580" opacity="0.3"/>
+        <!-- Cross at top -->
+        <line x1="265" y1="10" x2="265" y2="30" opacity="0.3"/>
+        <line x1="255" y1="18" x2="275" y2="18" opacity="0.3"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="hero-ornament">— ✦ —</div>
+  <h1>
+    <span class="gold">From Ashes</span>
+    <span class="gothic-line"></span>
+    <span class="crimson">Reborn</span>
+  </h1>
+  <p class="hero-sub">
+    凤凰浴火重生，于灰烬中绽放永恒之光<br>
+    在黑暗中寻找力量，在毁灭中发现新生
+  </p>
+  <div class="hero-cta">
+    <button class="btn-phoenix" onclick="window.location.href='index.html'">✦ 开启灵魂之旅</button>
+    <button class="btn-blood" onclick="document.getElementById('path').scrollIntoView({behavior:'smooth'})">探索更多</button>
+  </div>
+</section>
+
+<div class="divider"><span class="divider-icon">◆</span></div>
+
+<!-- Path: Phoenix vs Rose -->
+<section class="section" id="path">
+  <div class="section-header reveal">
+    <div class="ornament">— THE PATH —</div>
+    <h2>光与暗的双生之道</h2>
+    <p>凤凰与蔷薇，毁灭与绽放</p>
+  </div>
+  <div class="path-grid">
+    <div class="gothic-card path-card reveal rd1">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="path-icon">🔥</div>
+      <div class="path-name gold">Phoenix</div>
+      <div class="path-sub">凤凰 · 涅槃之道</div>
+      <ul class="path-items">
+        <li>浴火重生 — 从灰烬中崛起</li>
+        <li>永恒之光 — 照亮最深的黑暗</li>
+        <li>高飞远瞩 — 超越凡俗视角</li>
+        <li>净化之火 — 烧尽虚假与执念</li>
+      </ul>
+    </div>
+    <div class="gothic-card path-card reveal rd2">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="path-icon">🥀</div>
+      <div class="path-name crimson">Black Rose</div>
+      <div class="path-sub">蔷薇 · 暗影之术</div>
+      <ul class="path-items">
+        <li>暗夜绽放 — 在最深的夜里盛开</li>
+        <li>荆棘之美 — 痛苦中孕育力量</li>
+        <li>神秘魅力 — 拥抱你的不同</li>
+        <li>不屈之花 — 黑暗中的永恒坚韧</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><span class="divider-icon">◆</span></div>
+
+<!-- Six Pillars -->
+<section class="section" id="wisdom">
+  <div class="section-header reveal">
+    <div class="ornament">— THE HEXAGRAM —</div>
+    <h2>六芒星 · 六维智慧</h2>
+    <p>六个独立体系交汇于一个中心</p>
+  </div>
+  <div class="pillars-grid">
+    <div class="gothic-card pillar-card reveal rd1">
+      <div class="corner tl"></div><div class="corner br"></div>
+      <div class="pillar-icon">🧠</div>
+      <div class="pillar-name">Psychology</div>
+      <div class="pillar-desc">MBTI · 依恋理论 · CBT</div>
+    </div>
+    <div class="gothic-card pillar-card reveal rd2">
+      <div class="corner tl"></div><div class="corner br"></div>
+      <div class="pillar-icon">🌌</div>
+      <div class="pillar-name">Astrology</div>
+      <div class="pillar-desc">日月升 · 元素 · 宫位</div>
+    </div>
+    <div class="gothic-card pillar-card reveal rd3">
+      <div class="corner tl"></div><div class="corner br"></div>
+      <div class="pillar-icon">☯</div>
+      <div class="pillar-name">Zi Wei</div>
+      <div class="pillar-desc">十四主星 · 十二宫位</div>
+    </div>
+    <div class="gothic-card pillar-card reveal rd1">
+      <div class="corner tl"></div><div class="corner br"></div>
+      <div class="pillar-icon">☯️</div>
+      <div class="pillar-name">I Ching</div>
+      <div class="pillar-desc">六十四卦 · 变爻指引</div>
+    </div>
+    <div class="gothic-card pillar-card reveal rd2">
+      <div class="corner tl"></div><div class="corner br"></div>
+      <div class="pillar-icon">📜</div>
+      <div class="pillar-name">BaZi</div>
+      <div class="pillar-desc">四柱八字 · 五行生克</div>
+    </div>
+    <div class="gothic-card pillar-card reveal rd3">
+      <div class="corner tl"></div><div class="corner br"></div>
+      <div class="pillar-icon">✦</div>
+      <div class="pillar-name">AI Fusion</div>
+      <div class="pillar-desc">多维交叉验证 · 统一画像</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><span class="divider-icon">◆</span></div>
+
+<!-- Ritual Steps -->
+<section class="section">
+  <div class="section-header reveal">
+    <div class="ornament">— THE RITUAL —</div>
+    <h2>四步仪式</h2>
+  </div>
+  <div class="ritual-steps">
+    <div class="gothic-card ritual-step reveal rd1">
+      <div class="corner tl"></div><div class="corner br"></div>
+      <div class="ritual-num gold">I</div>
+      <div class="ritual-title">献上坐标</div>
+      <div class="ritual-desc">出生时间与地点<br>星辰为你绘制的地图</div>
+    </div>
+    <div class="gothic-card ritual-step reveal rd2">
+      <div class="corner tl"></div><div class="corner br"></div>
+      <div class="ritual-num crimson">II</div>
+      <div class="ritual-title">选择面具</div>
+      <div class="ritual-desc">MBTI 人格类型<br>你与世界交互的界面</div>
+    </div>
+    <div class="gothic-card ritual-step reveal rd3">
+      <div class="corner tl"></div><div class="corner br"></div>
+      <div class="ritual-num gold">III</div>
+      <div class="ritual-title">六芒融合</div>
+      <div class="ritual-desc">AI 交叉验证<br>在对立中寻找统一</div>
+    </div>
+    <div class="gothic-card ritual-step reveal rd4">
+      <div class="corner tl"></div><div class="corner br"></div>
+      <div class="ritual-num crimson">IV</div>
+      <div class="ritual-title">灵魂画像</div>
+      <div class="ritual-desc">看见完整的自己<br>光明与暗影并存</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><span class="divider-icon">◆</span></div>
+
+<!-- Testimonial -->
+<section class="section">
+  <div class="testimonial reveal">
+    <div class="testimonial-quote">在凤凰的火焰中，我看见了自己的重生。在蔷薇的荆棘中，我找到了自己的力量。第一次，我看见了完整的自己。</div>
+    <div class="testimonial-author">— 早期用户 · 旧金山</div>
+  </div>
+</section>
+
+<div class="divider"><span class="divider-icon">◆</span></div>
+
+<!-- Pricing -->
+<section class="section" id="offering">
+  <div class="section-header reveal">
+    <div class="ornament">— THE OFFERING —</div>
+    <h2>选择你的深度</h2>
+  </div>
+  <div class="pricing-grid">
+    <div class="gothic-card price-card reveal rd1">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="price-name gold">Seeker</div>
+      <div class="price-amount gold">$0</div>
+      <div class="price-period">永恒</div>
+      <ul class="price-features">
+        <li>基础灵魂画像</li>
+        <li>每日运势指引</li>
+        <li>社交分享</li>
+      </ul>
+      <button class="btn-blood" style="width:100%" onclick="window.location.href='index.html'">开始探索</button>
+    </div>
+    <div class="gothic-card price-card featured reveal rd2">
+      <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+      <div class="price-name crimson">Adept</div>
+      <div class="price-amount crimson">$3.99</div>
+      <div class="price-period">/月</div>
+      <ul class="price-features">
+        <li>六维深度融合画像</li>
+        <li>无限配对分析</li>
+        <li>每周个性化指引</li>
+        <li>深度星盘解读</li>
+        <li>关系智慧</li>
+        <li>优先 AI 响应</li>
+      </ul>
+      <button class="btn-phoenix" style="width:100%">通过 App 订阅</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><span class="divider-icon">◆</span></div>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="section-header reveal">
+    <div class="ornament">— QUESTIONS —</div>
+    <h2>常见问题</h2>
+  </div>
+  <div style="max-width:560px;margin:0 auto">
+    <div class="faq-item reveal" onclick="this.classList.toggle('open')">
+      <div class="faq-q">这是算命吗？</div>
+      <div class="faq-a">不是。这是一个融合现代心理学与古老智慧的人格建模工具，用于自我反思与个人成长。</div>
+    </div>
+    <div class="faq-item reveal" onclick="this.classList.toggle('open')">
+      <div class="faq-q">准确度如何？</div>
+      <div class="faq-a">AI 交叉验证多个独立体系。用户反馈高度共鸣。但请记住——这是用于自我反思，而非专业建议。</div>
+    </div>
+    <div class="faq-item reveal" onclick="this.classList.toggle('open')">
+      <div class="faq-q">数据安全吗？</div>
+      <div class="faq-a">绝对安全。从不出售个人数据，加密存储，随时可删除。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="logo">✦ GOTHIC PHOENIX · 哥特凤凰</div>
+  <p>From Ashes Reborn — AI-Powered Personality Discovery</p>
+  <p class="disclaimer">仅供娱乐和自我反思之用，不构成专业建议。</p>
+</footer>
+
+<script>
+// ===== Canvas: Stars + Embers =====
+const canvas=document.getElementById('canvas'),ctx=canvas.getContext('2d');
+let W,H,stars=[],embers=[];
+function init(){
+  W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;
+  stars=[];embers=[];
+  for(let i=0;i<150;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1+0.2,a:Math.random(),d:Math.random()*0.002+0.001,s:Math.random()*0.3+0.2});
+  for(let i=0;i<25;i++)embers.push({x:Math.random()*W,y:H+Math.random()*100,vx:(Math.random()-0.5)*0.3,vy:-(Math.random()*0.5+0.3),r:Math.random()*2+0.5,a:Math.random()*0.5+0.2,life:Math.random()*300+200,age:0});
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // Stars
+  stars.forEach(s=>{s.a+=s.d*s.s;if(s.a>1||s.a<0)s.d*=-1;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(184,134,11,${s.a*0.4})`;ctx.fill()});
+  // Embers
+  embers.forEach(e=>{
+    e.x+=e.vx;e.y+=e.vy;e.age++;
+    if(e.age>e.life||e.y<-20){e.x=Math.random()*W;e.y=H+10;e.age=0}
+    const fade=e.age<30?e.age/30:e.age>e.life-30?(e.life-e.age)/30:1;
+    const col=e.a>0.35?`rgba(212,175,55,${e.a*fade})`:`rgba(196,30,58,${e.a*fade})`;
+    ctx.beginPath();ctx.arc(e.x,e.y,e.r*fade,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+  });
+  // Constellation lines
+  ctx.lineWidth=0.3;
+  for(let i=0;i<stars.length;i++){for(let j=i+1;j<stars.length;j++){
+    const dx=stars[i].x-stars[j].x,dy=stars[i].y-stars[j].y,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<100){ctx.strokeStyle=`rgba(184,134,11,${(1-dist/100)*0.06})`;ctx.beginPath();ctx.moveTo(stars[i].x,stars[i].y);ctx.lineTo(stars[j].x,stars[j].y);ctx.stroke()}
+  }}
+  requestAnimationFrame(draw);
+}
+init();draw();
+window.addEventListener('resize',init);
+
+// ===== Scroll Reveal =====
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible')})},{threshold:0.1,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+<script>
+(function(){
+  var k='sc_visitor_id',id=localStorage.getItem(k);
+  if(!id){id='v_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,id)}
+  var d=JSON.stringify({page:'gothic.html',visitor_id:id});
+  if(navigator.sendBeacon){navigator.sendBeacon('/api/analytics/track',new Blob([d],{type:'application/json'}))}
+  else{fetch('/api/analytics/track',{method:'POST',headers:{'Content-Type':'application/json'},body:d,keepalive:true})}
+})();
+</script>
+
+</body>
+</html>

@@ -595,6 +595,14 @@ function submitFeedback(type,el){
 <script src="js/iching.js"></script>
 <script src="js/profile.js"></script>
 <script src="js/auth.js"></script>
-
+<script>
+(function(){
+  var k='sc_visitor_id',id=localStorage.getItem(k);
+  if(!id){id='v_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,id)}
+  var d=JSON.stringify({page:'mystic.html',visitor_id:id});
+  if(navigator.sendBeacon){navigator.sendBeacon('/api/analytics/track',new Blob([d],{type:'application/json'}))}
+  else{fetch('/api/analytics/track',{method:'POST',headers:{'Content-Type':'application/json'},body:d,keepalive:true})}
+})();
+</script>
 </body>
 </html>

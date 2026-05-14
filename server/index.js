@@ -1,6 +1,6 @@
 /**
  * Soul Cosmos - 后端代理服务
- * 调用 Mify 网关的 Mimo 模型生成灵魂画像
+ * Soul Cosmos 后端 API 服务
  */
 const express = require('express');
 const path = require('path');
@@ -18,11 +18,14 @@ function calculateBazi(birthDate, birthTime, gender) {
     const [year, month, day] = birthDate.split('-').map(Number);
     const [hour] = (birthTime || '12:00').split(':').map(Number);
     const scriptPath = path.join(__dirname, 'bazi.py');
-    const result = execSync(
-      `python3 "${scriptPath}" ${year} ${month} ${day} ${hour} ${gender || 'unknown'}`,
-      { encoding: 'utf-8', timeout: 10000 }
-    );
-    return JSON.parse(result);
+    // Validate gender to prevent command injection
+    const safeGender = ['male', 'female', 'unknown'].includes(gender) ? gender : 'unknown';
+    const { spawnSync } = require('child_process');
+    const result = spawnSync('python3', [scriptPath, String(year), String(month), String(day), String(hour), safeGender], {
+      encoding: 'utf-8', timeout: 10000,
+    });
+    if (result.error) throw result.error;
+    return JSON.parse(result.stdout);
   } catch (err) {
     console.error('BaZi calculation error:', err.message);
     return null;
@@ -30,10 +33,14 @@ function calculateBazi(birthDate, birthTime, gender) {
 }
 const PORT = 8066;
 
-// 从环境变量读取 API Key
-const MIFY_API_KEY = process.env.MIFY_API_KEY;
-if (!MIFY_API_KEY) {
-  console.error('❌ Missing $MIFY_API_KEY. Run: export MIFY_API_KEY=sk-...');
+// 检查至少有一个 provider 配置了 API key
+const { PROVIDERS } = require('./providers');
+const hasAnyKey = Object.values(PROVIDERS).some(p => p.apiKey);
+if (!hasAnyKey) {
+  console.error('❌ No AI provider API key found. Configure at least one:');
+  console.error('   export OPENAI_API_KEY=sk-...  (OpenAI)');
+  console.error('   export DEEPSEEK_API_KEY=sk-...(DeepSeek)');
+  console.error('   export DASHSCOPE_API_KEY=sk-...(Qwen)');
   process.exit(1);
 }
 
@@ -47,17 +54,27 @@ app.use('/api/user', require('./routes/user'));
 app.use('/api/stripe', require('./routes/stripe'));
 app.use('/api/daily', require('./routes/daily'));
 app.use('/api/hardware', require('./routes/hardware'));
+app.use('/api/analytics', require('./routes/analytics'));
 
-// CORS
+// CORS — restricted to configured origins
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:8066').split(',');
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('X-Content-Type-Options', 'nosniff');
+  res.header('X-Frame-Options', 'DENY');
   if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
 
-const { callMify, MIFY_MODEL } = require('./mify');
+const { callMify, getMifyModel } = require('./mify');
+const { getAvailableProviders } = require('./providers');
+const configStore = require('./config-store');
 
 /**
  * 手动提取（JSON解析失败时的兜底）
@@ -366,7 +383,7 @@ ${req.user ? kepa.getFusionStrategy(req.user.id) : ''}`;
       profile = extractManually(rawResponse || '');
     }
 
-    res.json({ success: true, profile, model: MIFY_MODEL });
+    res.json({ success: true, profile, model: getMifyModel() });
   } catch (err) {
     console.error('Generate profile error:', err.message);
     res.status(500).json({ error: err.message });
@@ -510,7 +527,7 @@ Write today's personalized insight. Make it feel like you're reading their mind.
       { role: 'user', content: userPrompt },
     ], 300);
 
-    res.json({ success: true, insight, model: MIFY_MODEL });
+    res.json({ success: true, insight, model: getMifyModel() });
   } catch (err) {
     console.error('Daily insight error:', err.message);
     res.status(500).json({ error: err.message });
@@ -555,7 +572,7 @@ Analyze their compatibility.`;
       compatibility = jsonMatch ? JSON.parse(jsonMatch[0]) : { score: 50, description: rawResponse };
     }
 
-    res.json({ success: true, compatibility, model: MIFY_MODEL });
+    res.json({ success: true, compatibility, model: getMifyModel() });
   } catch (err) {
     console.error('Compatibility error:', err.message);
     res.status(500).json({ error: err.message });
@@ -618,7 +635,7 @@ Make it feel like you actually know these people.`;
       result = match ? JSON.parse(match[0]) : { forecasts: people.map(p => ({ name: p.name, score: 50, advice: 'Stay balanced this week.' })) };
     }
 
-    res.json({ success: true, forecasts: result.forecasts || [], model: MIFY_MODEL });
+    res.json({ success: true, forecasts: result.forecasts || [], model: getMifyModel() });
   } catch (err) {
     console.error('Weekly forecast error:', err.message);
     res.status(500).json({ error: err.message });
@@ -715,7 +732,7 @@ Give practical office Feng Shui recommendations. Consider:
       }
     }
 
-    res.json({ success: true, fengshui: result, model: MIFY_MODEL });
+    res.json({ success: true, fengshui: result, model: getMifyModel() });
   } catch (err) {
     console.error('Feng shui error:', err.message);
     res.status(500).json({ error: err.message });
@@ -765,7 +782,7 @@ Make it feel personal and specific to their profile.`;
       result = match ? JSON.parse(match[0]) : { summary: rawResponse.slice(0, 300), traits: [], advice: '' };
     }
 
-    res.json({ success: true, analysis: result, model: MIFY_MODEL });
+    res.json({ success: true, analysis: result, model: getMifyModel() });
   } catch (err) {
     console.error('Photo analysis error:', err.message);
     res.status(500).json({ error: err.message });
@@ -773,59 +790,48 @@ Make it feel personal and specific to their profile.`;
 });
 
 /**
- * API: 周度场景建议
+ * API: 周度场景建议（两阶段：本地即时 + AI 异步增强）
  */
-app.post('/api/scenes', async (req, res) => {
+app.post('/api/scenes', optionalAuth, async (req, res) => {
   try {
     const { userProfile, lang } = req.body;
-    const L = lang === 'zh' ? 'Chinese (中文)' : 'English';
-    const memoryContext = getMemoryContext();
+    const { generateLocalScenes } = require('./scenes');
 
-    const systemPrompt = `You are a life scene advisor combining Eastern metaphysics, Western astrology, and social psychology.
-Generate 3-4 weekly scene-based advice cards for the user.
-Today is ${new Date().toISOString().slice(0, 10)}.
-ALL OUTPUT MUST BE IN ${L}.
-Write in English. Be practical, specific, and slightly humorous.
-${memoryContext}
+    // Phase 1: 本地生成（0ms）
+    const localResult = generateLocalScenes(userProfile, lang);
 
-Respond with valid JSON:
-{
-  "scenes": [
-    {
-      "icon": "💼",
-      "title": "Scene Title",
-      "tag": "Workplace",
-      "tagColor": "rgba(96,165,250,0.1)",
-      "tagTextColor": "#60a5fa",
-      "body": "2-3 sentences describing the scene and energy this week",
-      "advice": "One specific action to take"
+    // 检查本周缓存
+    const weekKey = `scenes_${new Date().toISOString().slice(0, 10)}_${userProfile?.element}_${userProfile?.mbti}`;
+    const cached = fusionCache.get(weekKey);
+    if (cached) {
+      return res.json({ success: true, ...localResult, aiScenes: cached, cached: true });
     }
-  ]
-}
-Generate scenes for: Workplace, Relationships, Personal Growth, and optionally Finance or Health.
-Output ONLY the JSON.`;
 
-    const userPrompt = `User profile:
-- Sun: ${userProfile?.sun || 'Unknown'}, Moon: ${userProfile?.moon || 'Unknown'}, Rising: ${userProfile?.rising || 'Unknown'}
-- Element: ${userProfile?.element || 'Unknown'}
-- MBTI: ${userProfile?.mbti || 'Unknown'}
+    // Phase 2: 异步 AI 增强
+    const requestId = 'sc_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    fusionCache.set(requestId, { status: 'loading', profile: null });
 
-Generate this week's life scene advice. Be specific to their astrological profile. Make it feel like you actually know them.`;
+    const L = lang === 'zh' ? 'Chinese' : 'English';
+    const systemPrompt = `You are a life scene advisor. Generate 4 weekly scene cards.
+Reply in ${L}. Keep each card concise (2-3 sentences body, 1 sentence advice).
+Output ONLY valid JSON:
+{"scenes":[{"icon":"💼","title":"Title","body":"2-3 sentences","advice":"1 sentence"}]}`;
 
-    const rawResponse = await callMify([
+    callMify([
       { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
-    ], 2000);
+      { role: 'user', content: `User: ${userProfile?.sun||''} Sun, ${userProfile?.moon||''} Moon, ${userProfile?.mbti||''} MBTI, ${userProfile?.element||''} element. Generate workplace, relationship, growth, finance scenes for this week.` },
+    ], 2000).then(raw => {
+      let result;
+      try { result = JSON.parse(raw); } catch { const m = raw.match(/\{[\s\S]*\}/); result = m ? JSON.parse(m[0]) : null; }
+      if (result?.scenes) {
+        fusionCache.set(requestId, { status: 'ready', scenes: result.scenes });
+        fusionCache.set(weekKey, result.scenes); // 持久缓存本周
+      } else {
+        fusionCache.set(requestId, { status: 'failed', scenes: null });
+      }
+    }).catch(() => fusionCache.set(requestId, { status: 'failed', scenes: null }));
 
-    let result;
-    try {
-      result = JSON.parse(rawResponse.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim());
-    } catch {
-      const match = rawResponse.match(/\{[\s\S]*\}/);
-      result = match ? JSON.parse(match[0]) : { scenes: [] };
-    }
-
-    res.json({ success: true, scenes: result.scenes || [], model: MIFY_MODEL });
+    res.json({ success: true, ...localResult, requestId });
   } catch (err) {
     console.error('Scenes error:', err.message);
     res.status(500).json({ error: err.message });
@@ -851,10 +857,42 @@ function getMemoryContext() {
 }
 
 /**
+ * API: 获取可用模型列表
+ */
+app.get('/api/models', (req, res) => {
+  const providers = getAvailableProviders();
+  const active = configStore.getActiveModel();
+  res.json({ success: true, providers, active });
+});
+
+/**
+ * API: 切换模型
+ */
+app.post('/api/models/select', (req, res) => {
+  const { provider, model, temperature, maxTokens } = req.body;
+  if (!provider) return res.status(400).json({ success: false, error: 'provider required' });
+
+  const providerConfig = require('./providers').getProvider(provider);
+  if (!providerConfig) return res.status(400).json({ success: false, error: `Unknown provider: ${provider}` });
+  if (!providerConfig.apiKey) return res.status(400).json({ success: false, error: `${providerConfig.name} API key not configured` });
+
+  // 验证 model 属于该 provider
+  if (model && !providerConfig.models.some(m => m.id === model)) {
+    return res.status(400).json({ success: false, error: `Model ${model} not available for ${providerConfig.name}` });
+  }
+
+  configStore.setActiveModel(provider, model, temperature, maxTokens);
+  const updated = configStore.getActiveModel();
+  console.log(`Model switched: ${updated.provider}/${updated.model}`);
+  res.json({ success: true, active: updated });
+});
+
+/**
  * 健康检查
  */
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', model: MIFY_MODEL, timestamp: new Date().toISOString() });
+  const active = configStore.getActiveModel();
+  res.json({ status: 'ok', provider: active.provider, model: active.model, timestamp: new Date().toISOString() });
 });
 
 /**
@@ -874,7 +912,12 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`\n✦ Soul Cosmos Server`);
   console.log(`  Local:   http://localhost:${PORT}`);
-  console.log(`  Model:   ${MIFY_MODEL}`);
-  console.log(`  API Key: ${MIFY_API_KEY.slice(0, 8)}...`);
+  const active = configStore.getActiveModel();
+  console.log(`  Provider: ${active.provider}`);
+  console.log(`  Model:    ${active.model}`);
+  const { getProvider } = require('./providers');
+  const providerConfig = getProvider(active.provider);
+  const key = providerConfig?.apiKey || '';
+  console.log(`  API Key:  ${key.slice(0, 8)}...`);
   console.log(`\n  Ready.\n`);
 });

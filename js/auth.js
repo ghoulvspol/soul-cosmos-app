@@ -242,9 +242,15 @@ const Auth = (() => {
       const res = await authFetch(`/api/user/profile/${id}`);
       const data = await res.json();
       if (data.success && data.profile.soul_profile) {
-        // 复用现有渲染逻辑
+        // 复用现有渲染逻辑 (renderResult expects: profile, natalChart, ziweiChart, model)
         if (typeof renderResult === 'function') {
-          renderResult(data.profile.soul_profile, data.profile.bazi_data);
+          const p = data.profile;
+          renderResult(
+            p.soul_profile,
+            p.natal_chart || null,
+            p.ziwei_chart || null,
+            'history'
+          );
         }
       }
     } catch (err) {

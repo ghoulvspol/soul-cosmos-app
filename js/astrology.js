@@ -58,6 +58,8 @@ const Astrology = {
         break;
       }
     }
+    // Wrap around for Capricorn (Dec 22 - Jan 19)
+    if (month === 1 && day < 20) signIndex = 9; // Capricorn
     return this.SIGNS[signIndex];
   },
 
@@ -69,8 +71,8 @@ const Astrology = {
     const d = new Date(date + 'T' + time);
     const daysSinceEpoch = Math.floor(d.getTime() / 86400000);
     // 月亮约27.3天走完一圈，每天约13.2°
-    const moonLongitude = (daysSinceEpoch * 13.2) % 360;
-    const index = Math.floor(moonLongitude / 30);
+    const moonLongitude = ((daysSinceEpoch * 13.2) % 360 + 360) % 360;
+    const index = Math.floor(moonLongitude / 30) % 12;
     return this.SIGNS[index];
   },
 
@@ -84,12 +86,14 @@ const Astrology = {
     // 城市经度修正（简化）
     const cityOffsets = {
       'new_york': -5, 'los_angeles': -8, 'london': 0, 'tokyo': 9,
-      'shanghai': 8, 'seoul': 9, 'sydney': 11, 'toronto': -5
+      'shanghai': 8, 'beijing': 8, 'guangzhou': 8, 'shenzhen': 8,
+      'chengdu': 8, 'hangzhou': 8, 'seoul': 9, 'sydney': 11, 'toronto': -5
     };
     const offset = cityOffsets[city] || 0;
-    const adjustedMinutes = (totalMinutes + offset * 60 + 1440) % 1440;
-    // 每120分钟一个星座
-    const index = Math.floor(adjustedMinutes / 120) % 12;
+    // Convert to LST (Local Sidereal Time) approximation
+    // Rising sign changes every ~2 hours; offset adjusts for longitude
+    const lstMinutes = ((totalMinutes + offset * 60) % 1440 + 1440) % 1440;
+    const index = Math.floor(lstMinutes / 120) % 12;
     return this.SIGNS[index];
   },
 

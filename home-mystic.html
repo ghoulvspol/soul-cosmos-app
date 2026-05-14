@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soul Cosmos — 灵魂宇宙</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@300;400;500;600;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       DESIGN TOKENS — Inspired by Framer (dark canvas) +
+       Claude (warm serif editorial) + Stripe (gradient mesh)
+       ============================================================ */
+    :root {
+      /* Surface — Framer-style pure dark */
+      --canvas: #07070a;
+      --surface-1: #111116;
+      --surface-2: #1a1a22;
+      --surface-3: #222230;
+      --hairline: rgba(255,255,255,0.06);
+      --hairline-gold: rgba(212,165,116,0.12);
+
+      /* Brand — Warm gold (replaces generic purple) */
+      --gold: #d4a574;
+      --gold-deep: #b8860b;
+      --gold-soft: rgba(212,165,116,0.08);
+      --gold-glow: rgba(212,165,116,0.2);
+
+      /* Accent — Claude-inspired warm coral */
+      --coral: #cc785c;
+      --coral-deep: #a9583e;
+
+      /* Text — Claude-style warm hierarchy */
+      --ink: #f0ece4;
+      --ink-strong: #faf9f5;
+      --ink-body: #c8c2b6;
+      --ink-muted: #7a756c;
+      --ink-faint: #4a463f;
+
+      /* Mystical accents */
+      --violet: #8b7ab8;
+      --teal: #5db8a6;
+      --crimson: #b85d5d;
+
+      /* Typography — Framer extreme tracking + Claude serif */
+      --font-display: 'Cormorant Garamond', 'Noto Serif SC', serif;
+      --font-body: 'Inter', 'Noto Serif SC', sans-serif;
+      --font-calligraphy: 'Ma Shan Zheng', 'Noto Serif SC', serif;
+
+      /* Spacing — Stripe 8px base */
+      --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+      --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+      --sp-section: 96px;
+
+      /* Radius */
+      --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-xl: 16px;
+      --r-2xl: 24px; --r-pill: 9999px;
+    }
+
+    /* ============================================================
+       RESET + BASE
+       ============================================================ */
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth;font-feature-settings:"ss01","cv11"}
+    body{
+      font-family:var(--font-body);
+      background:var(--canvas);color:var(--ink);
+      overflow-x:hidden;line-height:1.55;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    /* ============================================================
+       BACKGROUND — Framer dark canvas + Stripe gradient mesh
+       ============================================================ */
+    .bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+    #starBg{z-index:1}
+    .mesh{
+      z-index:2;
+      background:
+        radial-gradient(ellipse 900px 600px at 25% 15%,rgba(212,165,116,0.05),transparent),
+        radial-gradient(ellipse 700px 500px at 75% 85%,rgba(139,92,246,0.04),transparent),
+        radial-gradient(ellipse 500px 400px at 50% 50%,rgba(204,120,92,0.03),transparent);
+      animation:mesh-shift 25s ease-in-out infinite alternate;
+    }
+    @keyframes mesh-shift{
+      0%{opacity:0.7}50%{opacity:1}100%{opacity:0.8}
+    }
+    .noise{
+      z-index:3;opacity:0.025;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ============================================================
+       NAV — Framer-style top bar
+       ============================================================ */
+    .nav{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:var(--sp-4) var(--sp-7);
+      background:rgba(7,7,10,0.6);backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--hairline);
+      transition:all .3s;height:56px;
+    }
+    .nav.scrolled{background:rgba(7,7,10,0.95);height:52px}
+    .nav-logo{
+      font-family:var(--font-display);font-size:18px;font-weight:500;
+      color:var(--gold);letter-spacing:2px;
+    }
+    .nav-links{display:flex;gap:var(--sp-1)}
+    .nav-link{
+      padding:6px 14px;border-radius:var(--r-md);font-size:13px;font-weight:500;
+      color:var(--ink-muted);cursor:pointer;transition:all .2s;
+      background:transparent;border:none;font-family:var(--font-body);
+      letter-spacing:-0.13px;
+    }
+    .nav-link:hover{color:var(--ink);background:rgba(255,255,255,0.03)}
+    .nav-right{display:flex;gap:var(--sp-3);align-items:center}
+    .btn-lang{
+      padding:6px 12px;background:var(--surface-1);border:1px solid var(--hairline);
+      border-radius:var(--r-md);color:var(--ink-muted);font-size:12px;font-weight:500;
+      cursor:pointer;transition:all .2s;letter-spacing:-0.12px;
+      font-family:var(--font-body);
+    }
+    .btn-lang:hover{background:var(--surface-2);color:var(--ink)}
+    .btn-cta{
+      padding:8px 20px;background:var(--gold);border:none;
+      border-radius:var(--r-pill);color:var(--canvas);
+      font-size:13px;font-weight:600;cursor:pointer;
+      transition:all .3s;font-family:var(--font-body);
+      letter-spacing:-0.13px;
+    }
+    .btn-cta:hover{background:var(--gold-deep);transform:translateY(-1px)}
+
+    /* ============================================================
+       HERO — Framer poster-style + Claude serif
+       ============================================================ */
+    .hero{
+      position:relative;z-index:10;
+      min-height:100vh;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;text-align:center;
+      padding:var(--sp-8) var(--sp-5) var(--sp-6);
+    }
+
+    /* Seal — Eastern element */
+    .seal{
+      width:88px;height:88px;margin-bottom:var(--sp-6);position:relative;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .seal-ring{
+      position:absolute;inset:0;border-radius:50%;
+      border:1px solid var(--hairline-gold);
+      animation:seal-breathe 5s ease-in-out infinite;
+    }
+    .seal-ring:nth-child(2){inset:10px;border-color:rgba(204,120,92,0.1);animation-delay:1.5s}
+    .seal-ring:nth-child(3){inset:20px;border-color:rgba(139,122,184,0.1);animation-delay:3s}
+    @keyframes seal-breathe{0%,100%{transform:scale(1);opacity:0.4}50%{transform:scale(1.08);opacity:1}}
+    .seal-char{
+      font-family:var(--font-calligraphy);font-size:32px;
+      color:var(--gold);z-index:1;opacity:0.7;
+      text-shadow:0 0 20px rgba(212,165,116,0.2);
+    }
+
+    /* Eyebrow — Framer micro-cap style */
+    .hero-eyebrow{
+      font-size:11px;font-weight:500;color:var(--ink-muted);
+      letter-spacing:3px;text-transform:uppercase;
+      margin-bottom:var(--sp-5);
+    }
+
+    /* Title — Claude serif + Framer extreme tracking */
+    .hero-title{
+      font-family:var(--font-display);font-weight:400;
+      font-size:clamp(44px,7vw,80px);line-height:0.95;
+      color:var(--ink-strong);margin-bottom:var(--sp-2);
+      letter-spacing:-3px;
+    }
+    .hero-title-cn{
+      font-family:'Noto Serif SC',serif;font-weight:300;
+      font-size:clamp(20px,3vw,32px);line-height:1.3;
+      color:var(--gold);opacity:0.5;margin-bottom:var(--sp-5);
+      letter-spacing:8px;
+    }
+    .hero-desc{
+      font-size:16px;color:var(--ink-body);line-height:1.7;
+      max-width:480px;margin:0 auto var(--sp-7);
+      font-weight:300;letter-spacing:-0.16px;
+    }
+
+    /* ============================================================
+       TAROT CARDS — Premium glass-morphism
+       ============================================================ */
+    .tarot-stage{
+      perspective:1200px;margin-bottom:var(--sp-7);
+      display:flex;gap:var(--sp-5);justify-content:center;flex-wrap:wrap;
+    }
+    .tarot-card{
+      width:170px;height:260px;position:relative;
+      transform-style:preserve-3d;
+      transition:transform .8s cubic-bezier(.4,0,.2,1);
+      cursor:pointer;
+    }
+    .tarot-card:hover{transform:rotateY(12deg) rotateX(-4deg) translateY(-6px)}
+    .tarot-card.flipped{transform:rotateY(180deg)}
+    .tarot-face{
+      position:absolute;inset:0;backface-visibility:hidden;
+      border-radius:var(--r-xl);display:flex;flex-direction:column;
+      align-items:center;justify-content:center;overflow:hidden;
+    }
+    .tarot-back{
+      background:var(--surface-1);
+      border:1px solid var(--hairline-gold);
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
+    }
+    .tarot-back-inner{
+      width:130px;height:220px;border:1px solid var(--hairline-gold);
+      border-radius:var(--r-lg);display:flex;align-items:center;
+      justify-content:center;flex-direction:column;gap:6px;
+      background:
+        repeating-linear-gradient(45deg,transparent,transparent 8px,rgba(212,165,116,0.02) 8px,rgba(212,165,116,0.02) 9px),
+        repeating-linear-gradient(-45deg,transparent,transparent 8px,rgba(212,165,116,0.02) 8px,rgba(212,165,116,0.02) 9px);
+    }
+    .tarot-back-sym{font-size:36px;filter:drop-shadow(0 0 8px rgba(212,165,116,0.2))}
+    .tarot-back-text{
+      font-family:var(--font-calligraphy);font-size:16px;
+      color:var(--gold);opacity:0.4;letter-spacing:4px;
+    }
+    .tarot-front{
+      background:linear-gradient(180deg,var(--surface-1),#0e0e18,var(--surface-1));
+      border:1px solid rgba(139,122,184,0.15);
+      transform:rotateY(180deg);padding:var(--sp-4);
+      box-shadow:0 8px 32px rgba(139,122,184,0.1);
+    }
+    .tarot-front-num{
+      position:absolute;top:10px;left:14px;
+      font-family:var(--font-display);font-size:11px;
+      color:var(--gold);opacity:0.4;font-weight:500;
+    }
+    .tarot-front-num-br{
+      position:absolute;bottom:10px;right:14px;
+      font-family:var(--font-display);font-size:11px;
+      color:var(--gold);opacity:0.4;font-weight:500;
+      transform:rotate(180deg);
+    }
+    .tarot-corner{position:absolute;width:16px;height:16px;border-color:var(--hairline-gold);border-style:solid}
+    .tarot-corner.tl{top:6px;left:6px;border-width:1px 0 0 1px}
+    .tarot-corner.tr{top:6px;right:6px;border-width:1px 1px 0 0}
+    .tarot-corner.bl{bottom:6px;left:6px;border-width:0 0 1px 1px}
+    .tarot-corner.br{bottom:6px;right:6px;border-width:0 1px 1px 0}
+    .tarot-front-icon{font-size:40px;margin-bottom:6px;filter:drop-shadow(0 0 10px rgba(139,122,184,0.3))}
+    .tarot-front-title{
+      font-family:var(--font-display);font-size:15px;
+      color:var(--ink-strong);font-weight:500;letter-spacing:-0.3px;
+    }
+    .tarot-front-sub{
+      font-family:'Noto Serif SC',serif;font-size:10px;
+      color:var(--gold);opacity:0.5;letter-spacing:2px;margin-top:2px;
+    }
+    .tarot-front-desc{
+      font-size:9px;color:var(--ink-muted);text-align:center;
+      line-height:1.5;margin-top:6px;padding:0 6px;letter-spacing:-0.09px;
+    }
+    .tarot-glow{
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      width:100px;height:100px;border-radius:50%;
+      background:radial-gradient(circle,rgba(139,122,184,0.12),transparent);
+      animation:glow-pulse 4s ease-in-out infinite;
+    }
+    @keyframes glow-pulse{0%,100%{opacity:0.4;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}}
+
+    .tarot-label{text-align:center;margin-top:var(--sp-3)}
+    .tarot-label-name{font-size:12px;color:var(--ink-muted);font-weight:500;letter-spacing:-0.12px}
+    .tarot-label-cn{font-family:'Noto Serif SC',serif;font-size:10px;color:var(--gold);opacity:0.4;letter-spacing:2px}
+
+    /* ============================================================
+       BUTTONS — Framer pill + Claude warmth
+       ============================================================ */
+    .hero-actions{display:flex;gap:var(--sp-4);margin-bottom:var(--sp-7);flex-wrap:wrap;justify-content:center}
+    .btn-hero{
+      padding:12px 28px;border-radius:var(--r-pill);font-size:14px;font-weight:500;
+      cursor:pointer;transition:all .3s;font-family:var(--font-body);
+      letter-spacing:-0.14px;
+    }
+    .btn-hero-primary{
+      background:var(--gold);border:none;color:var(--canvas);
+      box-shadow:0 4px 20px rgba(212,165,116,0.2);
+    }
+    .btn-hero-primary:hover{background:var(--gold-deep);transform:translateY(-2px);box-shadow:0 8px 28px rgba(212,165,116,0.3)}
+    .btn-hero-ghost{
+      background:var(--surface-1);border:1px solid var(--hairline);color:var(--ink-body);
+    }
+    .btn-hero-ghost:hover{background:var(--surface-2);color:var(--ink);border-color:var(--hairline-gold)}
+
+    /* Stats */
+    .hero-stats{display:flex;gap:var(--sp-7);justify-content:center}
+    .hero-stat{text-align:center}
+    .hero-stat-num{
+      font-family:var(--font-display);font-size:26px;font-weight:500;
+      color:var(--gold);letter-spacing:-0.5px;
+    }
+    .hero-stat-label{
+      font-size:10px;color:var(--ink-faint);text-transform:uppercase;
+      letter-spacing:2px;margin-top:2px;font-weight:500;
+    }
+
+    /* ============================================================
+       SECTIONS — Claude editorial rhythm
+       ============================================================ */
+    .section{position:relative;z-index:10;padding:var(--sp-section) var(--sp-5);max-width:1080px;margin:0 auto}
+    .section-header{text-align:center;margin-bottom:var(--sp-8)}
+    .section-sigil{font-size:20px;color:var(--gold);opacity:0.3;margin-bottom:var(--sp-3);display:block}
+    .section-header h2{
+      font-family:var(--font-display);font-size:clamp(28px,4vw,44px);
+      font-weight:400;color:var(--ink-strong);letter-spacing:-1.5px;
+      margin-bottom:var(--sp-2);
+    }
+    .section-header-cn{
+      font-family:'Noto Serif SC',serif;font-size:14px;
+      color:var(--gold);opacity:0.35;letter-spacing:6px;margin-bottom:var(--sp-3);
+      font-weight:300;
+    }
+    .section-header p{font-size:15px;color:var(--ink-muted);max-width:440px;margin:0 auto;letter-spacing:-0.15px}
+
+    /* ============================================================
+       DIMENSIONS — Horizontal scroll cards
+       ============================================================ */
+    .dim-scroll{
+      display:flex;gap:var(--sp-4);overflow-x:auto;padding:var(--sp-2) 0 var(--sp-5);
+      scroll-snap-type:x mandatory;scrollbar-width:none;
+    }
+    .dim-scroll::-webkit-scrollbar{display:none}
+    .dim-card{
+      min-width:200px;flex-shrink:0;scroll-snap-align:start;
+      background:var(--surface-1);border:1px solid var(--hairline);
+      border-radius:var(--r-2xl);padding:var(--sp-6) var(--sp-5);
+      transition:all .4s;position:relative;overflow:hidden;
+    }
+    .dim-card::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,var(--gold-glow),transparent);
+      opacity:0;transition:opacity .4s;
+    }
+    .dim-card:hover{border-color:var(--hairline-gold);transform:translateY(-4px)}
+    .dim-card:hover::before{opacity:1}
+    .dim-icon{font-size:28px;margin-bottom:var(--sp-3);display:block}
+    .dim-name{font-size:15px;color:var(--ink-strong);font-weight:500;letter-spacing:-0.15px;margin-bottom:2px}
+    .dim-name-cn{font-family:'Noto Serif SC',serif;font-size:11px;color:var(--gold);opacity:0.35;letter-spacing:2px;margin-bottom:var(--sp-3);font-weight:300}
+    .dim-desc{font-size:12px;color:var(--ink-muted);line-height:1.6;letter-spacing:-0.12px}
+    .dim-tag{
+      display:inline-block;margin-top:var(--sp-3);padding:3px 10px;
+      background:var(--gold-soft);border-radius:var(--r-pill);
+      font-size:10px;color:var(--gold);font-weight:500;letter-spacing:-0.1px;
+    }
+
+    /* ============================================================
+       FUSION DIAGRAM
+       ============================================================ */
+    .fusion{display:flex;align-items:center;justify-content:center;gap:var(--sp-5);padding:var(--sp-7) 0;flex-wrap:wrap}
+    .fusion-node{
+      width:72px;height:72px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;flex-direction:column;
+      background:var(--surface-1);border:1px solid var(--hairline);
+      font-size:24px;transition:all .3s;
+    }
+    .fusion-node:hover{border-color:var(--hairline-gold);transform:scale(1.08)}
+    .fusion-node-label{font-size:8px;color:var(--ink-faint);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
+    .fusion-arrow{font-size:16px;color:var(--ink-faint)}
+    .fusion-core{
+      width:88px;height:88px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;flex-direction:column;
+      background:radial-gradient(circle,var(--gold-soft),rgba(139,122,184,0.03));
+      border:1.5px solid var(--hairline-gold);
+      font-size:28px;position:relative;
+      box-shadow:0 0 40px rgba(212,165,116,0.08);
+    }
+    .fusion-core::after{
+      content:'';position:absolute;inset:-4px;border-radius:50%;
+      border:1px solid rgba(212,165,116,0.06);
+      animation:core-pulse 3s ease-in-out infinite;
+    }
+    @keyframes core-pulse{0%,100%{transform:scale(1);opacity:0.5}50%{transform:scale(1.12);opacity:0}}
+    .fusion-core-label{font-size:8px;color:var(--gold);font-weight:600;letter-spacing:1px;margin-top:2px}
+
+    /* ============================================================
+       DIVIDER
+       ============================================================ */
+    .divider{
+      display:flex;align-items:center;justify-content:center;gap:var(--sp-4);
+      padding:var(--sp-5) 0;position:relative;z-index:10;
+    }
+    .divider-line{width:48px;height:1px;background:linear-gradient(90deg,transparent,var(--hairline-gold),transparent)}
+    .divider-glyph{font-size:14px;color:var(--gold);opacity:0.25}
+
+    /* ============================================================
+       STEPS — Framer surface cards
+       ============================================================ */
+    .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-4)}
+    .step-card{
+      background:var(--surface-1);border:1px solid var(--hairline);
+      border-radius:var(--r-xl);padding:var(--sp-6) var(--sp-5);
+      text-align:center;position:relative;
+    }
+    .step-card::after{
+      content:'→';position:absolute;right:-12px;top:50%;transform:translateY(-50%);
+      color:var(--ink-faint);font-size:14px;
+    }
+    .step-card:last-child::after{display:none}
+    .step-glyph{
+      font-family:var(--font-calligraphy);font-size:28px;
+      color:var(--gold);opacity:0.35;margin-bottom:var(--sp-3);
+    }
+    .step-card h3{
+      font-size:14px;color:var(--ink-strong);font-weight:500;
+      margin-bottom:var(--sp-2);letter-spacing:-0.14px;
+    }
+    .step-card p{font-size:12px;color:var(--ink-muted);line-height:1.5;letter-spacing:-0.12px}
+
+    /* ============================================================
+       SOCIAL PROOF
+       ============================================================ */
+    .proof{display:flex;justify-content:center;gap:var(--sp-7);padding:var(--sp-6) 0;flex-wrap:wrap}
+    .proof-item{display:flex;align-items:center;gap:var(--sp-3)}
+    .proof-icon{
+      width:32px;height:32px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:14px;
+      background:var(--surface-1);border:1px solid var(--hairline);
+    }
+    .proof-text{font-size:12px;color:var(--ink-muted);letter-spacing:-0.12px}
+    .proof-text strong{display:block;color:var(--gold);font-size:16px;font-weight:600;letter-spacing:-0.3px}
+
+    /* ============================================================
+       TESTIMONIALS
+       ============================================================ */
+    .testimonials{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-4)}
+    .testimonial{
+      background:var(--surface-1);border:1px solid var(--hairline);
+      border-radius:var(--r-xl);padding:var(--sp-6);position:relative;
+    }
+    .testimonial::before{
+      content:'"';position:absolute;top:10px;left:var(--sp-5);
+      font-family:var(--font-display);font-size:42px;
+      color:var(--gold);opacity:0.1;line-height:1;
+    }
+    .testimonial-stars{color:var(--gold);font-size:11px;margin-bottom:var(--sp-3);letter-spacing:2px}
+    .testimonial-text{
+      font-size:13px;color:var(--ink-body);line-height:1.7;
+      margin-bottom:var(--sp-4);font-style:italic;padding-top:var(--sp-2);
+      letter-spacing:-0.13px;
+    }
+    .testimonial-author{display:flex;align-items:center;gap:var(--sp-3)}
+    .testimonial-avatar{
+      width:32px;height:32px;border-radius:50%;
+      background:var(--surface-2);border:1px solid var(--hairline);
+      display:flex;align-items:center;justify-content:center;font-size:13px;
+    }
+    .testimonial-name{font-size:12px;font-weight:500;color:var(--ink-strong);letter-spacing:-0.12px}
+    .testimonial-type{font-size:10px;color:var(--ink-faint);letter-spacing:-0.1px}
+
+    /* ============================================================
+       PRICING — Stripe card + Framer surface lift
+       ============================================================ */
+    .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-4)}
+    .price-card{
+      background:var(--surface-1);border:1px solid var(--hairline);
+      border-radius:var(--r-xl);padding:var(--sp-6);position:relative;transition:all .3s;
+    }
+    .price-card:hover{transform:translateY(-4px);border-color:var(--hairline-gold)}
+    .price-card-popular{
+      border-color:rgba(212,165,116,0.2);background:rgba(212,165,116,0.02);
+      transform:scale(1.02);
+    }
+    .price-card-popular:hover{transform:scale(1.02) translateY(-4px)}
+    .price-badge{
+      position:absolute;top:-10px;left:var(--sp-5);
+      padding:3px 14px;background:var(--gold);color:var(--canvas);
+      border-radius:var(--r-pill);font-size:10px;font-weight:600;
+      letter-spacing:0.5px;
+    }
+    .price-tier{
+      font-size:11px;color:var(--ink-faint);text-transform:uppercase;
+      letter-spacing:2px;font-weight:500;margin-bottom:var(--sp-3);
+    }
+    .price-cost{display:flex;align-items:baseline;gap:2px;margin-bottom:2px}
+    .price-dollar{font-size:14px;color:var(--ink-muted);font-weight:500}
+    .price-amount{
+      font-family:var(--font-display);font-size:40px;font-weight:500;
+      color:var(--ink-strong);letter-spacing:-1px;
+    }
+    .price-period{font-size:12px;color:var(--ink-faint);margin-bottom:var(--sp-6)}
+    .price-features{list-style:none;margin-bottom:var(--sp-6)}
+    .price-features li{
+      font-size:13px;color:var(--ink-muted);padding:6px 0;
+      display:flex;align-items:center;gap:var(--sp-2);
+      border-bottom:1px solid rgba(255,255,255,0.02);
+      letter-spacing:-0.13px;
+    }
+    .price-features li::before{content:'✦';color:var(--gold);font-size:8px;opacity:0.5}
+    .btn-price{
+      width:100%;padding:12px;border-radius:var(--r-pill);font-size:13px;font-weight:500;
+      cursor:pointer;transition:all .3s;font-family:var(--font-body);letter-spacing:-0.13px;
+    }
+    .btn-price-primary{background:var(--gold);border:none;color:var(--canvas)}
+    .btn-price-primary:hover{background:var(--gold-deep)}
+    .btn-price-ghost{background:var(--surface-2);border:1px solid var(--hairline);color:var(--ink-body)}
+    .btn-price-ghost:hover{border-color:var(--hairline-gold);color:var(--ink)}
+
+    /* ============================================================
+       ALTAR CTA
+       ============================================================ */
+    .altar{text-align:center;padding:var(--sp-8) var(--sp-5);position:relative;z-index:10;max-width:560px;margin:0 auto}
+    .altar-sigil{
+      font-size:40px;margin-bottom:var(--sp-5);opacity:0.6;
+      filter:drop-shadow(0 0 16px rgba(212,165,116,0.2));
+      animation:altar-float 5s ease-in-out infinite;
+    }
+    @keyframes altar-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    .altar h2{
+      font-family:var(--font-display);font-size:clamp(28px,4vw,40px);
+      font-weight:400;color:var(--ink-strong);letter-spacing:-1.2px;margin-bottom:var(--sp-2);
+    }
+    .altar-cn{
+      font-family:'Noto Serif SC',serif;font-size:14px;
+      color:var(--gold);opacity:0.35;letter-spacing:6px;margin-bottom:var(--sp-3);font-weight:300;
+    }
+    .altar p{font-size:14px;color:var(--ink-muted);margin-bottom:var(--sp-6);letter-spacing:-0.14px}
+
+    /* ============================================================
+       FOOTER — Framer minimal
+       ============================================================ */
+    .footer{
+      position:relative;z-index:10;padding:var(--sp-8) var(--sp-5);
+      border-top:1px solid var(--hairline);
+    }
+    .footer-inner{
+      display:flex;justify-content:space-between;align-items:center;
+      max-width:1080px;margin:0 auto;flex-wrap:wrap;gap:var(--sp-4);
+    }
+    .footer-logo{font-family:var(--font-display);font-size:16px;color:var(--gold);letter-spacing:2px;opacity:0.6}
+    .footer-links{display:flex;gap:var(--sp-5)}
+    .footer-links a{color:var(--ink-faint);text-decoration:none;font-size:12px;letter-spacing:-0.12px}
+    .footer-copy{font-size:11px;color:var(--ink-faint);opacity:0.5}
+
+    /* ============================================================
+       MODAL — Framer surface-2
+       ============================================================ */
+    .modal-overlay{
+      display:none;position:fixed;inset:0;
+      background:rgba(7,7,10,0.92);backdrop-filter:blur(16px);z-index:500;
+      align-items:center;justify-content:center;
+    }
+    .modal-overlay.active{display:flex}
+    .modal{
+      width:420px;max-width:90vw;
+      background:var(--surface-1);border:1px solid var(--hairline);
+      border-radius:var(--r-2xl);padding:var(--sp-6);position:relative;
+      box-shadow:0 24px 64px rgba(0,0,0,0.5);
+    }
+    .modal::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:1px;
+      background:linear-gradient(90deg,transparent,var(--hairline-gold),transparent);
+    }
+    .modal-close{
+      position:absolute;top:var(--sp-4);right:var(--sp-4);
+      width:28px;height:28px;border-radius:50%;
+      background:var(--surface-2);border:1px solid var(--hairline);
+      color:var(--ink-muted);font-size:12px;cursor:pointer;transition:all .2s;
+    }
+    .modal-close:hover{background:var(--surface-3);color:var(--ink)}
+    .modal h3{font-size:18px;color:var(--ink-strong);margin-bottom:2px;font-weight:500;letter-spacing:-0.18px}
+    .modal p{font-size:13px;color:var(--ink-muted);margin-bottom:var(--sp-5);letter-spacing:-0.13px}
+    .modal .form-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)}
+    .form-group{margin-bottom:var(--sp-3)}
+    .form-group label{
+      display:block;font-size:10px;color:var(--ink-faint);
+      margin-bottom:4px;text-transform:uppercase;letter-spacing:1.5px;font-weight:500;
+    }
+    .form-group input,.form-group select{
+      width:100%;padding:10px 12px;
+      background:var(--surface-2);border:1px solid var(--hairline);
+      border-radius:var(--r-md);color:var(--ink);font-size:14px;outline:none;
+      transition:all .2s;font-family:var(--font-body);letter-spacing:-0.14px;
+    }
+    .form-group input:focus,.form-group select:focus{border-color:var(--gold-glow);background:var(--surface-3)}
+    .form-group select option{background:var(--surface-1);color:var(--ink)}
+    .mbti-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:var(--sp-4)}
+    .mbti-btn{
+      padding:10px 4px;background:var(--surface-2);
+      border:1px solid var(--hairline);border-radius:var(--r-lg);
+      color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;
+      transition:all .2s;text-align:center;font-family:var(--font-body);
+      letter-spacing:-0.13px;
+    }
+    .mbti-btn small{display:block;font-weight:400;font-size:8px;color:var(--ink-faint);margin-top:2px}
+    .mbti-btn:hover{border-color:var(--hairline-gold);background:var(--surface-3)}
+    .mbti-btn.selected{border-color:var(--gold);background:var(--gold-soft);color:var(--gold)}
+    .btn-modal{
+      width:100%;padding:12px;border-radius:var(--r-pill);font-size:13px;font-weight:500;
+      cursor:pointer;transition:all .3s;font-family:var(--font-body);
+      background:var(--gold);border:none;color:var(--canvas);letter-spacing:-0.13px;
+    }
+    .btn-modal:hover{background:var(--gold-deep)}
+    .btn-modal:disabled{opacity:0.2;cursor:not-allowed}
+    .btn-modal-back{
+      padding:10px 16px;background:var(--surface-2);border:1px solid var(--hairline);
+      border-radius:var(--r-pill);color:var(--ink-muted);font-size:12px;cursor:pointer;
+      font-family:var(--font-body);transition:all .2s;letter-spacing:-0.12px;
+    }
+    .btn-modal-back:hover{border-color:var(--hairline-gold);color:var(--ink)}
+    .modal-actions{display:flex;gap:var(--sp-3);margin-top:var(--sp-4)}
+    .modal-actions .btn-modal{flex:1}
+    .modal-step{display:none;animation:step-in .3s ease}
+    .modal-step.active{display:block}
+    @keyframes step-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+    /* Loading */
+    .loading-overlay{
+      display:none;position:fixed;inset:0;
+      background:rgba(7,7,10,0.96);z-index:600;
+      align-items:center;justify-content:center;flex-direction:column;
+    }
+    .loading-overlay.active{display:flex}
+    .loading-rings{width:72px;height:72px;position:relative;margin-bottom:var(--sp-5)}
+    .loading-rings div{
+      position:absolute;inset:0;border-radius:50%;
+      border:1px solid var(--hairline-gold);
+      animation:ring-spin 3s linear infinite;
+    }
+    .loading-rings div:nth-child(2){inset:8px;border-color:rgba(139,122,184,0.12);animation-direction:reverse;animation-duration:2s}
+    .loading-rings div:nth-child(3){inset:16px;border-color:rgba(204,120,92,0.12);animation-duration:1.5s}
+    .loading-char{
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      font-family:var(--font-calligraphy);font-size:20px;color:var(--gold);opacity:0.5;
+      animation:char-pulse 2s ease-in-out infinite;
+    }
+    @keyframes ring-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    @keyframes char-pulse{0%,100%{opacity:0.3}50%{opacity:0.8}}
+    .loading-msg{font-size:13px;color:var(--ink-muted);letter-spacing:-0.13px}
+    .ls-item{font-size:12px;color:var(--ink-faint);padding:3px 0;opacity:0.3;transition:opacity .3s}
+    .loading-msg-cn{font-family:'Noto Serif SC',serif;font-size:11px;color:var(--gold);opacity:0.3;margin-top:4px;letter-spacing:3px}
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media(max-width:768px){
+      .nav{padding:var(--sp-3) var(--sp-5)}
+      .nav-links{display:none}
+      .hero{padding:80px var(--sp-5) var(--sp-6)}
+      .tarot-stage{gap:var(--sp-3)}
+      .tarot-card{width:130px;height:200px}
+      .tarot-front-icon{font-size:28px}
+      .tarot-front-title{font-size:12px}
+      .hero-stats{gap:var(--sp-5);flex-wrap:wrap}
+      .dim-scroll{padding-left:var(--sp-5)}
+      .dim-card{min-width:170px}
+      .fusion{gap:var(--sp-3)}
+      .fusion-node{width:52px;height:52px;font-size:18px}
+      .fusion-core{width:64px;height:64px;font-size:22px}
+      .steps{grid-template-columns:1fr 1fr}
+      .step-card::after{display:none}
+      .testimonials{grid-template-columns:1fr}
+      .pricing-grid{grid-template-columns:1fr}
+      .price-card-popular{transform:none}
+      .form-row{grid-template-columns:1fr}
+      .mbti-grid{grid-template-columns:repeat(4,1fr)}
+      .footer-inner{flex-direction:column;text-align:center}
+    }
+  </style>
+</head>
+<body>
+  <!-- Background -->
+  <canvas id="starBg" class="bg"></canvas>
+  <div class="bg mesh"></div>
+  <div class="bg noise"></div>
+
+  <!-- Nav -->
+  <nav class="nav" id="nav">
+    <div class="nav-logo">✦ SOUL COSMOS</div>
+    <div class="nav-links">
+      <button class="nav-link" onclick="scrollToS('features')" data-i18n="nav.features">Features</button>
+      <button class="nav-link" onclick="scrollToS('how')" data-i18n="nav.process">Process</button>
+      <button class="nav-link" onclick="scrollToS('pricing')" data-i18n="nav.pricing">Pricing</button>
+    </div>
+    <div class="nav-right">
+      <button class="btn-lang" onclick="toggleLang()" id="langBtn">EN</button>
+      <button class="btn-cta" onclick="openModal()" data-i18n="nav.cta">✦ 开始探索</button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="seal">
+      <div class="seal-ring"></div><div class="seal-ring"></div><div class="seal-ring"></div>
+      <span class="seal-char">命</span>
+    </div>
+    <div class="hero-eyebrow" data-i18n="hero.subtitle">✦ 东西方命理融合 AI ✦</div>
+    <h1 class="hero-title" data-i18n="hero.title">Soul Cosmos</h1>
+    <div class="hero-title-cn" data-i18n="hero.title.cn">灵 魂 宇 宙</div>
+    <p class="hero-desc" data-i18n="hero.desc">融合西方星盘、紫微斗数、易经、MBTI、面相手相、血型与心理学七大智慧体系，以 AI 交叉验证，为你呈现前所未有的多维灵魂画像。</p>
+
+    <!-- Tarot Cards -->
+    <div class="tarot-stage">
+      <div>
+        <div class="tarot-card" onclick="this.classList.toggle('flipped')">
+          <div class="tarot-face tarot-back"><div class="tarot-back-inner"><div class="tarot-back-sym">☀</div><div class="tarot-back-text">星 盘</div></div></div>
+          <div class="tarot-face tarot-front">
+            <div class="tarot-glow"></div>
+            <span class="tarot-front-num">XIV</span><span class="tarot-front-num-br">XIV</span>
+            <div class="tarot-corner tl"></div><div class="tarot-corner tr"></div><div class="tarot-corner bl"></div><div class="tarot-corner br"></div>
+            <div class="tarot-front-icon">♏</div>
+            <div class="tarot-front-title" data-i18n="tarot.1.title">Scorpio</div>
+            <div class="tarot-front-sub" data-i18n="tarot.1.sub">天 蝎 · 冥 王</div>
+            <div class="tarot-front-desc" data-i18n="tarot.1.desc">Deep perception, transformation, magnetic intensity</div>
+          </div>
+        </div>
+        <div class="tarot-label"><div class="tarot-label-name" data-i18n="tarot.western.name">Western Astrology</div><div class="tarot-label-cn" data-i18n="tarot.western.cn">西方星盘</div></div>
+      </div>
+      <div>
+        <div class="tarot-card" onclick="this.classList.toggle('flipped')">
+          <div class="tarot-face tarot-back"><div class="tarot-back-inner"><div class="tarot-back-sym">☯</div><div class="tarot-back-text">紫 微</div></div></div>
+          <div class="tarot-face tarot-front">
+            <div class="tarot-glow"></div>
+            <span class="tarot-front-num">I</span><span class="tarot-front-num-br">I</span>
+            <div class="tarot-corner tl"></div><div class="tarot-corner tr"></div><div class="tarot-corner bl"></div><div class="tarot-corner br"></div>
+            <div class="tarot-front-icon">✦</div>
+            <div class="tarot-front-title" data-i18n="tarot.2.title">Zi Wei</div>
+            <div class="tarot-front-sub" data-i18n="tarot.2.sub">紫 微 星 · 帝 王</div>
+            <div class="tarot-front-desc" data-i18n="tarot.2.desc">The Emperor's Star — authority, destiny, life palace mapping</div>
+          </div>
+        </div>
+        <div class="tarot-label"><div class="tarot-label-name" data-i18n="tarot.ziwei.name">Zi Wei Dou Shu</div><div class="tarot-label-cn" data-i18n="tarot.ziwei.cn">紫微斗数</div></div>
+      </div>
+      <div>
+        <div class="tarot-card" onclick="this.classList.toggle('flipped')">
+          <div class="tarot-face tarot-back"><div class="tarot-back-inner"><div class="tarot-back-sym">☯️</div><div class="tarot-back-text">易 经</div></div></div>
+          <div class="tarot-face tarot-front">
+            <div class="tarot-glow"></div>
+            <span class="tarot-front-num">☰</span><span class="tarot-front-num-br">☰</span>
+            <div class="tarot-corner tl"></div><div class="tarot-corner tr"></div><div class="tarot-corner bl"></div><div class="tarot-corner br"></div>
+            <div class="tarot-front-icon">☰</div>
+            <div class="tarot-front-title" data-i18n="tarot.3.title">I Ching</div>
+            <div class="tarot-front-sub" data-i18n="tarot.3.sub">乾 · 天 · 刚 健</div>
+            <div class="tarot-front-desc" data-i18n="tarot.3.desc">5,000 years of Chinese wisdom — 64 hexagrams of life archetypes</div>
+          </div>
+        </div>
+        <div class="tarot-label"><div class="tarot-label-name" data-i18n="tarot.iching.name">I Ching</div><div class="tarot-label-cn" data-i18n="tarot.iching.cn">易经六十四卦</div></div>
+      </div>
+      <div>
+        <div class="tarot-card" onclick="this.classList.toggle('flipped')">
+          <div class="tarot-face tarot-back"><div class="tarot-back-inner"><div class="tarot-back-sym">🧠</div><div class="tarot-back-text">人 格</div></div></div>
+          <div class="tarot-face tarot-front">
+            <div class="tarot-glow"></div>
+            <span class="tarot-front-num">V</span><span class="tarot-front-num-br">V</span>
+            <div class="tarot-corner tl"></div><div class="tarot-corner tr"></div><div class="tarot-corner bl"></div><div class="tarot-corner br"></div>
+            <div class="tarot-front-icon">🔮</div>
+            <div class="tarot-front-title" data-i18n="tarot.4.title">INTJ</div>
+            <div class="tarot-front-sub" data-i18n="tarot.4.sub">策 略 家 · 独 立</div>
+            <div class="tarot-front-desc" data-i18n="tarot.4.desc">Cognitive architecture fused with celestial blueprint</div>
+          </div>
+        </div>
+        <div class="tarot-label"><div class="tarot-label-name" data-i18n="tarot.mbti.name">MBTI Psychology</div><div class="tarot-label-cn" data-i18n="tarot.mbti.cn">人格心理学</div></div>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <button class="btn-hero btn-hero-primary" onclick="openModal()" data-i18n="hero.cta">✦ 免费生成灵魂画像</button>
+      <button class="btn-hero btn-hero-ghost" onclick="scrollToS('features')" data-i18n="hero.learn">探索七大维度 ↓</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-num">7</span><div class="hero-stat-label" data-i18n="stat.systems">智慧体系</div></div>
+      <div class="hero-stat"><span class="hero-stat-num">AI</span><div class="hero-stat-label" data-i18n="stat.engine">融合引擎</div></div>
+      <div class="hero-stat"><span class="hero-stat-num">∞</span><div class="hero-stat-label" data-i18n="stat.profiles">独特画像</div></div>
+      <div class="hero-stat"><span class="hero-stat-num">60s</span><div class="hero-stat-label" data-i18n="stat.time">即刻洞见</div></div>
+    </div>
+  </section>
+
+  <div class="divider"><div class="divider-line"></div><span class="divider-glyph">☰</span><div class="divider-line"></div></div>
+
+  <!-- Seven Dimensions -->
+  <section class="section" id="features">
+    <div class="section-header">
+      <span class="section-sigil">☽</span>
+      <h2 data-i18n="dim.title">Seven Dimensions of Self</h2>
+      <div class="section-header-cn" data-i18n="dim.title.cn">七 维 灵 魂 光 谱</div>
+      <p data-i18n="dim.subtitle">Most apps give you one lens. We give you the full spectrum.</p>
+    </div>
+    <div class="dim-scroll">
+      <div class="dim-card"><span class="dim-icon">🌌</span><div class="dim-name" data-i18n="dim.astro.name">Astrology</div><div class="dim-name-cn" data-i18n="dim.astro.cn">西 方 星 盘</div><div class="dim-desc" data-i18n="dim.astro.desc">Sun, Moon, Rising. The celestial blueprint of your soul.</div><span class="dim-tag" data-i18n="dim.astro.tag">Co-Star depth</span></div>
+      <div class="dim-card"><span class="dim-icon">☯</span><div class="dim-name" data-i18n="dim.ziwei.name">Zi Wei Dou Shu</div><div class="dim-name-cn" data-i18n="dim.ziwei.cn">紫 微 斗 数</div><div class="dim-desc" data-i18n="dim.ziwei.desc">1,400 years of Chinese star mapping. 14 main stars.</div><span class="dim-tag" data-i18n="dim.ziwei.tag">Eastern wisdom</span></div>
+      <div class="dim-card"><span class="dim-icon">☯️</span><div class="dim-name" data-i18n="dim.iching.name">I Ching</div><div class="dim-name-cn" data-i18n="dim.iching.cn">易 经 六 十 四 卦</div><div class="dim-desc" data-i18n="dim.iching.desc">64 hexagrams revealing your life archetype.</div><span class="dim-tag" data-i18n="dim.iching.tag">Ancient oracle</span></div>
+      <div class="dim-card"><span class="dim-icon">🧠</span><div class="dim-name" data-i18n="dim.mbti.name">MBTI</div><div class="dim-name-cn" data-i18n="dim.mbti.cn">人 格 心 理 学</div><div class="dim-desc" data-i18n="dim.mbti.desc">Cognitive stack fused with celestial data.</div><span class="dim-tag" data-i18n="dim.mbti.tag">Psychology + Stars</span></div>
+      <div class="dim-card"><span class="dim-icon">🖐️</span><div class="dim-name" data-i18n="dim.palm.name">Palm Reading</div><div class="dim-name-cn" data-i18n="dim.palm.cn">AI 手 相 分 析</div><div class="dim-desc" data-i18n="dim.palm.desc">CV model reads your palm lines.</div><span class="dim-tag" data-i18n="dim.palm.tag">AI-powered</span></div>
+      <div class="dim-card"><span class="dim-icon">👤</span><div class="dim-name" data-i18n="dim.face.name">Face Reading</div><div class="dim-name-cn" data-i18n="dim.face.cn">AI 面 相 分 析</div><div class="dim-desc" data-i18n="dim.face.desc">Chinese physiognomy through AI lens.</div><span class="dim-tag" data-i18n="dim.face.tag">AI-powered</span></div>
+      <div class="dim-card"><span class="dim-icon">🩸</span><div class="dim-name" data-i18n="dim.blood.name">Blood Type</div><div class="dim-name-cn" data-i18n="dim.blood.cn">血 型 人 格</div><div class="dim-desc" data-i18n="dim.blood.desc">East Asian personality theory.</div><span class="dim-tag" data-i18n="dim.blood.tag">East Asian</span></div>
+      <div class="dim-card"><span class="dim-icon">🧬</span><div class="dim-name" data-i18n="dim.psych.name">Psychology</div><div class="dim-name-cn" data-i18n="dim.psych.cn">社 会 心 理 学</div><div class="dim-desc" data-i18n="dim.psych.desc">Big Five, attachment, love language.</div><span class="dim-tag" data-i18n="dim.psych.tag">Evidence-based</span></div>
+    </div>
+  </section>
+
+  <!-- Fusion -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-sigil">✦</span>
+      <h2 data-i18n="fusion.title">AI Fusion Engine</h2>
+      <div class="section-header-cn" data-i18n="fusion.title.cn">交 叉 验 证 · 殊 途 同 归</div>
+    </div>
+    <div class="fusion">
+      <div class="fusion-node">🌌<span class="fusion-node-label">星盘</span></div>
+      <div class="fusion-node">☯<span class="fusion-node-label">紫微</span></div>
+      <div class="fusion-node">☯️<span class="fusion-node-label">易经</span></div>
+      <div class="fusion-node">🧠<span class="fusion-node-label">MBTI</span></div>
+      <span class="fusion-arrow">→</span>
+      <div class="fusion-core">✦<span class="fusion-core-label">AI</span></div>
+      <span class="fusion-arrow">→</span>
+      <div class="fusion-node" style="border-color:var(--hairline-gold);background:var(--gold-soft)">
+        <span style="font-family:var(--font-calligraphy);font-size:18px;color:var(--gold)">命</span>
+        <span class="fusion-node-label" data-i18n="fusion.label">灵魂画像</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><div class="divider-line"></div><span class="divider-glyph">☯</span><div class="divider-line"></div></div>
+
+  <!-- Steps -->
+  <section class="section" id="how">
+    <div class="section-header">
+      <span class="section-sigil">☵</span>
+      <h2 data-i18n="steps.title">The Ritual</h2>
+      <div class="section-header-cn" data-i18n="steps.title.cn">启 示 之 路</div>
+      <p data-i18n="steps.subtitle">From input to insight in 60 seconds.</p>
+    </div>
+    <div class="steps">
+      <div class="step-card"><div class="step-glyph">壹</div><h3 data-i18n="step.1.title">Birth Info</h3><p data-i18n="step.1.desc">Date, time, city, gender.</p></div>
+      <div class="step-card"><div class="step-glyph">贰</div><h3 data-i18n="step.2.title">MBTI Type</h3><p data-i18n="step.2.desc">Select or take a quick quiz.</p></div>
+      <div class="step-card"><div class="step-glyph">叁</div><h3 data-i18n="step.3.title">AI Fusion</h3><p data-i18n="step.3.desc">Seven systems cross-validated.</p></div>
+      <div class="step-card"><div class="step-glyph">肆</div><h3 data-i18n="step.4.title">Your Portrait</h3><p data-i18n="step.4.desc">Keywords, traits, shadows, insights.</p></div>
+    </div>
+  </section>
+
+  <!-- Proof -->
+  <div class="proof">
+    <div class="proof-item"><div class="proof-icon">✦</div><div class="proof-text"><strong>12,847</strong><span data-i18n="proof.1">本周生成画像</span></div></div>
+    <div class="proof-item"><div class="proof-icon">☽</div><div class="proof-text"><strong>94%</strong><span data-i18n="proof.2">用户认为准确</span></div></div>
+    <div class="proof-item"><div class="proof-icon">☯</div><div class="proof-text"><strong>7</strong><span data-i18n="proof.3">智慧体系融合</span></div></div>
+  </div>
+
+  <!-- Testimonials -->
+  <section class="section">
+    <div class="section-header">
+      <span class="section-sigil">✦</span>
+      <h2 data-i18n="testi.title">Seekers Speak</h2>
+      <div class="section-header-cn" data-i18n="testi.title.cn">探 索 者 之 声</div>
+    </div>
+    <div class="testimonials">
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text" data-i18n="testi.1.text">"我试过 Co-Star、The Pattern。Soul Cosmos 是第一个让我觉得它真正'认识'我的 App。"</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">🌙</div><div><div class="testimonial-name">Sarah K.</div><div class="testimonial-type" data-i18n="testi.1.type">INFJ · 天蝎座</div></div></div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text" data-i18n="testi.2.text">"MBTI 和星盘的融合让我震惊。它解释了我一直以来感受到的矛盾。"</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">☀️</div><div><div class="testimonial-name">Alex M.</div><div class="testimonial-type" data-i18n="testi.2.type">ENFP · 处女座</div></div></div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text" data-i18n="testi.3.text">"看到紫微斗数和西方星盘、MBTI 融合在一起，真的很有创新性。"</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">☯️</div><div><div class="testimonial-name">Wei L.</div><div class="testimonial-type" data-i18n="testi.3.type">INTJ · 摩羯座</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><div class="divider-line"></div><span class="divider-glyph">☲</span><div class="divider-line"></div></div>
+
+  <!-- Pricing -->
+  <section class="section" id="pricing">
+    <div class="section-header">
+      <span class="section-sigil">☲</span>
+      <h2 data-i18n="price.title">Choose Your Depth</h2>
+      <div class="section-header-cn" data-i18n="price.title.cn">择 道 而 行</div>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-tier" data-i18n="price.free.tier">入门</div>
+        <div class="price-cost"><span class="price-dollar">$</span><span class="price-amount">0</span></div>
+        <div class="price-period" data-i18n="price.free.period">永久免费</div>
+        <ul class="price-features"><li data-i18n="price.free.f1">基础灵魂画像</li><li data-i18n="price.free.f2">一句话描述</li><li data-i18n="price.free.f3">每日1条洞察</li><li data-i18n="price.free.f4">分享给朋友</li></ul>
+        <button class="btn-price btn-price-ghost" onclick="openModal()" data-i18n="price.free.btn">开始探索</button>
+      </div>
+      <div class="price-card price-card-popular">
+        <div class="price-badge" data-i18n="price.prem.badge">最受欢迎</div>
+        <div class="price-tier" data-i18n="price.prem.tier">深度</div>
+        <div class="price-cost"><span class="price-dollar">$</span><span class="price-amount">3.99</span></div>
+        <div class="price-period" data-i18n="price.prem.period">/月</div>
+        <ul class="price-features"><li data-i18n="price.prem.f1">完整7维度分析</li><li data-i18n="price.prem.f2">无限关系报告</li><li data-i18n="price.prem.f3">每日个性化洞察</li><li data-i18n="price.prem.f4">深度星盘解读</li><li data-i18n="price.prem.f5">AI面相手相</li><li data-i18n="price.prem.f6">紫微斗数</li><li data-i18n="price.prem.f7">AI优先响应</li></ul>
+        <button class="btn-price btn-price-primary" data-i18n="price.prem.btn">立即订阅</button>
+      </div>
+      <div class="price-card">
+        <div class="price-tier" data-i18n="price.ann.tier">年度</div>
+        <div class="price-cost"><span class="price-dollar">$</span><span class="price-amount">29.99</span></div>
+        <div class="price-period" data-i18n="price.ann.period">/年（省37%）</div>
+        <ul class="price-features"><li data-i18n="price.ann.f1">深度版全部功能</li><li data-i18n="price.ann.f2">年度进化报告</li><li data-i18n="price.ann.f3">独家内容</li><li data-i18n="price.ann.f4">抢先体验</li></ul>
+        <button class="btn-price btn-price-ghost" data-i18n="price.ann.btn">年度订阅</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Altar -->
+  <section class="altar">
+    <div class="altar-sigil">☯</div>
+    <h2 data-i18n="altar.title">遇见你的灵魂</h2>
+    <div class="altar-cn" data-i18n="altar.cn">万 象 归 一 · 命 由 己 造</div>
+    <p data-i18n="altar.desc">免费 · 无需注册 · 2分钟 · 你的多维自我正在等待</p>
+    <button class="btn-cta" style="font-size:14px;padding:14px 36px" onclick="openModal()" data-i18n="altar.btn">✦ 免费生成灵魂画像</button>
+  </section>
+
+  <!-- Result Display (populated by app.js after profile generation) -->
+  <section class="section" id="resultSection" style="display:none">
+    <div id="loadingState">
+      <div style="text-align:center;padding:40px 0">
+        <div class="loading-rings" style="margin:0 auto 20px"><div></div><div></div><div></div><span class="loading-char">命</span></div>
+        <p style="font-size:14px;color:var(--ink-muted);margin-bottom:16px" data-i18n="loading.msg">Fusing 7 dimensions of your soul...</p>
+        <div style="width:200px;height:3px;background:var(--surface-2);border-radius:2px;margin:0 auto;overflow:hidden">
+          <div id="loadingBar" style="height:100%;background:linear-gradient(90deg,var(--gold),var(--violet));border-radius:2px;width:0%;transition:width .4s"></div>
+        </div>
+        <div id="loadingSteps" style="margin-top:16px;font-size:12px;color:var(--ink-faint)">
+          <div class="ls-item">Calculating natal chart...</div>
+          <div class="ls-item">Analyzing MBTI functions...</div>
+          <div class="ls-item">Mapping Zi Wei stars...</div>
+          <div class="ls-item">Fusing with AI...</div>
+          <div class="ls-item">Generating soul portrait...</div>
+        </div>
+      </div>
+    </div>
+    <div id="resultState" style="display:none">
+      <div style="background:var(--surface-1);border:1px solid var(--hairline);border-radius:var(--r-2xl);padding:var(--sp-7);text-align:center;max-width:640px;margin:0 auto">
+        <div style="font-size:11px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:var(--sp-4)">YOUR SOUL PROFILE</div>
+        <h2 id="resultKeywords" style="font-family:var(--font-display);font-size:28px;font-weight:400;color:var(--ink-strong);letter-spacing:-1px;margin-bottom:var(--sp-3)"></h2>
+        <p id="resultPortrait" style="font-size:15px;color:var(--ink-body);line-height:1.7;font-style:italic;margin-bottom:var(--sp-5)"></p>
+        <div id="resultZodiac" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:var(--sp-5)"></div>
+
+        <!-- Reasoning Chain -->
+        <div id="resultReasoning" style="display:none;text-align:left;margin-bottom:var(--sp-5)">
+          <div style="font-size:11px;color:var(--violet);letter-spacing:1px;font-weight:600;margin-bottom:var(--sp-3)">✦ REASONING PROCESS</div>
+          <div id="reasoningChain"></div>
+          <div id="reasoningConvergence" style="display:none;margin-top:var(--sp-4);padding:var(--sp-4);background:var(--surface-2);border-radius:var(--r-lg);text-align:center">
+            <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:var(--sp-2)">CROSS-VALIDATION</div>
+            <div id="convergenceText" style="font-size:13px;color:var(--ink-body);line-height:1.7"></div>
+          </div>
+        </div>
+
+        <!-- Core Traits -->
+        <div style="text-align:left;margin-bottom:var(--sp-5)">
+          <h3 style="font-size:14px;color:var(--gold);font-weight:500;margin-bottom:var(--sp-3);letter-spacing:-0.14px">✦ Core Traits</h3>
+          <div id="resultTraits"></div>
+        </div>
+
+        <!-- Shadow Side -->
+        <div style="text-align:left;margin-bottom:var(--sp-5)">
+          <h3 style="font-size:14px;color:var(--coral);font-weight:500;margin-bottom:var(--sp-3);letter-spacing:-0.14px">◐ Shadow Side</h3>
+          <div id="resultShadows"></div>
+        </div>
+
+        <!-- Life Theme -->
+        <div style="text-align:left;margin-bottom:var(--sp-5)">
+          <h3 style="font-size:14px;color:var(--teal);font-weight:500;margin-bottom:var(--sp-3);letter-spacing:-0.14px">✧ Life Theme</h3>
+          <p id="resultTheme" style="font-size:14px;color:var(--ink-body);line-height:1.7;padding:var(--sp-4);background:var(--surface-2);border-radius:var(--r-lg);border-left:2px solid var(--teal)"></p>
+        </div>
+
+        <!-- Daily Insight -->
+        <div style="text-align:left;margin-bottom:var(--sp-5)">
+          <h3 style="font-size:14px;color:var(--gold);font-weight:500;margin-bottom:var(--sp-3);letter-spacing:-0.14px">☀ Today's Insight</h3>
+          <p id="resultDaily" style="font-size:14px;color:var(--ink-body);line-height:1.7;padding:var(--sp-4);background:var(--surface-2);border-radius:var(--r-lg);border-left:2px solid var(--gold)"></p>
+        </div>
+
+        <!-- Extra info -->
+        <div id="resultExtra"></div>
+
+        <!-- Next Steps -->
+        <div id="resultNextSteps"></div>
+
+        <!-- CTA -->
+        <div style="margin-top:var(--sp-6);padding-top:var(--sp-5);border-top:1px solid var(--hairline)">
+          <button class="btn-hero btn-hero-primary" onclick="shareProfile()" style="margin-right:8px">✦ Share Profile</button>
+          <button class="btn-hero btn-hero-ghost" onclick="resetProfile()">← Start Over</button>
+          <div class="feedback-bar" style="display:flex;align-items:center;gap:8px;margin-top:var(--sp-4);padding:var(--sp-3);background:var(--surface-2);border-radius:var(--r-lg);justify-content:center">
+            <span style="font-size:12px;color:var(--ink-muted)">How accurate?</span>
+            <button class="btn-hero btn-hero-ghost" style="padding:6px 12px;font-size:12px" onclick="submitFeedback('accurate',this)">👍 准</button>
+            <button class="btn-hero btn-hero-ghost" style="padding:6px 12px;font-size:12px" onclick="submitFeedback('inaccurate',this)">👎 不准</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo">✦ SOUL COSMOS</div>
+      <div class="footer-links"><a href="#" data-i18n="footer.privacy">隐私政策</a><a href="#" data-i18n="footer.terms">服务条款</a><a href="#" data-i18n="footer.contact">联系我们</a></div>
+      <div class="footer-copy" data-i18n="footer.copy">© 2026 Soul Cosmos</div>
+    </div>
+  </footer>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-step active" id="mStep1">
+        <h3 data-i18n="modal.1.title">✦ 你的出生信息</h3>
+        <p data-i18n="modal.1.desc">我们需要这些来计算你的星盘、八字和紫微命盘。</p>
+        <div class="form-row">
+          <div class="form-group"><label data-i18n="modal.birth">出生日期</label><input type="date" id="birthDate" value="1995-06-15"></div>
+          <div class="form-group"><label data-i18n="modal.time">出生时间</label><input type="time" id="birthTime" value="14:30"></div>
+        </div>
+        <div class="form-group"><label data-i18n="modal.city">出生城市</label>
+          <select id="birthCity"><option value="shanghai">上海</option><option value="beijing">北京</option><option value="guangzhou">广州</option><option value="shenzhen">深圳</option><option value="chengdu">成都</option><option value="hangzhou">杭州</option><option value="new_york">New York</option><option value="los_angeles">Los Angeles</option><option value="london">London</option><option value="tokyo">Tokyo</option></select>
+        </div>
+        <div class="form-group"><label data-i18n="modal.gender">性别</label>
+          <select id="birthGender"><option value="unknown" data-i18n="modal.gender.unknown">不便透露</option><option value="male" data-i18n="modal.gender.male">男</option><option value="female" data-i18n="modal.gender.female">女</option><option value="nonbinary" data-i18n="modal.gender.nb">非二元</option></select>
+        </div>
+        <button class="btn-modal" onclick="mStep(2)" data-i18n="modal.continue">继续 →</button>
+      </div>
+      <div class="modal-step" id="mStep2">
+        <h3 data-i18n="modal.2.title">✦ 你的 MBTI 类型</h3>
+        <p data-i18n="modal.2.desc">选择你的类型，与星盘融合分析。</p>
+        <div class="mbti-grid">
+          <button class="mbti-btn" data-type="INTJ">INTJ<small>建筑师</small></button><button class="mbti-btn" data-type="INTP">INTP<small>逻辑学家</small></button><button class="mbti-btn" data-type="ENTJ">ENTJ<small>指挥官</small></button><button class="mbti-btn" data-type="ENTP">ENTP<small>辩论家</small></button>
+          <button class="mbti-btn" data-type="INFJ">INFJ<small>提倡者</small></button><button class="mbti-btn" data-type="INFP">INFP<small>调停者</small></button><button class="mbti-btn" data-type="ENFJ">ENFJ<small>主人公</small></button><button class="mbti-btn" data-type="ENFP">ENFP<small>竞选者</small></button>
+          <button class="mbti-btn" data-type="ISTJ">ISTJ<small>物流师</small></button><button class="mbti-btn" data-type="ISFJ">ISFJ<small>守卫者</small></button><button class="mbti-btn" data-type="ESTJ">ESTJ<small>总经理</small></button><button class="mbti-btn" data-type="ESFJ">ESFJ<small>执政官</small></button>
+          <button class="mbti-btn" data-type="ISTP">ISTP<small>鉴赏家</small></button><button class="mbti-btn" data-type="ISFP">ISFP<small>探险家</small></button><button class="mbti-btn" data-type="ESTP">ESTP<small>企业家</small></button><button class="mbti-btn" data-type="ESFP">ESFP<small>表演者</small></button>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-modal-back" onclick="mStep(1)" data-i18n="modal.back">← 返回</button>
+          <button class="btn-modal" id="btnGenerate" disabled data-i18n="modal.gen.disabled">请先选择类型</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-rings"><div></div><div></div><div></div><span class="loading-char">命</span></div>
+    <div class="loading-msg" data-i18n="loading.msg">Fusing 7 dimensions of your soul...</div>
+    <div class="loading-msg-cn" data-i18n="loading.msg.cn">正 在 融 合 七 维 灵 魂 · · ·</div>
+  </div>
+
+  <!-- Backend JS Modules -->
+  <script src="js/astrology.js"></script>
+  <script src="js/iching.js"></script>
+  <script src="js/profile.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/share.js"></script>
+  <script src="js/network.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    /* === i18n === */
+    const I18N={zh:{'nav.features':'功能','nav.process':'流程','nav.pricing':'定价','nav.cta':'✦ 开始探索','hero.subtitle':'✦ 东西方命理融合 AI ✦','hero.title':'Soul Cosmos','hero.title.cn':'灵 魂 宇 宙','hero.desc':'融合西方星盘、紫微斗数、易经、MBTI、面相手相、血型与心理学七大智慧体系，以 AI 交叉验证，为你呈现前所未有的多维灵魂画像。','hero.cta':'✦ 免费生成灵魂画像','hero.learn':'探索七大维度 ↓','stat.systems':'智慧体系','stat.engine':'融合引擎','stat.profiles':'独特画像','stat.time':'即刻洞见','tarot.western.name':'Western Astrology','tarot.western.cn':'西方星盘','tarot.ziwei.name':'Zi Wei Dou Shu','tarot.ziwei.cn':'紫微斗数','tarot.iching.name':'I Ching','tarot.iching.cn':'易经六十四卦','tarot.mbti.name':'MBTI Psychology','tarot.mbti.cn':'人格心理学','tarot.1.title':'Scorpio','tarot.1.sub':'天 蝎 · 冥 王','tarot.1.desc':'Deep perception, transformation, magnetic intensity','tarot.2.title':'Zi Wei','tarot.2.sub':'紫 微 星 · 帝 王','tarot.2.desc':'帝王之星 — 权威、命运、命宫映射','tarot.3.title':'I Ching','tarot.3.sub':'乾 · 天 · 刚 健','tarot.3.desc':'五千年中国智慧 — 六十四卦人生原型','tarot.4.title':'INTJ','tarot.4.sub':'策 略 家 · 独 立','tarot.4.desc':'认知架构与天体蓝图的融合','dim.title':'Seven Dimensions of Self','dim.title.cn':'七 维 灵 魂 光 谱','dim.subtitle':'大多数 App 只给你一个视角。我们给你完整的光谱。','dim.astro.name':'Astrology','dim.astro.cn':'西 方 星 盘','dim.astro.desc':'太阳、月亮、上升。你灵魂的天体蓝图。','dim.astro.tag':'星盘级深度','dim.ziwei.name':'Zi Wei Dou Shu','dim.ziwei.cn':'紫 微 斗 数','dim.ziwei.desc':'帝王之学，1400年星象体系，14颗主星。','dim.ziwei.tag':'东方智慧','dim.iching.name':'I Ching','dim.iching.cn':'易 经 六 十 四 卦','dim.iching.desc':'六十四卦揭示你的人生原型。','dim.iching.tag':'古老神谕','dim.mbti.name':'MBTI','dim.mbti.cn':'人 格 心 理 学','dim.mbti.desc':'认知功能栈与天体数据融合。','dim.mbti.tag':'心理学+星象','dim.palm.name':'Palm Reading','dim.palm.cn':'AI 手 相 分 析','dim.palm.desc':'CV 模型读取你的掌纹。','dim.palm.tag':'AI 驱动','dim.face.name':'Face Reading','dim.face.cn':'AI 面 相 分 析','dim.face.desc':'中国面相学的 AI 视角。','dim.face.tag':'AI 驱动','dim.blood.name':'Blood Type','dim.blood.cn':'血 型 人 格','dim.blood.desc':'东亚人格理论。','dim.blood.tag':'东亚科学','dim.psych.name':'Psychology','dim.psych.cn':'社 会 心 理 学','dim.psych.desc':'大五人格、依恋、爱的语言。','dim.psych.tag':'科学验证','fusion.title':'AI Fusion Engine','fusion.title.cn':'交 叉 验 证 · 殊 途 同 归','fusion.label':'灵魂画像','steps.title':'The Ritual','steps.title.cn':'启 示 之 路','steps.subtitle':'从输入到洞察，60秒搞定。','step.1.title':'出生信息','step.1.desc':'日期、时间、城市、性别。','step.2.title':'MBTI 类型','step.2.desc':'选择或快速测试。','step.3.title':'AI 融合','step.3.desc':'七大体系交叉验证。','step.4.title':'灵魂画像','step.4.desc':'关键词、特质、阴影、洞察。','proof.1':'本周生成画像','proof.2':'用户认为准确','proof.3':'智慧体系融合','testi.title':'Seekers Speak','testi.title.cn':'探 索 者 之 声','testi.1.text':'"Soul Cosmos 是第一个让我觉得它真正认识我的 App。"','testi.1.type':'INFJ · 天蝎座','testi.2.text':'"MBTI 和星盘的融合让我震惊。它解释了我一直以来的矛盾。"','testi.2.type':'ENFP · 处女座','testi.3.text':'"看到紫微斗数和西方星盘融合，真的很有创新性。"','testi.3.type':'INTJ · 摩羯座','price.title':'Choose Your Depth','price.title.cn':'择 道 而 行','price.free.tier':'入门','price.free.period':'永久免费','price.free.f1':'基础灵魂画像','price.free.f2':'一句话描述','price.free.f3':'每日1条洞察','price.free.f4':'分享给朋友','price.free.btn':'开始探索','price.prem.tier':'深度','price.prem.badge':'最受欢迎','price.prem.period':'/月','price.prem.f1':'完整7维度分析','price.prem.f2':'无限关系报告','price.prem.f3':'每日个性化洞察','price.prem.f4':'深度星盘解读','price.prem.f5':'AI面相手相','price.prem.f6':'紫微斗数','price.prem.f7':'AI优先响应','price.prem.btn':'立即订阅','price.ann.tier':'年度','price.ann.period':'/年（省37%）','price.ann.f1':'深度版全部功能','price.ann.f2':'年度进化报告','price.ann.f3':'独家内容','price.ann.f4':'抢先体验','price.ann.btn':'年度订阅','altar.title':'遇见你的灵魂','altar.cn':'万 象 归 一 · 命 由 己 造','altar.desc':'免费 · 无需注册 · 2分钟 · 你的多维自我正在等待','altar.btn':'✦ 免费生成灵魂画像','footer.privacy':'隐私政策','footer.terms':'服务条款','footer.contact':'联系我们','footer.copy':'© 2026 Soul Cosmos · 用星尘与古老智慧打造','modal.1.title':'✦ 你的出生信息','modal.1.desc':'我们需要这些来计算你的星盘、八字和紫微命盘。','modal.birth':'出生日期','modal.time':'出生时间','modal.city':'出生城市','modal.gender':'性别','modal.gender.unknown':'不便透露','modal.gender.male':'男','modal.gender.female':'女','modal.gender.nb':'非二元','modal.continue':'继续 →','modal.2.title':'✦ 你的 MBTI 类型','modal.2.desc':'选择你的类型，与星盘融合分析。','modal.back':'← 返回','modal.gen.disabled':'请先选择类型','modal.gen.ready':'✦ 生成灵魂画像 →','mbti.INTJ':'建筑师','mbti.INTP':'逻辑学家','mbti.ENTJ':'指挥官','mbti.ENTP':'辩论家','mbti.INFJ':'提倡者','mbti.INFP':'调停者','mbti.ENFJ':'主人公','mbti.ENFP':'竞选者','mbti.ISTJ':'物流师','mbti.ISFJ':'守卫者','mbti.ESTJ':'总经理','mbti.ESFJ':'执政官','mbti.ISTP':'鉴赏家','mbti.ISFP':'探险家','mbti.ESTP':'企业家','mbti.ESFP':'表演者','loading.msg':'Fusing 7 dimensions of your soul...','loading.msg.cn':'正 在 融 合 七 维 灵 魂 · · ·','alert.generated':'灵魂画像已生成！正式版将展示完整的多维灵魂分析结果。'},
+    en:{'nav.features':'Features','nav.process':'Process','nav.pricing':'Pricing','nav.cta':'✦ Begin','hero.subtitle':'✦ East Meets West Personality AI ✦','hero.title':'Soul Cosmos','hero.title.cn':'SOUL COSMOS','hero.desc':'Seven wisdom systems — Astrology, Zi Wei Dou Shu, I Ching, MBTI, Palm Reading, Blood Type, and Psychology — fused by AI into one unified portrait.','hero.cta':'✦ Generate My Soul Profile — Free','hero.learn':'Explore Seven Dimensions ↓','stat.systems':'Wisdom Systems','stat.engine':'Fusion Engine','stat.profiles':'Unique Profiles','stat.time':'To Insight','tarot.western.name':'Western Astrology','tarot.western.cn':'ASTROLOGY','tarot.ziwei.name':'Zi Wei Dou Shu','tarot.ziwei.cn':'ZI WEI','tarot.iching.name':'I Ching','tarot.iching.cn':'I CHING','tarot.mbti.name':'MBTI Psychology','tarot.mbti.cn':'MBTI','tarot.1.title':'Scorpio','tarot.1.sub':'Scorpio · Pluto','tarot.1.desc':'Deep perception, transformation, magnetic intensity','tarot.2.title':'Zi Wei','tarot.2.sub':'Emperor Star · Destiny','tarot.2.desc':'The Emperor Star — authority, destiny, life palace mapping','tarot.3.title':'I Ching','tarot.3.sub':'Heaven · Strength','tarot.3.desc':'5,000 years of Chinese wisdom — 64 hexagrams of life archetypes','tarot.4.title':'INTJ','tarot.4.sub':'Strategist · Independent','tarot.4.desc':'Cognitive architecture fused with celestial blueprint','dim.title':'Seven Dimensions of Self','dim.title.cn':'SEVEN DIMENSIONS','dim.subtitle':'Most apps give you one lens. We give you the full spectrum.','dim.astro.name':'Astrology','dim.astro.cn':'WESTERN ASTROLOGY','dim.astro.desc':'Sun, Moon, Rising. The celestial blueprint of your soul.','dim.astro.tag':'Co-Star depth','dim.ziwei.name':'Zi Wei Dou Shu','dim.ziwei.cn':'ZI WEI DOU SHU','dim.ziwei.desc':'1,400 years of Chinese star mapping. 14 main stars.','dim.ziwei.tag':'Eastern wisdom','dim.iching.name':'I Ching','dim.iching.cn':'I CHING · 64 HEXAGRAMS','dim.iching.desc':'64 hexagrams revealing your life archetype.','dim.iching.tag':'Ancient oracle','dim.mbti.name':'MBTI','dim.mbti.cn':'MBTI PSYCHOLOGY','dim.mbti.desc':'Cognitive stack fused with celestial data.','dim.mbti.tag':'Psychology + Stars','dim.palm.name':'Palm Reading','dim.palm.cn':'AI PALM READING','dim.palm.desc':'CV model reads your palm lines.','dim.palm.tag':'AI-powered','dim.face.name':'Face Reading','dim.face.cn':'AI FACE READING','dim.face.desc':'Chinese physiognomy through AI lens.','dim.face.tag':'AI-powered','dim.blood.name':'Blood Type','dim.blood.cn':'BLOOD TYPE','dim.blood.desc':'East Asian personality theory.','dim.blood.tag':'East Asian','dim.psych.name':'Psychology','dim.psych.cn':'SOCIAL PSYCHOLOGY','dim.psych.desc':'Big Five, attachment, love language.','dim.psych.tag':'Evidence-based','fusion.title':'AI Fusion Engine','fusion.title.cn':'CROSS-VALIDATED · CONVERGENT','fusion.label':'SOUL PORTRAIT','steps.title':'The Ritual','steps.title.cn':'PATH TO REVELATION','steps.subtitle':'From input to insight in 60 seconds.','step.1.title':'Birth Info','step.1.desc':'Date, time, city, gender.','step.2.title':'MBTI Type','step.2.desc':'Select or take a quick quiz.','step.3.title':'AI Fusion','step.3.desc':'Seven systems cross-validated.','step.4.title':'Your Portrait','step.4.desc':'Keywords, traits, shadows, insights.','proof.1':'profiles this week','proof.2':'find it accurate','proof.3':'systems fused','testi.title':'Seekers Speak','testi.title.cn':'WHAT SEEKERS SAY','testi.1.text':'"Soul Cosmos is the first app that actually felt like it KNEW me."','testi.1.type':'INFJ · Scorpio','testi.2.text':'"The fusion of MBTI and astrology blew my mind."','testi.2.type':'ENFP · Virgo','testi.3.text':'"Seeing Zi Wei fused with Western astrology is genuinely innovative."','testi.3.type':'INTJ · Capricorn','price.title':'Choose Your Depth','price.title.cn':'CHOOSE YOUR PATH','price.free.tier':'Free','price.free.period':'forever','price.free.f1':'Basic Soul Profile','price.free.f2':'One-sentence portrait','price.free.f3':'1 daily insight','price.free.f4':'Share with friends','price.free.btn':'Get Started','price.prem.tier':'Premium','price.prem.badge':'Most Popular','price.prem.period':'/month','price.prem.f1':'Full 7-dimension analysis','price.prem.f2':'Unlimited reports','price.prem.f3':'Daily insights','price.prem.f4':'Deep natal chart','price.prem.f5':'AI palm & face','price.prem.f6':'Zi Wei analysis','price.prem.f7':'Priority AI','price.prem.btn':'Subscribe Now','price.ann.tier':'Annual','price.ann.period':'/year (save 37%)','price.ann.f1':'Everything in Premium','price.ann.f2':'Yearly evolution report','price.ann.f3':'Exclusive content','price.ann.f4':'Early access','price.ann.btn':'Subscribe Annual','altar.title':'Meet Your Soul','altar.cn':'ALL THINGS CONVERGE · YOUR DESTINY IS YOURS','altar.desc':'Free · No signup · 2 minutes · Your multi-dimensional self awaits','altar.btn':'✦ Generate My Soul Profile','footer.privacy':'Privacy','footer.terms':'Terms','footer.contact':'Contact','footer.copy':'© 2026 Soul Cosmos · Built with stardust','modal.1.title':'✦ Your Birth Info','modal.1.desc':'We need this to calculate your natal chart and Zi Wei chart.','modal.birth':'Birth Date','modal.time':'Birth Time','modal.city':'Birth City','modal.gender':'Gender','modal.gender.unknown':'Prefer not to say','modal.gender.male':'Male','modal.gender.female':'Female','modal.gender.nb':'Non-binary','modal.continue':'Continue →','modal.2.title':'✦ Your MBTI Type','modal.2.desc':'Select your type to fuse with your astrological profile.','modal.back':'← Back','modal.gen.disabled':'Select your type first','modal.gen.ready':'✦ Generate Soul Profile →','mbti.INTJ':'Architect','mbti.INTP':'Logician','mbti.ENTJ':'Commander','mbti.ENTP':'Debater','mbti.INFJ':'Advocate','mbti.INFP':'Mediator','mbti.ENFJ':'Protagonist','mbti.ENFP':'Campaigner','mbti.ISTJ':'Logistician','mbti.ISFJ':'Defender','mbti.ESTJ':'Executive','mbti.ESFJ':'Consul','mbti.ISTP':'Virtuoso','mbti.ISFP':'Adventurer','mbti.ESTP':'Entrepreneur','mbti.ESFP':'Entertainer','loading.msg':'Fusing 7 dimensions of your soul...','loading.msg.cn':'FUSING SEVEN DIMENSIONS...','alert.generated':'Soul Profile generated! Full version will show your complete analysis.'}};
+    let isZh=true;
+    function t(k){return I18N[isZh?'zh':'en'][k]||k}
+    function applyLang(){
+      document.querySelectorAll('[data-i18n]').forEach(el=>{const v=t(el.dataset.i18n);if(v)el.textContent=v});
+      document.querySelectorAll('.mbti-btn[data-type]').forEach(btn=>{const s=btn.querySelector('small');if(s)s.textContent=t('mbti.'+btn.dataset.type)});
+      if(selectedMBTI)document.getElementById('btnGenerate').textContent=t('modal.gen.ready');
+      document.title=isZh?'Soul Cosmos — 灵魂宇宙':'Soul Cosmos — Discover Your Soul';
+    }
+    function toggleLang(){isZh=!isZh;document.getElementById('langBtn').textContent=isZh?'EN':'中文';applyLang()}
+
+    /* === Stars === */
+    const cv=document.getElementById('starBg'),cx=cv.getContext('2d');let stars=[];
+    function rBg(){cv.width=innerWidth;cv.height=innerHeight}
+    function cStars(){stars=[];for(let i=0;i<280;i++)stars.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1+.3,a:Math.random()*.5+.1,s:Math.random()*.01+.002,t:Math.random()>.7})}
+    function dBg(){cx.clearRect(0,0,cv.width,cv.height);stars.forEach(s=>{if(s.t)s.a+=Math.sin(Date.now()*s.s)*.006;s.a=Math.max(.03,Math.min(.7,s.a));cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);cx.fillStyle=`rgba(255,255,255,${s.a})`;cx.fill()});requestAnimationFrame(dBg)}
+    rBg();cStars();dBg();addEventListener('resize',()=>{rBg();cStars()});
+
+    /* === Nav === */
+    addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',scrollY>60)});
+
+    /* === MBTI === */
+    let selectedMBTI=null;
+    document.querySelectorAll('.mbti-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.mbti-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');selectedMBTI=btn.dataset.type;const g=document.getElementById('btnGenerate');g.disabled=false;g.textContent=t('modal.gen.ready')})});
+
+    /* === Modal === */
+    function openModal(){document.getElementById('modalOverlay').classList.add('active');mStep(1)}
+    function closeModal(){document.getElementById('modalOverlay').classList.remove('active')}
+    function mStep(n){document.querySelectorAll('.modal-step').forEach(s=>s.classList.remove('active'));document.getElementById('mStep'+n).classList.add('active')}
+    document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+
+    /* === Generate (real backend integration) === */
+    document.getElementById('btnGenerate').addEventListener('click', function() {
+      if (!selectedMBTI) return;
+      closeModal();
+
+      // Show result section with loading state
+      const section = document.getElementById('resultSection');
+      const loadingState = document.getElementById('loadingState');
+      const resultState = document.getElementById('resultState');
+      section.style.display = '';
+      loadingState.style.display = '';
+      resultState.style.display = 'none';
+      section.scrollIntoView({ behavior: 'smooth' });
+
+      // Animate loading bar
+      const loadingBar = document.getElementById('loadingBar');
+      const lsItems = document.querySelectorAll('.ls-item');
+      let progress = 0;
+      const loadingInterval = setInterval(() => {
+        progress += Math.random() * 8 + 3;
+        if (progress > 90) progress = 90;
+        loadingBar.style.width = progress + '%';
+        const stepIdx = Math.floor((progress / 90) * lsItems.length);
+        lsItems.forEach((s, i) => s.style.opacity = i <= stepIdx ? '1' : '0.3');
+      }, 400);
+
+      // Gather birth data
+      const birthDate = document.getElementById('birthDate').value;
+      const birthTime = document.getElementById('birthTime').value;
+      const birthCity = document.getElementById('birthCity').value;
+      const gender = document.getElementById('birthGender').value;
+
+      // Compute local charts
+      let natalChart, ziweiChart, ichingInfo;
+      try {
+        natalChart = Astrology.getNatalChart(birthDate, birthTime, birthCity);
+        ziweiChart = Astrology.getZiweiChart(birthDate);
+        const hex = IChing.getHexagramByBirth(birthDate, birthTime);
+        ichingInfo = IChing.getHexagramInfo(hex);
+      } catch (e) {
+        console.warn('Local calculation error:', e);
+      }
+
+      // Call backend
+      const API_BASE = window.location.origin;
+      fetch(API_BASE + '/api/harness-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          natalChart, mbtiType: selectedMBTI, ziweiChart,
+          iching: ichingInfo, lang: isZh ? 'zh' : 'en', gender,
+          birthDate, birthTime
+        })
+      })
+      .then(r => r.json())
+      .then(data => {
+        clearInterval(loadingInterval);
+        loadingBar.style.width = '100%';
+
+        if (data.error) throw new Error(data.error);
+
+        // If cached result, show immediately
+        if (data.cached && data.profile) {
+          showResult(data.profile, natalChart, ziweiChart);
+        } else if (data.requestId) {
+          // Poll for fusion result
+          pollForResult(data.requestId, natalChart, ziweiChart);
+        } else {
+          // Use local fallback
+          const profile = ProfileEngine.generate(natalChart, selectedMBTI, ziweiChart);
+          showResult(profile, natalChart, ziweiChart);
+        }
+      })
+      .catch(err => {
+        console.warn('Backend error, using local fallback:', err);
+        clearInterval(loadingInterval);
+        loadingBar.style.width = '100%';
+        const profile = ProfileEngine.generate(natalChart, selectedMBTI, ziweiChart);
+        showResult(profile, natalChart, ziweiChart);
+      });
+    });
+
+    function pollForResult(requestId, natalChart, ziweiChart) {
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
+        if (attempts > 25) {
+          clearInterval(poll);
+          const profile = ProfileEngine.generate(natalChart, selectedMBTI, ziweiChart);
+          showResult(profile, natalChart, ziweiChart);
+          return;
+        }
+        try {
+          const res = await fetch('/api/fusion/' + requestId);
+          const data = await res.json();
+          if (data.status === 'ready' && data.profile) {
+            clearInterval(poll);
+            showResult(data.profile, natalChart, ziweiChart);
+          } else if (data.status === 'failed') {
+            clearInterval(poll);
+            const profile = ProfileEngine.generate(natalChart, selectedMBTI, ziweiChart);
+            showResult(profile, natalChart, ziweiChart);
+          }
+        } catch (e) {}
+      }, 2000);
+    }
+
+    function showResult(profile, natalChart, ziweiChart) {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('resultState').style.display = '';
+
+      // Keywords
+      const keywords = profile.soulKeywords || profile.keywords || [];
+      document.getElementById('resultKeywords').textContent = keywords.join(' · ');
+
+      // Portrait
+      document.getElementById('resultPortrait').textContent = profile.oneSentencePortrait || profile.portrait || '';
+
+      // Zodiac tags
+      const zodiacEl = document.getElementById('resultZodiac');
+      zodiacEl.innerHTML = '';
+      if (natalChart) {
+        ['☀ ' + natalChart.sun.name, '☽ ' + natalChart.moon.name, '↑ ' + natalChart.rising.name, '🧠 ' + selectedMBTI].forEach(t => {
+          const tag = document.createElement('span');
+          tag.style.cssText = 'padding:4px 10px;background:var(--surface-2);border:1px solid var(--hairline);border-radius:var(--r-pill);font-size:11px;color:var(--ink-muted)';
+          tag.textContent = t;
+          zodiacEl.appendChild(tag);
+        });
+      }
+
+      // Reasoning chain
+      if (profile.reasoningSteps?.length) {
+        const reasoningEl = document.getElementById('resultReasoning');
+        const chainEl = document.getElementById('reasoningChain');
+        reasoningEl.style.display = '';
+        chainEl.innerHTML = profile.reasoningSteps.map((step, i) =>
+          '<div style="padding:8px 0;border-bottom:1px solid var(--hairline);font-size:12px">' +
+          '<div style="color:var(--violet);font-weight:600;margin-bottom:4px">' + (step.icon || '✦') + ' ' + (step.system || '') + '</div>' +
+          '<div style="color:var(--ink-body);line-height:1.6">' + (step.reasoning || '') + '</div>' +
+          (step.conclusion ? '<div style="color:var(--teal);margin-top:4px;padding:4px 8px;background:rgba(93,184,166,0.05);border-radius:var(--r-sm);font-size:11px">→ ' + step.conclusion + '</div>' : '') +
+          '</div>'
+        ).join('');
+      }
+
+      // Traits
+      const traits = profile.coreTraits || profile.traits || [];
+      document.getElementById('resultTraits').innerHTML = traits.map(t =>
+        '<div style="padding:10px 12px;background:var(--surface-2);border-radius:var(--r-lg);margin-bottom:6px;font-size:13px;color:var(--ink-body);line-height:1.6"><strong style="color:var(--ink-strong)">' + t.trait + '</strong> — ' + (t.description || t.desc || '') + '</div>'
+      ).join('');
+
+      // Shadows
+      const shadows = profile.shadows || [];
+      document.getElementById('resultShadows').innerHTML = shadows.map(s =>
+        '<div style="padding:10px 12px;background:var(--surface-2);border-radius:var(--r-lg);margin-bottom:6px;font-size:13px;color:var(--ink-body);line-height:1.6"><strong style="color:var(--coral)">' + s.challenge + '</strong> — ' + (s.description || s.desc || '') + '</div>'
+      ).join('');
+
+      // Theme & Daily
+      document.getElementById('resultTheme').textContent = profile.lifeTheme || '';
+      document.getElementById('resultDaily').textContent = profile.dailyInsight || '';
+
+      // Extra sections
+      const extraEl = document.getElementById('resultExtra');
+      let extra = '';
+      if (profile.careerGuidance) extra += '<div style="text-align:left;margin-bottom:var(--sp-4)"><h3 style="font-size:14px;color:var(--gold);margin-bottom:var(--sp-2)">💼 Career</h3><p style="font-size:13px;color:var(--ink-body);line-height:1.7;padding:var(--sp-3);background:var(--surface-2);border-radius:var(--r-lg)">' + profile.careerGuidance + '</p></div>';
+      if (profile.relationshipStyle) extra += '<div style="text-align:left;margin-bottom:var(--sp-4)"><h3 style="font-size:14px;color:var(--gold);margin-bottom:var(--sp-2)">💕 Relationship</h3><p style="font-size:13px;color:var(--ink-body);line-height:1.7;padding:var(--sp-3);background:var(--surface-2);border-radius:var(--r-lg)">' + profile.relationshipStyle + '</p></div>';
+      if (profile.luckyElements) {
+        const le = profile.luckyElements;
+        extra += '<div style="text-align:left;margin-bottom:var(--sp-4)"><h3 style="font-size:14px;color:var(--gold);margin-bottom:var(--sp-2)">🍀 Lucky Elements</h3><p style="font-size:13px;color:var(--ink-body)">' + ((le.colors||[]).join(', ')) + ' · ' + ((le.numbers||[]).join(', ')) + ' · ' + (le.direction||'') + '</p></div>';
+      }
+      extraEl.innerHTML = extra;
+
+      // Next steps
+      document.getElementById('resultNextSteps').innerHTML =
+        '<div style="margin-top:var(--sp-5);padding-top:var(--sp-4);border-top:1px solid var(--hairline)">' +
+        '<div style="font-size:14px;color:var(--violet);font-weight:500;text-align:center;margin-bottom:var(--sp-4)">🔮 Explore More Dimensions</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+        '<div style="padding:12px;background:var(--surface-2);border:1px solid var(--hairline);border-radius:var(--r-lg);text-align:center;cursor:pointer" onclick="scrollToS(\'features\')"><div style="font-size:20px;margin-bottom:4px">👥</div><div style="font-size:12px;color:var(--ink-strong)">My Circle</div></div>' +
+        '<div style="padding:12px;background:var(--surface-2);border:1px solid var(--hairline);border-radius:var(--r-lg);text-align:center;cursor:pointer" onclick="scrollToS(\'features\')"><div style="font-size:20px;margin-bottom:4px">🏠</div><div style="font-size:12px;color:var(--ink-strong)">Feng Shui</div></div>' +
+        '<div style="padding:12px;background:var(--surface-2);border:1px solid var(--hairline);border-radius:var(--r-lg);text-align:center;cursor:pointer" onclick="scrollToS(\'features\')"><div style="font-size:20px;margin-bottom:4px">🖐️</div><div style="font-size:12px;color:var(--ink-strong)">Face/Palm</div></div>' +
+        '<div style="padding:12px;background:var(--surface-2);border:1px solid var(--hairline);border-radius:var(--r-lg);text-align:center;cursor:pointer" onclick="scrollToS(\'features\')"><div style="font-size:20px;margin-bottom:4px">📅</div><div style="font-size:12px;color:var(--ink-strong)">Weekly Scenes</div></div>' +
+        '</div></div>';
+
+      // Store for sharing
+      window._lastProfile = profile;
+      window._lastNatalChart = natalChart;
+
+      document.getElementById('resultState').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetProfile() {
+      selectedMBTI = null;
+      document.querySelectorAll('.mbti-btn').forEach(b => b.classList.remove('selected'));
+      document.getElementById('btnGenerate').disabled = true;
+      document.getElementById('btnGenerate').textContent = t('modal.gen.disabled');
+      document.getElementById('resultSection').style.display = 'none';
+      document.getElementById('resultState').style.display = 'none';
+      document.getElementById('loadingBar').style.width = '0%';
+    }
+
+    function shareProfile() {
+      if (typeof ShareCard !== 'undefined' && window._lastProfile) {
+        ShareCard.downloadCard(window._lastProfile);
+      } else {
+        const kw = document.getElementById('resultKeywords').textContent;
+        const text = '✦ My Soul Profile: ' + kw + '\n\nDiscover yours at Soul Cosmos ✦';
+        if (navigator.share) navigator.share({ title: 'My Soul Profile', text });
+        else navigator.clipboard.writeText(text).then(() => alert('Copied!'));
+      }
+    }
+
+    function submitFeedback(type, el) {
+      if (typeof Memory !== 'undefined') {
+        Memory.addFeedback('profile', type, document.getElementById('resultPortrait')?.textContent || '');
+      }
+      el.style.background = 'rgba(93,184,166,0.15)';
+      el.style.borderColor = 'var(--teal)';
+    }
+
+    /* === Scroll === */
+    function scrollToS(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'})}
+
+    /* === Init === */
+    applyLang();
+  </script>
+  <script>
+  (function(){
+    var k='sc_visitor_id',id=localStorage.getItem(k);
+    if(!id){id='v_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,id)}
+    var d=JSON.stringify({page:'home-mystic.html',visitor_id:id});
+    if(navigator.sendBeacon){navigator.sendBeacon('/api/analytics/track',new Blob([d],{type:'application/json'}))}
+    else{fetch('/api/analytics/track',{method:'POST',headers:{'Content-Type':'application/json'},body:d,keepalive:true})}
+  })();
+  </script>
+</body>
+</html>
