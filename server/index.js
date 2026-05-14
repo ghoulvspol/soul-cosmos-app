@@ -75,6 +75,7 @@ app.use((req, res, next) => {
 const { callMify, getMifyModel } = require('./mify');
 const { getAvailableProviders } = require('./providers');
 const configStore = require('./config-store');
+const { requireAdmin } = require('./admin-auth');
 
 /**
  * 手动提取（JSON解析失败时的兜底）
@@ -858,17 +859,22 @@ function getMemoryContext() {
 
 /**
  * API: 获取可用模型列表
+ * 未认证时隐藏 available 字段（不暴露哪些 provider 有 key）
  */
 app.get('/api/models', (req, res) => {
   const providers = getAvailableProviders();
   const active = configStore.getActiveModel();
+  const isAdmin = !process.env.ADMIN_API_KEY || req.headers['x-admin-key'] === process.env.ADMIN_API_KEY;
+  if (!isAdmin) {
+    providers.forEach(p => delete p.available);
+  }
   res.json({ success: true, providers, active });
 });
 
 /**
- * API: 切换模型
+ * API: 切换模型（需 admin）
  */
-app.post('/api/models/select', (req, res) => {
+app.post('/api/models/select', requireAdmin, (req, res) => {
   const { provider, model, temperature, maxTokens } = req.body;
   if (!provider) return res.status(400).json({ success: false, error: 'provider required' });
 

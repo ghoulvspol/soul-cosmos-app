@@ -97,7 +97,8 @@
   <!-- Header -->
   <div class="header">
     <h1><span>✦</span> Soul Cosmos 管理后台</h1>
-    <div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <input type="password" id="adminKeyInput" placeholder="Admin Key" style="padding:4px 10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:#e2e8f0;font-size:12px;width:140px;outline:none" title="设置 ADMIN_API_KEY 后需输入密钥">
       <span class="status-badge status-ok" id="statusBadge">● 已连接</span>
     </div>
   </div>
@@ -362,6 +363,25 @@ let currentProvider = 'openai';
 let currentModel = '';
 let logs = [];
 
+// Admin key 管理
+function getAdminKey() {
+  return document.getElementById('adminKeyInput').value || localStorage.getItem('admin_key') || '';
+}
+function getAdminHeaders() {
+  const key = getAdminKey();
+  const h = { 'Content-Type': 'application/json' };
+  if (key) h['X-Admin-Key'] = key;
+  return h;
+}
+// 初始化：从 localStorage 恢复 key
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('admin_key');
+  if (saved) document.getElementById('adminKeyInput').value = saved;
+});
+document.getElementById('adminKeyInput')?.addEventListener('change', (e) => {
+  localStorage.setItem('admin_key', e.target.value);
+});
+
 // ========== Tab 切换 ==========
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -386,7 +406,7 @@ function toast(msg, type = 'ok') {
 // ========== AI 配置 ==========
 async function loadModels() {
   try {
-    const res = await fetch(API + '/api/models');
+    const res = await fetch(API + '/api/models', { headers: getAdminHeaders() });
     const data = await res.json();
     if (!data.success) throw new Error('Failed to load models');
 
@@ -459,7 +479,7 @@ async function saveAIConfig() {
   try {
     const res = await fetch(API + '/api/models/select', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders(),
       body: JSON.stringify({
         provider: currentProvider,
         model: currentModel,
@@ -637,8 +657,8 @@ function clearLogs() {
 async function refreshVisitors() {
   try {
     const [statsRes, pagesRes] = await Promise.all([
-      fetch(API + '/api/analytics/stats'),
-      fetch(API + '/api/analytics/pages'),
+      fetch(API + '/api/analytics/stats', { headers: getAdminHeaders() }),
+      fetch(API + '/api/analytics/pages', { headers: getAdminHeaders() }),
     ]);
     const statsData = await statsRes.json();
     const pagesData = await pagesRes.json();
@@ -743,7 +763,7 @@ function renderPageTable(pages) {
 async function clearVisitors() {
   if (!confirm('确定清除所有访问数据？此操作不可撤销。')) return;
   try {
-    await fetch(API + '/api/analytics/clear', { method: 'DELETE' });
+    await fetch(API + '/api/analytics/clear', { method: 'DELETE', headers: getAdminHeaders() });
     refreshVisitors();
     toast('✅ 访问数据已清除');
     addLog('Visitor data cleared');
