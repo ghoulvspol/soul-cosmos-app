@@ -55,6 +55,7 @@ app.use('/api/stripe', require('./routes/stripe'));
 app.use('/api/daily', require('./routes/daily'));
 app.use('/api/hardware', require('./routes/hardware'));
 app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/admin', require('./routes/admin'));
 
 // CORS — restricted to configured origins
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:8066').split(',');
