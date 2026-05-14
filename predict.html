@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soul Cosmos · 命理预测</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#0a0a14;color:#e2e8f0;min-height:100vh;overflow-x:hidden}
+    .bg-glow{position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(167,139,250,0.08) 0%,transparent 70%);pointer-events:none;z-index:0}
+    .container{max-width:680px;margin:0 auto;padding:24px 20px;position:relative;z-index:1}
+    .header{text-align:center;padding:32px 0 24px}
+    .header h1{font-size:28px;font-weight:700;background:linear-gradient(135deg,#a78bfa,#e879f9,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+    .header p{font-size:14px;color:#94a3b8}
+    .card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;margin-bottom:20px;backdrop-filter:blur(10px)}
+    .card-title{font-size:15px;font-weight:600;color:#a78bfa;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .form-grid .full{grid-column:1/-1}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    .form-group label{font-size:12px;color:#94a3b8;font-weight:500;text-transform:uppercase;letter-spacing:1px}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 16px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#e2e8f0;font-size:14px;outline:none;font-family:inherit;transition:border-color .2s}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#a78bfa}
+    .form-group textarea{min-height:80px;resize:vertical;line-height:1.6}
+    .gender-group{display:flex;gap:10px}
+    .gender-btn{flex:1;padding:12px;text-align:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;cursor:pointer;font-size:14px;transition:all .2s;color:#94a3b8}
+    .gender-btn:hover{border-color:rgba(167,139,250,0.3)}
+    .gender-btn.active{border-color:#a78bfa;background:rgba(167,139,250,0.1);color:#a78bfa;font-weight:600}
+    .system-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .system-card{display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;cursor:pointer;transition:all .2s}
+    .system-card:hover{border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.05)}
+    .system-card.active{border-color:#a78bfa;background:rgba(167,139,250,0.1)}
+    .system-card.locked{border-color:#6366f1;background:rgba(99,102,241,0.1);cursor:default}
+    .system-icon{font-size:24px;width:36px;text-align:center}
+    .system-info{flex:1}
+    .system-name{font-size:14px;font-weight:600;color:#e2e8f0}
+    .system-desc{font-size:11px;color:#64748b;margin-top:2px}
+    .system-check{width:20px;height:20px;border:2px solid rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+    .system-card.active .system-check{border-color:#a78bfa;background:#a78bfa}
+    .system-card.active .system-check::after{content:'✓';color:white;font-size:12px;font-weight:700}
+    .system-card.locked .system-check{border-color:#6366f1;background:#6366f1}
+    .system-card.locked .system-check::after{content:'✓';color:white;font-size:12px;font-weight:700}
+    .predict-btn{width:100%;padding:16px;background:linear-gradient(135deg,#a78bfa,#6366f1);border:none;border-radius:12px;color:white;font-size:16px;font-weight:700;cursor:pointer;transition:all .3s;margin-top:8px}
+    .predict-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(167,139,250,0.3)}
+    .predict-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
+    .predict-btn .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;margin-right:8px;vertical-align:middle}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .result-section{margin-top:24px;animation:slideUp .5s ease}
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .result-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:20px;margin-bottom:14px}
+    .result-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    .result-icon{font-size:28px}
+    .result-title{font-size:16px;font-weight:700;color:#a78bfa}
+    .result-system{font-size:11px;color:#64748b;margin-top:2px}
+    .result-reading{font-size:14px;line-height:1.8;color:#e2e8f0;margin-bottom:12px}
+    .result-advice{display:flex;align-items:flex-start;gap:8px;padding:12px;background:rgba(167,139,250,0.06);border-radius:10px;font-size:13px;color:#c4b5fd;line-height:1.6}
+    .result-advice::before{content:'💡';flex-shrink:0}
+    .result-lucky{display:flex;gap:16px;margin-top:12px}
+    .lucky-item{font-size:12px;color:#64748b}
+    .lucky-item span{color:#a78bfa;font-weight:600}
+    .synthesis-card{background:linear-gradient(135deg,rgba(167,139,250,0.1),rgba(99,102,241,0.1));border:1px solid rgba(167,139,250,0.2);border-radius:16px;padding:24px;margin-top:20px}
+    .synthesis-title{font-size:18px;font-weight:700;color:#a78bfa;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .synthesis-text{font-size:15px;line-height:1.8;color:#e2e8f0;margin-bottom:16px}
+    .synthesis-score{text-align:center;margin:16px 0}
+    .score-circle{display:inline-flex;align-items:center;justify-content:center;width:80px;height:80px;border-radius:50%;border:3px solid #a78bfa;font-size:28px;font-weight:700;color:#a78bfa}
+    .score-label{font-size:12px;color:#64748b;margin-top:8px}
+    .key-insight{padding:14px;background:rgba(255,255,255,0.04);border-radius:10px;font-size:13px;color:#c4b5fd;border-left:3px solid #a78bfa}
+    .footer{text-align:center;padding:32px 0;font-size:12px;color:#4a4560}
+    .lang-toggle{position:fixed;top:16px;right:16px;display:flex;gap:4px;z-index:10}
+    .lang-btn{padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#94a3b8;transition:all .2s}
+    .lang-btn.active{background:rgba(167,139,250,0.2);border-color:#a78bfa;color:#a78bfa}
+    @media(max-width:600px){.form-grid,.system-grid{grid-template-columns:1fr}.container{padding:16px}}
+  </style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="lang-toggle">
+  <div class="lang-btn active" onclick="setLang('zh')">中</div>
+  <div class="lang-btn" onclick="setLang('en')">EN</div>
+</div>
+
+<div class="container">
+  <div class="header">
+    <h1 id="pageTitle">✦ 命理多维预测</h1>
+    <p id="pageSub">融合东方命理与西方星象，AI 为你解读命运密码</p>
+  </div>
+
+  <!-- 个人信息 -->
+  <div class="card">
+    <div class="card-title" id="infoTitle">👤 个人信息</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label id="lblName">姓名</label>
+        <input type="text" id="inpName" placeholder="请输入姓名">
+      </div>
+      <div class="form-group">
+        <label id="lblGender">性别</label>
+        <div class="gender-group">
+          <div class="gender-btn active" data-val="male" onclick="selectGender(this)" id="btnMale">男</div>
+          <div class="gender-btn" data-val="female" onclick="selectGender(this)" id="btnFemale">女</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label id="lblBirthDate">出生日期</label>
+        <input type="date" id="inpBirthDate">
+      </div>
+      <div class="form-group">
+        <label id="lblBirthTime">出生时间</label>
+        <input type="time" id="inpBirthTime">
+      </div>
+      <div class="form-group full">
+        <label id="lblCity">出生地点</label>
+        <input type="text" id="inpCity" placeholder="如：北京、上海、New York">
+      </div>
+    </div>
+  </div>
+
+  <!-- MBTI -->
+  <div class="card">
+    <div class="card-title">🧠 MBTI 性格类型</div>
+    <div class="form-group">
+      <select id="selMBTI">
+        <option value="">-- 选择你的 MBTI 类型 --</option>
+        <option value="INTJ">INTJ - 建筑师</option>
+        <option value="INTP">INTP - 逻辑学家</option>
+        <option value="ENTJ">ENTJ - 指挥官</option>
+        <option value="ENTP">ENTP - 辩论家</option>
+        <option value="INFJ">INFJ - 提倡者</option>
+        <option value="INFP">INFP - 调停者</option>
+        <option value="ENFJ">ENFJ - 主人公</option>
+        <option value="ENFP">ENFP - 竞选者</option>
+        <option value="ISTJ">ISTJ - 物流师</option>
+        <option value="ISFJ">ISFJ - 守卫者</option>
+        <option value="ESTJ">ESTJ - 总经理</option>
+        <option value="ESFJ">ESFJ - 执政官</option>
+        <option value="ISTP">ISTP - 鉴赏家</option>
+        <option value="ISFP">ISFP - 探险家</option>
+        <option value="ESTP">ESTP - 企业家</option>
+        <option value="ESFP">ESFP - 表演者</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 命理系统选择 -->
+  <div class="card">
+    <div class="card-title" id="sysTitle">🔮 选择预测系统</div>
+    <div class="system-grid">
+      <div class="system-card active locked" data-sys="astrology">
+        <div class="system-icon">🌌</div>
+        <div class="system-info"><div class="system-name" id="sysAstro">西方星盘</div><div class="system-desc" id="sysAstroDesc">太阳/月亮/上升星座</div></div>
+        <div class="system-check"></div>
+      </div>
+      <div class="system-card active locked" data-sys="bazi">
+        <div class="system-icon">📜</div>
+        <div class="system-info"><div class="system-name" id="sysBazi">四柱八字</div><div class="system-desc" id="sysBaziDesc">天干地支五行分析</div></div>
+        <div class="system-check"></div>
+      </div>
+      <div class="system-card" data-sys="ziwei" onclick="toggleSystem(this)">
+        <div class="system-icon">☯</div>
+        <div class="system-info"><div class="system-name" id="sysZiwei">紫微斗数</div><div class="system-desc" id="sysZiweiDesc">命宫主星排盘</div></div>
+        <div class="system-check"></div>
+      </div>
+      <div class="system-card" data-sys="iching" onclick="toggleSystem(this)">
+        <div class="system-icon">☯️</div>
+        <div class="system-info"><div class="system-name" id="sysIching">易经</div><div class="system-desc" id="sysIchingDesc">64卦占卜</div></div>
+        <div class="system-check"></div>
+      </div>
+      <div class="system-card" data-sys="tarot" onclick="toggleSystem(this)">
+        <div class="system-icon">🃏</div>
+        <div class="system-info"><div class="system-name" id="sysTarot">塔罗牌</div><div class="system-desc" id="sysTarotDesc">随机抽牌解读</div></div>
+        <div class="system-check"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 所求事项 -->
+  <div class="card">
+    <div class="card-title" id="qTitle">🎯 所求事项</div>
+    <div class="form-group">
+      <select id="selQuestion">
+        <option value="comprehensive">综合运势</option>
+        <option value="career">事业运</option>
+        <option value="love">感情运</option>
+        <option value="wealth">财运</option>
+        <option value="health">健康运</option>
+        <option value="study">学业运</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <textarea id="inpQuestion" placeholder="可选：描述你特别想了解的问题..."></textarea>
+    </div>
+  </div>
+
+  <!-- 预测按钮 -->
+  <button class="predict-btn" id="predictBtn" onclick="startPredict()">
+    <span id="btnText">🔮 开始预测</span>
+  </button>
+
+  <!-- 结果展示 -->
+  <div id="resultArea"></div>
+
+  <div class="footer">Soul Cosmos · AI-Powered Multi-Dimensional Prediction</div>
+</div>
+
+<script>
+const API = window.location.origin;
+let lang = 'zh';
+let selectedGender = 'male';
+const selectedSystems = new Set(['astrology', 'bazi']);
+
+// ===== i18n =====
+const i18n = {
+  zh: {
+    pageTitle: '✦ 命理多维预测',
+    pageSub: '融合东方命理与西方星象，AI 为你解读命运密码',
+    infoTitle: '👤 个人信息', lblName: '姓名', lblGender: '性别', lblBirthDate: '出生日期', lblBirthTime: '出生时间', lblCity: '出生地点',
+    sysTitle: '🔮 选择预测系统', sysAstro: '西方星盘', sysAstroDesc: '太阳/月亮/上升星座', sysBazi: '四柱八字', sysBaziDesc: '天干地支五行分析',
+    sysZiwei: '紫微斗数', sysZiweiDesc: '命宫主星排盘', sysIching: '易经', sysIchingDesc: '64卦占卜', sysTarot: '塔罗牌', sysTarotDesc: '随机抽牌解读',
+    qTitle: '🎯 所求事项', btnText: '🔮 开始预测', btnLoading: '预测中...',
+    male: '男', female: '女', predict: '开始预测',
+  },
+  en: {
+    pageTitle: '✦ Multi-Dimensional Prediction',
+    pageSub: 'Fusing Eastern and Western metaphysics, AI decodes your destiny',
+    infoTitle: '👤 Personal Info', lblName: 'Name', lblGender: 'Gender', lblBirthDate: 'Birth Date', lblBirthTime: 'Birth Time', lblCity: 'Birth City',
+    sysTitle: '🔮 Select Systems', sysAstro: 'Western Astrology', sysAstroDesc: 'Sun/Moon/Rising signs', sysBazi: 'BaZi', sysBaziDesc: 'Four Pillars analysis',
+    sysZiwei: 'Zi Wei Dou Shu', sysZiweiDesc: 'Purple Star Astrology', sysIching: 'I Ching', sysIchingDesc: '64 Hexagrams', sysTarot: 'Tarot', sysTarotDesc: 'Card reading',
+    qTitle: '🎯 Your Question', btnText: '🔮 Start Prediction', btnLoading: 'Predicting...',
+    male: 'Male', female: 'Female', predict: 'Start Prediction',
+  }
+};
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent.trim() === (l==='zh'?'中':'EN')));
+  const t = i18n[l];
+  Object.keys(t).forEach(k => { const el = document.getElementById(k); if (el) { if (k==='btnText') el.textContent = t[k]; else el.textContent = t[k]; } });
+  document.getElementById('btnMale').textContent = t.male;
+  document.getElementById('btnFemale').textContent = t.female;
+}
+
+function selectGender(el) {
+  document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  selectedGender = el.dataset.val;
+}
+
+function toggleSystem(el) {
+  if (el.classList.contains('locked')) return;
+  el.classList.toggle('active');
+  const sys = el.dataset.sys;
+  selectedSystems.has(sys) ? selectedSystems.delete(sys) : selectedSystems.add(sys);
+}
+
+// ===== Zodiac calculation =====
+function getZodiac(month, day) {
+  const signs = [
+    {name:'摩羯座',en:'Capricorn',symbol:'♑'},{name:'水瓶座',en:'Aquarius',symbol:'♒'},
+    {name:'双鱼座',en:'Pisces',symbol:'♓'},{name:'白羊座',en:'Aries',symbol:'♈'},
+    {name:'金牛座',en:'Taurus',symbol:'♉'},{name:'双子座',en:'Gemini',symbol:'♊'},
+    {name:'巨蟹座',en:'Cancer',symbol:'♋'},{name:'狮子座',en:'Leo',symbol:'♌'},
+    {name:'处女座',en:'Virgo',symbol:'♍'},{name:'天秤座',en:'Libra',symbol:'♎'},
+    {name:'天蝎座',en:'Scorpio',symbol:'♏'},{name:'射手座',en:'Sagittarius',symbol:'♐'}
+  ];
+  const dates = [20,19,21,20,21,22,23,23,23,24,22,22];
+  const idx = day < dates[month-1] ? (month+10)%12 : (month+11)%12;
+  return signs[idx];
+}
+
+// ===== Predict =====
+async function startPredict() {
+  const name = document.getElementById('inpName').value;
+  const birthDate = document.getElementById('inpBirthDate').value;
+  if (!birthDate) { alert(lang==='zh'?'请选择出生日期':'Please select birth date'); return; }
+
+  const btn = document.getElementById('predictBtn');
+  const btnText = document.getElementById('btnText');
+  btn.disabled = true;
+  btnText.innerHTML = `<span class="spinner"></span>${i18n[lang].btnLoading}`;
+  document.getElementById('resultArea').innerHTML = '';
+
+  const systems = Array.from(selectedSystems);
+  const mbti = document.getElementById('selMBTI').value;
+  if (mbti && !systems.includes('mbti')) systems.push('mbti');
+
+  try {
+    const res = await fetch(API + '/api/predict', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name, birthDate,
+        birthTime: document.getElementById('inpBirthTime').value,
+        gender: selectedGender,
+        city: document.getElementById('inpCity').value,
+        mbti, systems,
+        question: document.getElementById('selQuestion').value + (document.getElementById('inpQuestion').value ? ': ' + document.getElementById('inpQuestion').value : ''),
+        lang,
+      }),
+    });
+    const data = await res.json();
+    if (data.success) renderResults(data);
+    else throw new Error(data.error || 'Prediction failed');
+  } catch (e) {
+    document.getElementById('resultArea').innerHTML = `<div class="card" style="border-color:rgba(255,69,58,0.3)"><div style="color:#f87171;text-align:center">${e.message}</div></div>`;
+  } finally {
+    btn.disabled = false;
+    btnText.textContent = i18n[lang].btnText;
+  }
+}
+
+function renderResults(data) {
+  const isZh = lang === 'zh';
+  let html = '<div class="result-section">';
+
+  // Prediction cards
+  if (data.predictions) {
+    const systemNames = {
+      astrology: isZh ? '西方星盘' : 'Western Astrology',
+      bazi: isZh ? '四柱八字' : 'BaZi',
+      ziwei: isZh ? '紫微斗数' : 'Zi Wei Dou Shu',
+      iching: isZh ? '易经' : 'I Ching',
+      tarot: isZh ? '塔罗牌' : 'Tarot',
+      mbti: 'MBTI',
+    };
+    for (const p of data.predictions) {
+      html += `<div class="result-card">
+        <div class="result-header">
+          <div class="result-icon">${p.icon || '🔮'}</div>
+          <div><div class="result-title">${p.title || systemNames[p.system] || p.system}</div><div class="result-system">${systemNames[p.system] || p.system}</div></div>
+        </div>
+        <div class="result-reading">${p.reading || ''}</div>
+        ${p.advice ? `<div class="result-advice">${p.advice}</div>` : ''}
+        ${p.lucky ? `<div class="result-lucky">
+          ${p.lucky.color ? `<div class="lucky-item">${isZh?'幸运色':'Color'}: <span>${p.lucky.color}</span></div>` : ''}
+          ${p.lucky.number ? `<div class="lucky-item">${isZh?'幸运数':'Number'}: <span>${p.lucky.number}</span></div>` : ''}
+          ${p.lucky.direction ? `<div class="lucky-item">${isZh?'方位':'Direction'}: <span>${p.lucky.direction}</span></div>` : ''}
+        </div>` : ''}
+      </div>`;
+    }
+  }
+
+  // Synthesis
+  if (data.synthesis) {
+    html += `<div class="synthesis-card">
+      <div class="synthesis-title">✨ ${isZh ? '综合预测' : 'Overall Synthesis'}</div>
+      <div class="synthesis-text">${data.synthesis.overall || ''}</div>
+      ${data.synthesis.score ? `<div class="synthesis-score"><div class="score-circle">${data.synthesis.score}</div><div class="score-label">${isZh ? '运势评分' : 'Fortune Score'}</div></div>` : ''}
+      ${data.synthesis.key_insight ? `<div class="key-insight">${data.synthesis.key_insight}</div>` : ''}
+    </div>`;
+  }
+
+  html += '</div>';
+  document.getElementById('resultArea').innerHTML = html;
+
+  // Scroll to results
+  document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Init
+setLang('zh');
+</script>
+<script>
+(function(){
+  var k='sc_visitor_id',id=localStorage.getItem(k);
+  if(!id){id='v_'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,id)}
+  var d=JSON.stringify({page:'predict.html',visitor_id:id});
+  if(navigator.sendBeacon){navigator.sendBeacon('/api/analytics/track',new Blob([d],{type:'application/json'}))}
+  else{fetch('/api/analytics/track',{method:'POST',headers:{'Content-Type':'application/json'},body:d,keepalive:true})}
+})();
+</script>
+</body>
+</html>

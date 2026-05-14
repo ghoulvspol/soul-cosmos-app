@@ -859,6 +859,122 @@ function getMemoryContext() {
 }
 
 /**
+ * API: 独立预测
+ * 接收用户信息 + 选中系统，调用 LLM 生成预测
+ */
+app.post('/api/predict', optionalAuth, async (req, res) => {
+  try {
+    const { name, birthDate, birthTime, gender, city, question, mbti, systems } = req.body;
+    if (!birthDate) return res.status(400).json({ success: false, error: 'birthDate required' });
+
+    const selectedSystems = systems || ['astrology', 'bazi', 'ziwei', 'iching', 'tarot'];
+    const lang = req.body.lang || 'zh';
+
+    // 构建系统描述
+    const systemDescs = {
+      astrology: 'Western Astrology (Sun/Moon/Rising signs based on birth date)',
+      bazi: 'Chinese BaZi (Four Pillars of Destiny based on birth date/time)',
+      ziwei: 'Zi Wei Dou Shu (Purple Star Astrology, Chinese fortune telling)',
+      iching: 'I Ching (Book of Changes, hexagram divination)',
+      tarot: 'Tarot Card Reading (random card draw)',
+      mbti: 'MBTI Personality Type Analysis',
+    };
+
+    const selectedDesc = selectedSystems.map(s => `- ${systemDescs[s] || s}`).join('\n');
+
+    const systemPrompt = `You are a master fortune teller and personality analyst. You combine multiple Eastern and Western metaphysical systems.
+Today is ${new Date().toISOString().slice(0, 10)}.
+ALL OUTPUT MUST BE IN ${lang === 'zh' ? 'Chinese (中文)' : 'English'}.
+Be specific, personal, and insightful. Make predictions feel real and actionable.`;
+
+    const userPrompt = `Person profile:
+- Name: ${name || 'Unknown'}
+- Birth Date: ${birthDate}
+- Birth Time: ${birthTime || 'Unknown'}
+- Gender: ${gender || 'Unknown'}
+- Birth City: ${city || 'Unknown'}
+- MBTI: ${mbti || 'Unknown'}
+- Question/Concern: ${question || 'General life guidance'}
+
+Selected systems to analyze:
+${selectedDesc}
+
+For EACH selected system, provide a prediction. Then give an overall synthesis.
+
+Respond with valid JSON:
+{
+  "predictions": [
+    {
+      "system": "system_name",
+      "icon": "emoji",
+      "title": "Short title in ${lang === 'zh' ? 'Chinese' : 'English'}",
+      "reading": "2-3 sentences of specific prediction",
+      "advice": "1 sentence of actionable advice",
+      "lucky": {"color": "...", "number": N, "direction": "..."}
+    }
+  ],
+  "synthesis": {
+    "overall": "2-3 sentences combining all systems into one coherent message",
+    "score": 75,
+    "key_insight": "The single most important thing to know"
+  }
+}
+
+Generate predictions for ALL selected systems. Output ONLY the JSON.`;
+
+    const rawResponse = await callMify([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ], 3000);
+
+    let result;
+    try {
+      result = JSON.parse(rawResponse.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim());
+    } catch {
+      const match = rawResponse.match(/\{[\s\S]*\}/);
+      result = match ? JSON.parse(match[0]) : null;
+    }
+
+    if (!result || !result.predictions) {
+      // Fallback: generate basic predictions locally
+      result = generateLocalPredictions(selectedSystems, lang);
+    }
+
+    res.json({ success: true, ...result });
+  } catch (err) {
+    console.error('Predict error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * 本地预测降级（LLM 调用失败时）
+ */
+function generateLocalPredictions(systems, lang) {
+  const isZh = lang === 'zh';
+  const predictions = systems.map(s => {
+    const templates = {
+      astrology: { icon: '🌌', title: isZh ? '星盘解读' : 'Astrology', reading: isZh ? '星象显示你正处于人生转折期，木星的能量为你带来扩张和机遇。' : 'The stars indicate a period of transformation. Jupiter brings expansion and opportunity.' },
+      bazi: { icon: '📜', title: isZh ? '八字命理' : 'BaZi', reading: isZh ? '五行格局显示你命中带水木之气，适合创意和沟通类工作。' : 'Your Four Pillars show strong Water and Wood elements, favoring creative and communication work.' },
+      ziwei: { icon: '☯', title: isZh ? '紫微斗数' : 'Zi Wei', reading: isZh ? '命宫主星明亮，近期有贵人相助，事业上有突破机会。' : 'Your main star shines bright. A benefactor will help you achieve a breakthrough soon.' },
+      iching: { icon: '☯️', title: isZh ? '易经卦象' : 'I Ching', reading: isZh ? '得"乾"卦，象征天行健君子以自强不息，积极进取将获成功。' : 'The hexagram of Qian (Heaven) appears. Strength and perseverance will bring success.' },
+      tarot: { icon: '🃏', title: isZh ? '塔罗占卜' : 'Tarot', reading: isZh ? '抽到"命运之轮"牌，代表变化即将到来，把握机遇。' : 'The Wheel of Fortune card appears. Change is coming, seize the opportunity.' },
+      mbti: { icon: '🧠', title: isZh ? 'MBTI 分析' : 'MBTI', reading: isZh ? '你的性格类型决定了你独特的决策方式和人际交往风格。' : 'Your personality type shapes your unique decision-making and interpersonal style.' },
+    };
+    const t = templates[s] || { icon: '✨', title: s, reading: 'Analysis pending.' };
+    return { system: s, ...t, advice: isZh ? '保持开放心态，顺势而为。' : 'Stay open and go with the flow.', lucky: { color: isZh ? '紫色' : 'Purple', number: 7, direction: isZh ? '东南' : 'Southeast' } };
+  });
+  return {
+    predictions,
+    synthesis: {
+      overall: isZh ? '综合各系统分析，你目前处于上升期，适合积极行动。注意平衡各方能量。' : 'Across all systems, you are in an ascending phase. Take action while balancing your energies.',
+      score: 72,
+      key_insight: isZh ? '变化是你的关键词，拥抱它。' : 'Change is your keyword. Embrace it.',
+    },
+  };
+}
+
+/**
  * API: 获取可用模型列表
  * 未认证时隐藏 available 字段（不暴露哪些 provider 有 key）
  */
