@@ -882,24 +882,30 @@ app.post('/api/predict', optionalAuth, async (req, res) => {
 
     const selectedDesc = selectedSystems.map(s => `- ${systemDescs[s] || s}`).join('\n');
 
-    const systemPrompt = `You are a master fortune teller and personality analyst. You combine multiple Eastern and Western metaphysical systems.
+    const systemPrompt = `You are a master fortune teller and personality analyst with deep expertise in both Eastern and Western metaphysical systems.
 Today is ${new Date().toISOString().slice(0, 10)}.
 ALL OUTPUT MUST BE IN ${lang === 'zh' ? 'Chinese (中文)' : 'English'}.
-Be specific, personal, and insightful. Make predictions feel real and actionable.`;
+Be deeply specific and personal. Reference actual astrological placements, BaZi elements, Zi Wei stars by name.
+Each reading should feel like a private consultation with a master, not generic horoscope copy.
+Write in a poetic yet grounded style. Use metaphors and imagery.`;
 
-    const userPrompt = `Person profile:
+    const userPrompt = `Person seeking guidance:
 - Name: ${name || 'Unknown'}
 - Birth Date: ${birthDate}
 - Birth Time: ${birthTime || 'Unknown'}
-- Gender: ${gender || 'Unknown'}
+- Gender: ${gender === 'male' ? '男 (Male)' : '女 (Female)'}
 - Birth City: ${city || 'Unknown'}
 - MBTI: ${mbti || 'Unknown'}
-- Question/Concern: ${question || 'General life guidance'}
+- Seeking guidance on: ${question || '综合运势 (General life guidance)'}
 
-Selected systems to analyze:
+Systems to consult:
 ${selectedDesc}
 
-For EACH selected system, provide a prediction. Then give an overall synthesis.
+IMPORTANT RULES:
+1. Each reading must be 4-6 sentences, rich with specific details (star names, element interactions, hexagram meanings)
+2. Do NOT include lucky color/number/direction per system. Only include them in the unified synthesis.
+3. The advice for each system should be 2 sentences, highly actionable.
+4. The synthesis must combine ALL systems into one coherent life narrative.
 
 Respond with valid JSON:
 {
@@ -907,25 +913,29 @@ Respond with valid JSON:
     {
       "system": "system_name",
       "icon": "emoji",
-      "title": "Short title in ${lang === 'zh' ? 'Chinese' : 'English'}",
-      "reading": "2-3 sentences of specific prediction",
-      "advice": "1 sentence of actionable advice",
-      "lucky": {"color": "...", "number": N, "direction": "..."}
+      "title": "Evocative title (4-6 words)",
+      "reading": "4-6 sentences. Reference specific placements: e.g. 'Your Day Master is Yang Water (壬水), sitting on the Horse (午) branch...' or 'With Venus conjunct your Midheaven in Taurus...'. Be concrete, not vague.",
+      "advice": "2 sentences of specific, actionable advice tied to the reading"
     }
   ],
   "synthesis": {
-    "overall": "2-3 sentences combining all systems into one coherent message",
+    "overall": "5-7 sentences weaving ALL systems into one life narrative. Reference specific elements from each system. End with a forward-looking statement.",
     "score": 75,
-    "key_insight": "The single most important thing to know"
+    "key_insight": "2-3 sentences: the single most important pattern across all systems",
+    "lucky": {
+      "color": "one specific color with meaning (e.g. '靛蓝 — 代表深邃的直觉力')",
+      "number": 7,
+      "direction": "one direction with meaning (e.g. '东南 — 木气生发之方')"
+    }
   }
 }
 
-Generate predictions for ALL selected systems. Output ONLY the JSON.`;
+Generate rich, detailed predictions for ALL selected systems. Output ONLY the JSON.`;
 
     const rawResponse = await callMify([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
-    ], 3000);
+    ], 4000);
 
     let result;
     try {
@@ -954,22 +964,27 @@ function generateLocalPredictions(systems, lang) {
   const isZh = lang === 'zh';
   const predictions = systems.map(s => {
     const templates = {
-      astrology: { icon: '🌌', title: isZh ? '星盘解读' : 'Astrology', reading: isZh ? '星象显示你正处于人生转折期，木星的能量为你带来扩张和机遇。' : 'The stars indicate a period of transformation. Jupiter brings expansion and opportunity.' },
-      bazi: { icon: '📜', title: isZh ? '八字命理' : 'BaZi', reading: isZh ? '五行格局显示你命中带水木之气，适合创意和沟通类工作。' : 'Your Four Pillars show strong Water and Wood elements, favoring creative and communication work.' },
-      ziwei: { icon: '☯', title: isZh ? '紫微斗数' : 'Zi Wei', reading: isZh ? '命宫主星明亮，近期有贵人相助，事业上有突破机会。' : 'Your main star shines bright. A benefactor will help you achieve a breakthrough soon.' },
-      iching: { icon: '☯️', title: isZh ? '易经卦象' : 'I Ching', reading: isZh ? '得"乾"卦，象征天行健君子以自强不息，积极进取将获成功。' : 'The hexagram of Qian (Heaven) appears. Strength and perseverance will bring success.' },
-      tarot: { icon: '🃏', title: isZh ? '塔罗占卜' : 'Tarot', reading: isZh ? '抽到"命运之轮"牌，代表变化即将到来，把握机遇。' : 'The Wheel of Fortune card appears. Change is coming, seize the opportunity.' },
-      mbti: { icon: '🧠', title: isZh ? 'MBTI 分析' : 'MBTI', reading: isZh ? '你的性格类型决定了你独特的决策方式和人际交往风格。' : 'Your personality type shapes your unique decision-making and interpersonal style.' },
+      astrology: { icon: '🌌', title: isZh ? '星辰密语' : 'Whispers of the Stars', reading: isZh ? '太阳行经双子座，赋予你灵活的思维与沟通天赋。月亮驻留处女座，使你在细节中寻找秩序与美感。上升摩羯座为你的外在表现增添沉稳与目标感。金星与中天合相，暗示事业领域将迎来和谐的人际助力。当前木星过境金牛座，为你带来物质层面的扩张机遇，适合稳扎稳打地推进长期计划。' : 'The Sun transiting Gemini blesses you with agile thinking and communication gifts. The Moon in Virgo seeks order and beauty in details. Capricorn rising adds steadiness and ambition to your outer expression. Venus conjunct the Midheaven hints at harmonious support in career matters. Jupiter transiting Taurus brings material expansion, favoring steady, long-term planning.' },
+      bazi: { icon: '📜', title: isZh ? '四柱玄机' : 'Secrets of the Four Pillars', reading: isZh ? '日主壬水坐午火，水火既济之象，主智慧与热情并存。年柱天干透甲木，食神生财格局初显，利于才华变现。月令未土为正官，暗示规范与秩序是你成功的基石。时柱若有金水相助，则晚年运势亨通。当前大运行至木火之地，正是发力进取之时，但需防火旺水枯，注意劳逸结合。' : 'Your Day Master of Yang Water sitting on the Horse branch creates a Water-Fire harmony, blending wisdom with passion. The year pillar reveals Wood energy, forming a Talent-to-Wealth pattern. The month branch of Earth as your Authority star suggests structure is your foundation for success. The current luck period favors Wood and Fire, making this an active time for growth, but beware of burning too bright, too fast.' },
+      ziwei: { icon: '☯', title: isZh ? '紫微星命' : 'The Purple Star\'s Decree', reading: isZh ? '命宫坐紫微星，帝王之星照命，天生具有领导气质与大局观。事业宫有武曲星驻守，主财运与执行力，适合在商业或管理领域深耕。夫妻宫天同星化忌，感情上需注意沟通方式，避免因过度理性而忽略伴侣感受。迁移宫有天府星，外出发展或有贵人相助。今年流年命宫逢化禄，是拓展人脉、提升影响力的好时机。' : 'The Purple Star sits in your Life Palace, bestowing natural leadership and a grand vision. The Career Palace holds the Military Star, favoring financial acumen and execution in business. The Marriage Palace warns of communication challenges, urging you to balance logic with emotional awareness. The Travel Palace promises helpful connections abroad. This year brings expansion energy to your social influence.' },
+      iching: { icon: '☯️', title: isZh ? '卦象启示' : 'Hexagram Revelation', reading: isZh ? '得"天火同人"卦（乾上离下），象征与志同道合者同行。卦辞曰"同人于野，亨"，暗示在广阔天地中寻找同盟将带来通达。此卦主火在天下，光明普照，适合公开透明地推进合作。变爻在九三，警示勿在暗处谋划，坦诚相待方得始终。整体卦象利于社交、合作、公开演讲等需要众人之力的事务。' : 'The hexagram of Fellowship (Heaven over Fire) appears, symbolizing unity with like-minded souls. "Fellowship in the open brings success" suggests finding allies in broad daylight, through transparency and openness. The changing line warns against hidden agendas. This hexagram favors collaboration, public speaking, and any endeavor requiring collective strength.' },
+      tarot: { icon: '🃏', title: isZh ? '塔罗指引' : 'Tarot Guidance', reading: isZh ? '抽到"命运之轮"（The Wheel of Fortune），大阿尔卡那第十张牌。牌面上命运之轮永不停息地转动，象征生命中的周期性变化与机遇的循环。正位出现时，暗示好运即将降临，宇宙正在为你重新洗牌。此牌与木星相关，呼应扩张与幸运的能量。配合"星星"牌作为补充，确认你正走在正确的道路上，保持信心与耐心。' : 'The Wheel of Fortune appears, the tenth Major Arcana card. The wheel turns ceaselessly, symbolizing cyclical change and the rotation of opportunity. Upright, it signals incoming luck as the universe reshuffles your deck. Associated with Jupiter, it echoes expansion and fortune. A clarifying Star card confirms you are on the right path, urging faith and patience.' },
+      mbti: { icon: '🧠', title: isZh ? '人格密码' : 'Personality Code', reading: isZh ? '你的 MBTI 类型揭示了独特的认知功能栈。主导功能决定了你最自然的信息处理方式，辅助功能则是你与世界互动的桥梁。第三功能在压力下可能成为盲点，而劣势功能则是你成长的终极课题。了解这些功能的运作方式，能帮助你在决策时更有意识地调用不同认知模式，避免陷入单一思维的陷阱。' : 'Your MBTI type reveals a unique cognitive function stack. Your dominant function defines your most natural way of processing information, while your auxiliary function bridges you to the world. The tertiary function can become a blind spot under stress, and the inferior function holds your ultimate growth edge. Understanding these patterns helps you consciously engage different cognitive modes.' },
     };
-    const t = templates[s] || { icon: '✨', title: s, reading: 'Analysis pending.' };
-    return { system: s, ...t, advice: isZh ? '保持开放心态，顺势而为。' : 'Stay open and go with the flow.', lucky: { color: isZh ? '紫色' : 'Purple', number: 7, direction: isZh ? '东南' : 'Southeast' } };
+    const t = templates[s] || { icon: '✨', title: s, reading: isZh ? '分析进行中...' : 'Analysis in progress...' };
+    return { system: s, ...t, advice: isZh ? '保持觉知，顺势而动。将命理的启示转化为日常的行动，方为上策。' : 'Stay aware and act in harmony with the flow. Transform metaphysical insights into daily action for the best results.' };
   });
   return {
     predictions,
     synthesis: {
-      overall: isZh ? '综合各系统分析，你目前处于上升期，适合积极行动。注意平衡各方能量。' : 'Across all systems, you are in an ascending phase. Take action while balancing your energies.',
-      score: 72,
-      key_insight: isZh ? '变化是你的关键词，拥抱它。' : 'Change is your keyword. Embrace it.',
+      overall: isZh ? '综合多方命理系统分析，你当前正处于一个能量转换的关键节点。星盘显示木星的扩张力量与土星的结构性要求形成张力，这意味着既要大胆进取，也要脚踏实地。八字五行中水木相生的格局赋予你创造力与适应力，而紫微斗数中帝星坐命则暗示你天生具备领导潜质。易经的同人卦提醒你，真正的成功来自与志同道合者的携手同行。综合来看，这是一个适合主动出击、广结善缘的时期。' : 'Across all systems, you stand at a pivotal energy gateway. Your astrological chart shows Jupiter\'s expansion in tension with Saturn\'s structure, calling for both bold action and grounded planning. Your BaZi reveals a Water-Wood creative flow, while Zi Wei\'s imperial star confirms innate leadership. The I Ching\'s Fellowship hexagram reminds that true success comes through alliance. This is a time for proactive outreach and building meaningful connections.',
+      score: 76,
+      key_insight: isZh ? '核心启示：变化中蕴含机遇，稳定中孕育突破。你的优势在于兼具创造力与执行力，关键是在两者之间找到动态平衡。本月重点关注人脉拓展与核心技能提升。' : 'Core insight: Opportunity hides within change, and breakthrough brews in stability. Your strength lies in combining creativity with execution. The key is finding dynamic balance between the two. Focus this month on expanding your network and deepening core skills.',
+      lucky: {
+        color: isZh ? '靛蓝 — 代表深邃的直觉力与内在智慧' : 'Indigo — representing deep intuition and inner wisdom',
+        number: 7,
+        direction: isZh ? '东南 — 木气生发之方，利于新计划启动' : 'Southeast — where Wood energy rises, favoring new beginnings',
+      },
     },
   };
 }

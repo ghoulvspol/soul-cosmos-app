@@ -329,22 +329,23 @@ function renderResults(data) {
         </div>
         <div class="result-reading">${p.reading || ''}</div>
         ${p.advice ? `<div class="result-advice">${p.advice}</div>` : ''}
-        ${p.lucky ? `<div class="result-lucky">
-          ${p.lucky.color ? `<div class="lucky-item">${isZh?'幸运色':'Color'}: <span>${p.lucky.color}</span></div>` : ''}
-          ${p.lucky.number ? `<div class="lucky-item">${isZh?'幸运数':'Number'}: <span>${p.lucky.number}</span></div>` : ''}
-          ${p.lucky.direction ? `<div class="lucky-item">${isZh?'方位':'Direction'}: <span>${p.lucky.direction}</span></div>` : ''}
-        </div>` : ''}
       </div>`;
     }
   }
 
   // Synthesis
   if (data.synthesis) {
+    const l = data.synthesis.lucky;
     html += `<div class="synthesis-card">
       <div class="synthesis-title">✨ ${isZh ? '综合预测' : 'Overall Synthesis'}</div>
       <div class="synthesis-text">${data.synthesis.overall || ''}</div>
       ${data.synthesis.score ? `<div class="synthesis-score"><div class="score-circle">${data.synthesis.score}</div><div class="score-label">${isZh ? '运势评分' : 'Fortune Score'}</div></div>` : ''}
       ${data.synthesis.key_insight ? `<div class="key-insight">${data.synthesis.key_insight}</div>` : ''}
+      ${l ? `<div style="display:flex;gap:20px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+        ${l.color ? `<div style="text-align:center;padding:12px 20px;background:rgba(167,139,250,0.08);border-radius:10px;min-width:100px"><div style="font-size:20px;margin-bottom:4px">🎨</div><div style="font-size:11px;color:#64748b">${isZh?'幸运色':'Lucky Color'}</div><div style="font-size:14px;font-weight:600;color:#a78bfa;margin-top:2px">${l.color}</div></div>` : ''}
+        ${l.number ? `<div style="text-align:center;padding:12px 20px;background:rgba(167,139,250,0.08);border-radius:10px;min-width:100px"><div style="font-size:20px;margin-bottom:4px">🔢</div><div style="font-size:11px;color:#64748b">${isZh?'幸运数':'Lucky Number'}</div><div style="font-size:14px;font-weight:600;color:#a78bfa;margin-top:2px">${l.number}</div></div>` : ''}
+        ${l.direction ? `<div style="text-align:center;padding:12px 20px;background:rgba(167,139,250,0.08);border-radius:10px;min-width:100px"><div style="font-size:20px;margin-bottom:4px">🧭</div><div style="font-size:11px;color:#64748b">${isZh?'吉利方位':'Lucky Direction'}</div><div style="font-size:14px;font-weight:600;color:#a78bfa;margin-top:2px">${l.direction}</div></div>` : ''}
+      </div>` : ''}
     </div>`;
   }
 
