@@ -1,0 +1,90 @@
+import Foundation
+
+class APIClient {
+    static let shared = APIClient()
+    var baseURL: String {
+        UserDefaults.standard.string(forKey: "api_base_url") ?? "http://localhost:8066"
+    }
+
+    private let session: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 30
+        return URLSession(configuration: config)
+    }()
+
+    private func post<T: Decodable>(_ path: String, body: [String: Any]) async throws -> T {
+        guard let url = URL(string: "\(baseURL)\(path)") else {
+            throw APIError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw APIError.serverError
+        }
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+
+    func fetchProfile(_ info: BirthInfo, lang: String = "zh") async throws -> ProfileResponse {
+        let natalChart: [String: Any] = [
+            "sun": ["name": "Aries", "element": "Fire", "quality": "Cardinal"],
+            "moon": ["name": "Cancer", "element": "Water"],
+            "rising": ["name": "Capricorn", "element": "Earth"],
+            "dominantElement": "Fire"
+        ]
+        let ziwei: [String: Any] = ["mainStar": "紫微", "lifePalace": "命宫", "careerPalace": "官禄宫"]
+        let body: [String: Any] = [
+            "birth_date": info.birthDateStr,
+            "birth_time": info.birthTimeStr,
+            "longitude": info.longitude,
+            "gender": info.gender.rawValue,
+            "mbti_type": info.mbtiType,
+            "natalChart": natalChart,
+            "ziweiChart": ziwei,
+            "lang": lang
+        ]
+        return try await post("/api/reading/profile", body: body)
+    }
+
+    func fetchDaily(_ info: BirthInfo, lang: String = "zh") async throws -> DailyForecastResponse {
+        let body: [String: Any] = [
+            "birth_date": info.birthDateStr,
+            "gender": info.gender.rawValue,
+            "mbti_type": info.mbtiType,
+            "lang": lang
+        ]
+        return try await post("/api/reading/daily", body: body)
+    }
+
+    func fetchWeekly(_ info: BirthInfo, lang: String = "zh") async throws -> WeeklyForecastResponse {
+        let body: [String: Any] = [
+            "birth_date": info.birthDateStr,
+            "gender": info.gender.rawValue,
+            "lang": lang
+        ]
+        return try await post("/api/reading/weekly", body: body)
+    }
+
+    func fetchMonthly(_ info: BirthInfo, lang: String = "zh") async throws -> MonthlyForecastResponse {
+        let body: [String: Any] = [
+            "birth_date": info.birthDateStr,
+            "gender": info.gender.rawValue,
+            "lang": lang
+        ]
+        return try await post("/api/reading/monthly", body: body)
+    }
+
+    enum APIError: LocalizedError {
+        case invalidURL, serverError, decodingError
+        var errorDescription: String? {
+            switch self {
+            case .invalidURL: return "无效的 API 地址"
+            case .serverError: return "服务器错误"
+            case .decodingError: return "数据解析失败"
+            }
+        }
+    }
+}
