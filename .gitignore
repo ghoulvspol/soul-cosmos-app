@@ -10,6 +10,9 @@ server/node_modules/
 # Database
 server/data/
 
+# Generated
+server/templates/tag-combinations.json
+
 # Logs
 server.log
 *.log

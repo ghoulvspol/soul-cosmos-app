@@ -8,20 +8,23 @@ const { execSync } = require('child_process');
 const { optionalAuth } = require('./auth');
 const kepa = require('./kepa');
 
+// 启动时加载模板数据库
+const templateDB = require('./template-db');
+templateDB.load();
+
 const app = express();
 
 /**
  * 调用 Python 八字排盘引擎
  */
-function calculateBazi(birthDate, birthTime, gender) {
+function calculateBazi(birthDate, birthTime, gender, longitude) {
   try {
     const [year, month, day] = birthDate.split('-').map(Number);
-    const [hour] = (birthTime || '12:00').split(':').map(Number);
+    const [hour, minute] = (birthTime || '12:00').split(':').map(Number);
     const scriptPath = path.join(__dirname, 'bazi.py');
-    // Validate gender to prevent command injection
     const safeGender = ['male', 'female', 'unknown'].includes(gender) ? gender : 'unknown';
     const { spawnSync } = require('child_process');
-    const result = spawnSync('python3', [scriptPath, String(year), String(month), String(day), String(hour), safeGender], {
+    const result = spawnSync('python3', [scriptPath, String(year), String(month), String(day), String(hour || 12), String(minute || 0), String(longitude || 120), safeGender], {
       encoding: 'utf-8', timeout: 10000,
     });
     if (result.error) throw result.error;
@@ -56,6 +59,7 @@ app.use('/api/daily', require('./routes/daily'));
 app.use('/api/hardware', require('./routes/hardware'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/reading', require('./routes/reading'));
 
 // CORS — restricted to configured origins
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:8066').split(',');
@@ -73,8 +77,8 @@ app.use((req, res, next) => {
   next();
 });
 
-const { callMify, getMifyModel } = require('./mify');
-const { getAvailableProviders } = require('./providers');
+const { callAI, getActiveModel } = require('./llm');
+const { getAvailableProviders, getProvider } = require('./providers');
 const configStore = require('./config-store');
 const { requireAdmin } = require('./admin-auth');
 
@@ -281,7 +285,7 @@ ${iching ? `I CHING (易经) HEXAGRAM:
 Create a deeply personal, specific soul portrait. Fuse ALL systems into ONE coherent description — do NOT list each system separately. Make the person feel "this is SO me."
 ${req.user ? kepa.getFusionStrategy(req.user.id) : ''}`;
 
-    const rawResponse = await callMify([
+    const rawResponse = await callAI([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ], 4000);
@@ -385,7 +389,7 @@ ${req.user ? kepa.getFusionStrategy(req.user.id) : ''}`;
       profile = extractManually(rawResponse || '');
     }
 
-    res.json({ success: true, profile, model: getMifyModel() });
+    res.json({ success: true, profile, model: getActiveModel() });
   } catch (err) {
     console.error('Generate profile error:', err.message);
     res.status(500).json({ error: err.message });
@@ -445,7 +449,7 @@ app.post('/api/harness-profile', optionalAuth, async (req, res) => {
 Reply in English. Keep each field 1-2 sentences. Output ONLY valid JSON:
 {"soulKeywords":["k1","k2","k3","k4"],"oneSentencePortrait":"poetic","coreTraits":[{"trait":"Name","description":"2 sentences"}],"shadows":[{"challenge":"Name","description":"2 sentences"}],"lifeTheme":"2 sentences","dailyInsight":"2 sentences","marriageFortune":"2 sentences","careerGuidance":"2 sentences","healthAdvice":"2 sentences","annualFortune":"2 sentences","luckyElements":{"colors":[],"numbers":[],"direction":"","day":""}}`;
 
-    callMify([
+    callAI([
       { role: 'system', content: fusionPrompt },
       { role: 'user', content: `Analyses:\n${agentSummaries}\n\nFuse into one soul portrait.` },
     ], 4000).then(raw => {
@@ -524,12 +528,12 @@ Sun: ${sunSign}, Moon: ${moonSign}, MBTI: ${mbtiType}
 
 Write today's personalized insight. Make it feel like you're reading their mind. Be specific to their profile, not generic.`;
 
-    const insight = await callMify([
+    const insight = await callAI([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ], 300);
 
-    res.json({ success: true, insight, model: getMifyModel() });
+    res.json({ success: true, insight, model: getActiveModel() });
   } catch (err) {
     console.error('Daily insight error:', err.message);
     res.status(500).json({ error: err.message });
@@ -561,7 +565,7 @@ Person B: ${profileB.sun} Sun, ${profileB.moon} Moon, ${profileB.rising} Rising,
 
 Analyze their compatibility.`;
 
-    const rawResponse = await callMify([
+    const rawResponse = await callAI([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ], 800);
@@ -574,7 +578,7 @@ Analyze their compatibility.`;
       compatibility = jsonMatch ? JSON.parse(jsonMatch[0]) : { score: 50, description: rawResponse };
     }
 
-    res.json({ success: true, compatibility, model: getMifyModel() });
+    res.json({ success: true, compatibility, model: getActiveModel() });
   } catch (err) {
     console.error('Compatibility error:', err.message);
     res.status(500).json({ error: err.message });
@@ -624,7 +628,7 @@ Generate this week's relationship forecast for each person. Be specific about:
 
 Make it feel like you actually know these people.`;
 
-    const rawResponse = await callMify([
+    const rawResponse = await callAI([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ], 2000);
@@ -637,7 +641,7 @@ Make it feel like you actually know these people.`;
       result = match ? JSON.parse(match[0]) : { forecasts: people.map(p => ({ name: p.name, score: 50, advice: 'Stay balanced this week.' })) };
     }
 
-    res.json({ success: true, forecasts: result.forecasts || [], model: getMifyModel() });
+    res.json({ success: true, forecasts: result.forecasts || [], model: getActiveModel() });
   } catch (err) {
     console.error('Weekly forecast error:', err.message);
     res.status(500).json({ error: err.message });
@@ -706,7 +710,7 @@ Give practical office Feng Shui recommendations. Consider:
 5. How to activate career luck based on their goal`;
     }
 
-    const rawResponse = await callMify([
+    const rawResponse = await callAI([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ], 1500);
@@ -734,7 +738,7 @@ Give practical office Feng Shui recommendations. Consider:
       }
     }
 
-    res.json({ success: true, fengshui: result, model: getMifyModel() });
+    res.json({ success: true, fengshui: result, model: getActiveModel() });
   } catch (err) {
     console.error('Feng shui error:', err.message);
     res.status(500).json({ error: err.message });
@@ -771,7 +775,7 @@ Output ONLY the JSON.`;
 Note: No photo was actually uploaded (demo mode). Generate a ${type} reading based on their astrological/psychological profile, as if you had seen their ${type}.
 Make it feel personal and specific to their profile.`;
 
-    const rawResponse = await callMify([
+    const rawResponse = await callAI([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ], 1200);
@@ -784,7 +788,7 @@ Make it feel personal and specific to their profile.`;
       result = match ? JSON.parse(match[0]) : { summary: rawResponse.slice(0, 300), traits: [], advice: '' };
     }
 
-    res.json({ success: true, analysis: result, model: getMifyModel() });
+    res.json({ success: true, analysis: result, model: getActiveModel() });
   } catch (err) {
     console.error('Photo analysis error:', err.message);
     res.status(500).json({ error: err.message });
@@ -819,7 +823,7 @@ Reply in ${L}. Keep each card concise (2-3 sentences body, 1 sentence advice).
 Output ONLY valid JSON:
 {"scenes":[{"icon":"💼","title":"Title","body":"2-3 sentences","advice":"1 sentence"}]}`;
 
-    callMify([
+    callAI([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: `User: ${userProfile?.sun||''} Sun, ${userProfile?.moon||''} Moon, ${userProfile?.mbti||''} MBTI, ${userProfile?.element||''} element. Generate workplace, relationship, growth, finance scenes for this week.` },
     ], 2000).then(raw => {
@@ -932,7 +936,7 @@ Respond with valid JSON:
 
 Generate rich, detailed predictions for ALL selected systems. Output ONLY the JSON.`;
 
-    const rawResponse = await callMify([
+    const rawResponse = await callAI([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
     ], 4000);
@@ -1010,7 +1014,7 @@ app.post('/api/models/select', requireAdmin, (req, res) => {
   const { provider, model, temperature, maxTokens } = req.body;
   if (!provider) return res.status(400).json({ success: false, error: 'provider required' });
 
-  const providerConfig = require('./providers').getProvider(provider);
+  const providerConfig = getProvider(provider);
   if (!providerConfig) return res.status(400).json({ success: false, error: `Unknown provider: ${provider}` });
   if (!providerConfig.apiKey) return res.status(400).json({ success: false, error: `${providerConfig.name} API key not configured` });
 
@@ -1053,7 +1057,6 @@ app.listen(PORT, () => {
   const active = configStore.getActiveModel();
   console.log(`  Provider: ${active.provider}`);
   console.log(`  Model:    ${active.model}`);
-  const { getProvider } = require('./providers');
   const providerConfig = getProvider(active.provider);
   const key = providerConfig?.apiKey || '';
   console.log(`  API Key:  ${key.slice(0, 8)}...`);

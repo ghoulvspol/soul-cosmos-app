@@ -7,7 +7,7 @@
  * 白皮书 Phase 4: 品牌硬件
  */
 const { generateDailyFortune } = require('./daily');
-const { callMify } = require('./mify');
+const { callAI } = require('./llm');
 
 /**
  * 处理语音交互请求
@@ -37,7 +37,7 @@ Rules:
 - End with a brief encouragement`;
 
   try {
-    const response = await callMify([
+    const response = await callAI([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: query },
     ], 300);
@@ -115,7 +115,7 @@ Keep it under 150 words. Be practical and encouraging.`;
   ).join('\n');
 
   try {
-    const forecast = await callMify([
+    const forecast = await callAI([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: `Weekly almanac data:\n${summary}\nAverage score: ${avgScore}\n\nWrite a practical weekly forecast.` },
     ], 400);

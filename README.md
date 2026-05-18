@@ -133,8 +133,21 @@ cd server && node index.js
 | OpenAI | GPT-4o, GPT-4o Mini, GPT-4.1 Mini | `OPENAI_API_KEY` |
 | DeepSeek | DeepSeek Chat, DeepSeek Reasoner | `DEEPSEEK_API_KEY` |
 | Qwen | Qwen Plus, Qwen Turbo, Qwen Max | `DASHSCOPE_API_KEY` |
+| 自定义 | 任意 OpenAI 兼容模型 | `CUSTOM_API_KEY` + `CUSTOM_HOST` |
 
 所有 Provider 使用 OpenAI 兼容的 `/v1/chat/completions` 协议。切换后配置自动持久化到 SQLite。
+
+### 自定义 Provider（支持任意模型）
+
+支持 Ollama、vLLM、Together、Groq、硅基流动等任意 OpenAI 兼容端点：
+
+```bash
+CUSTOM_API_KEY=sk-your-key
+CUSTOM_PROVIDER_NAME=My Provider
+CUSTOM_HOST=api.example.com
+CUSTOM_PORT=443
+CUSTOM_MODEL=gpt-4o-mini
+```
 
 ---
 
@@ -144,21 +157,31 @@ cd server && node index.js
 soul-cosmos/
 ├── server/
 │   ├── index.js              # API 服务主入口
-│   ├── providers.js          # AI Provider 抽象层
+│   ├── providers.js          # AI Provider 抽象层（OpenAI/DeepSeek/Qwen/自定义）
 │   ├── config-store.js       # 运行时配置存储
-│   ├── mify.js               # LLM 调用兼容层（providers.js）
+│   ├── llm.js                # LLM 调用统一入口
+│   ├── mify.js               # LLM 调用兼容层（旧版，保留向后兼容）
 │   ├── auth.js               # JWT 认证中间件
 │   ├── db.js                 # SQLite 数据库初始化
 │   ├── kepa.js               # KEPA 自进化引擎
-│   ├── harness.js            # 多智能体编排系统
-│   ├── bazi.py               # Python 八字排盘
+│   ├── harness.js            # 多智能体编排系统（模板优先）
+│   ├── template-engine.js    # 模板匹配引擎（精确/降级/LLM兜底）
+│   ├── template-db.js        # 模板数据库（JSON 加载 + 内存索引）
+│   ├── bazi.py               # Python 八字排盘（支持全球时区）
+│   ├── daily-engine.js       # 日运计算引擎
+│   ├── weekly-engine.js      # 周运计算引擎
+│   ├── monthly-engine.js     # 月运计算引擎
 │   ├── daily.js              # 每日运势生成
 │   ├── scenes.js             # 场景建议模板
-│   ├── local-analysis.js     # 本地分析引擎
+│   ├── local-analysis.js     # 本地分析引擎（5系统）
+│   ├── templates/            # 种子模板目录
+│   │   ├── seed-profiles.json    # 5000+ 画像模板
+│   │   └── seed-daily.json       # 日运模板
 │   └── routes/
 │       ├── auth.js           # 注册、登录
 │       ├── user.js           # 用户数据
 │       ├── stripe.js         # 订阅支付
+│       ├── reading.js        # 周期测算 API（画像/日运/周运/月运）
 │       ├── daily.js          # 每日运势 API
 │       ├── analytics.js      # 页面访问监控
 │       └── hardware.js       # 设备检测
@@ -223,6 +246,10 @@ soul-cosmos/
 | `/api/auth/me` | GET | 当前用户 |
 | `/api/generate-profile` | POST | 生成灵魂画像 |
 | `/api/harness-profile` | POST | 多引擎画像 |
+| `/api/reading/profile` | POST | 画像（模板匹配，$0） |
+| `/api/reading/daily` | POST | 今日运势（本地计算，$0） |
+| `/api/reading/weekly` | POST | 本周运势（本地计算，$0） |
+| `/api/reading/monthly` | POST | 本月运势（本地计算，$0） |
 | `/api/daily-insight` | POST | 每日洞察 |
 | `/api/compatibility` | POST | 关系分析 |
 | `/api/weekly-forecast` | POST | 周度预测 |

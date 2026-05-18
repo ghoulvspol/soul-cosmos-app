@@ -69,9 +69,33 @@ def get_shishen(ri_wx, other_wx, ri_yy, other_yy):
     return SHISHEN_MAP.get((relation, same), '—')
 
 
-def calculate_bazi(year, month, day, hour, gender='unknown'):
-    """计算八字排盘"""
-    solar = Solar.fromYmd(year, month, day)
+def calculate_bazi(year, month, day, hour, minute=0, longitude=120, gender='unknown'):
+    """
+    计算八字排盘（支持全球任意出生地）
+
+    参数:
+        year: int       - 出生年
+        month: int      - 出生月
+        day: int        - 出生日
+        hour: int       - 出生小时 (本地时间)
+        minute: int     - 出生分钟 (default 0)
+        longitude: float - 出生地经度 (北京=120, 纽约≈-74, 洛杉矶≈-118)
+                          正值为东经，负值为西经
+        gender: str     - 'male' | 'female' | 'unknown'
+
+    真太阳时映射:
+        经度偏移 = (longitude - 120) × 4分钟
+        校正后时间 = 本地时间 + 经度偏移
+    """
+    # 真太阳时矫正
+    base_longitude = 120  # 北京时间基准：东经120°
+    offset_minutes = (longitude - base_longitude) * 4
+    solar_hour = (hour + offset_minutes / 60 + 24) % 24
+    solar_minute = (minute + (offset_minutes % 60) + 60) % 60
+    corrected_hour = int(solar_hour)
+    corrected_minute = int(solar_minute)
+
+    solar = Solar.fromYmdHms(year, month, day, hour, minute, 0)
     lunar = solar.getLunar()
 
     # 四柱
@@ -79,12 +103,14 @@ def calculate_bazi(year, month, day, hour, gender='unknown'):
     month_gz = lunar.getMonthInGanZhi()
     day_gz = lunar.getDayInGanZhi()
 
-    # 时柱（lunar-python 可直接获取）
-    hour_dz_idx = ((hour + 1) // 2) % 12
+    # 时柱——用真太阳时矫正后的小时数
+    hour_dz_idx = ((corrected_hour + 1) // 2) % 12
     hour_dz = DI_ZHI[hour_dz_idx]
     day_tg = day_gz[0]
     day_tg_idx = TIAN_GAN.index(day_tg)
-    hour_tg_idx = (day_tg_idx * 2 + hour_dz_idx) % 10
+    # 五鼠遁：日干决定时干起点
+    base_index = (day_tg_idx % 5) * 2
+    hour_tg_idx = (base_index + hour_dz_idx) % 10
     hour_tg = TIAN_GAN[hour_tg_idx]
     hour_gz = f'{hour_tg}{hour_dz}'
 
@@ -192,12 +218,14 @@ def calculate_bazi(year, month, day, hour, gender='unknown'):
 
 if __name__ == '__main__':
     if len(sys.argv) < 5:
-        print(json.dumps({'error': 'Usage: python3 bazi.py year month day hour [gender]'}))
+        print(json.dumps({'error': 'Usage: python3 bazi.py year month day hour [minute] [longitude] [gender]'}))
         sys.exit(1)
     year = int(sys.argv[1])
     month = int(sys.argv[2])
     day = int(sys.argv[3])
     hour = int(sys.argv[4])
-    gender = sys.argv[5] if len(sys.argv) > 5 else 'unknown'
-    result = calculate_bazi(year, month, day, hour, gender)
+    minute = int(sys.argv[5]) if len(sys.argv) > 5 else 0
+    longitude = float(sys.argv[6]) if len(sys.argv) > 6 else 120
+    gender = sys.argv[7] if len(sys.argv) > 7 else 'unknown'
+    result = calculate_bazi(year, month, day, hour, minute, longitude, gender)
     print(json.dumps(result, ensure_ascii=False, indent=2))

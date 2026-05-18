@@ -150,28 +150,6 @@ function analyzeMBTI(mbtiType, isZh) {
   };
 }
 
-// ========== 心理学分析 ==========
-function analyzePsychology(mbtiType, element, isZh) {
-  const cbtMap = {
-    'Fire': { zh: '注意控制冲动，将热情转化为持续行动', en: 'Channel impulsiveness into sustained action' },
-    'Earth': { zh: '警惕过度保守，定期走出舒适区', en: 'Guard against over-caution, step out of comfort zone' },
-    'Air': { zh: '避免过度分析导致行动瘫痪', en: 'Avoid analysis paralysis from overthinking' },
-    'Water': { zh: '学会情绪边界，区分自己和他人的情感', en: 'Set emotional boundaries, distinguish own feelings from others' },
-  };
-
-  const tip = cbtMap[element] || cbtMap['Fire'];
-
-  return {
-    system: isZh ? '社会心理学' : 'Social Psychology',
-    icon: '🧠',
-    input: `MBTI: ${mbtiType || '?'}, Element: ${element || '?'}`,
-    reasoning: isZh
-      ? `基于${element || '火'}元素和${mbtiType || ''}型人格，${tip.zh}。`
-      : `Based on ${element || 'Fire'} element and ${mbtiType || ''}: ${tip.en}.`,
-    conclusion: isZh ? `行动建议：${tip.zh}` : `Action: ${tip.en}`,
-  };
-}
-
 /**
  * 生成全部本地分析（0ms，无 API 调用）
  */
@@ -195,10 +173,7 @@ function generateLocalAnalysis(input) {
   const mbtiStep = analyzeMBTI(mbtiType, isZh);
   if (mbtiStep) steps.push(mbtiStep);
 
-  const psychStep = analyzePsychology(mbtiType, natalChart?.dominantElement, isZh);
-  if (psychStep) steps.push(psychStep);
-
   return steps;
 }
 
-module.exports = { generateLocalAnalysis, analyzeBazi, analyzeAstrology, analyzeZiwei, analyzeIching, analyzeMBTI, analyzePsychology };
+module.exports = { generateLocalAnalysis, analyzeBazi, analyzeAstrology, analyzeZiwei, analyzeIching, analyzeMBTI };

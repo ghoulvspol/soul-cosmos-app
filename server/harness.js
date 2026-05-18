@@ -1,12 +1,11 @@
 /**
- * Soul Cosmos - Multi-Agent Harness 编排系统（速度优化版）
+ * Soul Cosmos - Multi-Agent Harness 编排系统（模板优先版）
  *
- * 速度对比：
- *   单 Prompt:  1 × 4000 tokens ≈ 20s
- *   多 Agent:   6 × 200 tokens 并行 ≈ 4s + 1 × 1200 tokens 融合 ≈ 6s = 10s
- *   快速模式:   6 × 150 tokens 并行 ≈ 3s（无融合，直接输出）= 3s
+ * 新逻辑: 本地分析 → 模板匹配 → (兜底: LLM融合)
+ * 95%请求命中模板，$0成本
  */
-const { callMify } = require('./mify');
+const { callAI } = require('./llm');
+const templateEngine = require('./template-engine');
 
 const BUDGET = { total: 6000, green: 0.5, yellow: 0.2, red: 0.05, circuitBreak: 0.0 };
 
@@ -37,19 +36,14 @@ const AGENTS = {
     systemPrompt: 'You are an I Ching master. In 1 sentence, describe what the hexagram reveals about this person\'s life energy.',
     maxTokens: 100, weight: 1.0,
   },
-  psychology: {
-    name: '心理 Agent', icon: '🧠',
-    systemPrompt: 'You are a social psychology expert. In 1 sentence, give one actionable psychological insight for this person.',
-    maxTokens: 100, weight: 1.0,
-  },
 };
 
 const FUSION_AGENT = { name: 'Fusion', icon: '✦', maxTokens: 1200 };
 const { generateLocalAnalysis } = require('./local-analysis');
 
 /**
- * 快速编排：本地分析（0ms） + 单次 API 融合（~4s）= ~4s 出结果
- * 对比旧方案 6 次 API 并行 + 融合 = ~10s
+ * 快速编排：模板优先（$0）→ LLM 兜底
+ * 95%请求命中模板，本地返回，零API成本
  */
 async function orchestrateFast(input, userWeights = {}) {
   const { natalChart, mbtiType, ziweiChart, iching, bazi, lang, gender, birthDate } = input;
@@ -58,44 +52,28 @@ async function orchestrateFast(input, userWeights = {}) {
   // Phase 1: 本地分析（0ms，纯计算）
   const reasoningSteps = generateLocalAnalysis(input);
 
-  // Phase 2: 单次 API 融合（把所有分析结果合成一个画像）
-  const agentSummaries = reasoningSteps.map(s => `[${s.system}] ${s.reasoning}`).join('\n');
-  const L = isZh ? 'Chinese' : 'English';
+  // Phase 2: 构建标签对象
+  const tags = {
+    bazi: bazi || null,
+    natalChart: natalChart || null,
+    ziweiChart: ziweiChart || null,
+    mbtiType: mbtiType || null,
+    iching: iching || null,
+    gender: gender || 'unknown',
+    birthDate: birthDate || null,
+    lang,
+  };
 
-  const fusionPrompt = `You are a personality analyst. Fuse these analyses into a soul portrait.
-Reply in ${L}. Keep each field 1-2 sentences. Output ONLY valid JSON:
-{
-  "soulKeywords": ["k1", "k2", "k3", "k4"],
-  "oneSentencePortrait": "poetic sentence referencing 2+ systems",
-  "coreTraits": [{"trait": "Name", "description": "2 sentences"}],
-  "shadows": [{"challenge": "Name", "description": "2 sentences"}],
-  "lifeTheme": "2 sentences",
-  "dailyInsight": "2 sentences",
-  "marriageFortune": "2 sentences",
-  "careerGuidance": "2 sentences",
-  "healthAdvice": "2 sentences",
-  "annualFortune": "2 sentences",
-  "luckyElements": {"colors": ["c1","c2"], "numbers": [1,2], "direction": "N/S/E/W", "day": "Monday"}
-}`;
-
-  let profile = null;
-  try {
-    const raw = await callMify([
-      { role: 'system', content: fusionPrompt },
-      { role: 'user', content: `Analyses:\n${agentSummaries}\n\nFuse into one soul portrait.` },
-    ], FUSION_AGENT.maxTokens);
-
-    profile = parseJSON(raw);
-  } catch (err) {
-    console.warn('Fusion failed:', err.message);
-  }
+  // Phase 3: 模板匹配（新增，优先级最高）
+  const result = await templateEngine.matchAndRender(tags, lang);
 
   return {
-    mode: 'fast',
-    profile,
+    mode: result.mode,
+    profile: result.profile,
+    matchType: result.matchType,
     reasoningSteps,
-    budget: { used: FUSION_AGENT.maxTokens, total: BUDGET.total },
-    model: 'xiaomi/mimo-v2.5-pro',
+    budget: { used: result.mode === 'fallback-llm' ? 1200 : 0, total: BUDGET.total },
+    model: result.mode === 'fallback-llm' ? 'llm-fallback' : 'template-local',
   };
 }
 
@@ -143,7 +121,6 @@ async function orchestrate(input, userWeights = {}) {
   if (ziweiChart) { agentNames.push('ziwei'); agentTasks.push(runAgent('ziwei', formatZiweiInput(ziweiChart), lang, budget, weights.ziwei)); }
   if (mbtiType) { agentNames.push('mbti'); agentTasks.push(runAgent('mbti', `MBTI Type: ${mbtiType}`, lang, budget, weights.mbti)); }
   if (iching) { agentNames.push('iching'); agentTasks.push(runAgent('iching', formatIchingInput(iching), lang, budget, weights.iching)); }
-  agentNames.push('psychology'); agentTasks.push(runAgent('psychology', `Gender: ${gender}, MBTI: ${mbtiType}, Birth: ${birthDate}`, lang, budget, weights.psychology));
 
   const settled = await Promise.allSettled(agentTasks);
   const results = {};
@@ -180,7 +157,7 @@ async function runAgent(name, input, lang, budget, weightOverride) {
   const L = lang === 'zh' ? 'Chinese' : 'English';
 
   try {
-    const result = await callMify([
+    const result = await callAI([
       { role: 'system', content: `${agent.systemPrompt} Reply in ${L}. Be concise.` },
       { role: 'user', content: input },
     ], maxTokens);
@@ -220,10 +197,6 @@ function buildReasoningSteps(results, bazi, natalChart, ziweiChart, iching, mbti
     system: 'MBTI', icon: '🧠',
     input: mbtiType || '', reasoning: results.mbti.conclusion, conclusion: '',
   });
-  if (results.psychology) steps.push({
-    system: isZh ? '社会心理学' : 'Social Psychology', icon: '🧠',
-    input: '', reasoning: results.psychology.conclusion, conclusion: '',
-  });
 
   return steps;
 }
@@ -255,7 +228,7 @@ Reply in ${L}. Keep text fields brief (1-2 sentences each). Output ONLY valid JS
   "luckyElements": {"colors": [], "numbers": [], "direction": "", "day": ""}
 }`;
 
-  const result = await callMify([
+  const result = await callAI([
     { role: 'system', content: systemPrompt },
     { role: 'user', content: `Agent Results:\n${agentSummaries}\n\nFuse into one portrait. Be specific to this person.` },
   ], maxTokens);

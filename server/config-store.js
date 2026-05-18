@@ -41,9 +41,15 @@ function setConfig(key, value) {
  * @returns {{ provider: string, model: string, temperature: number, maxTokens: number }}
  */
 function getActiveModel() {
+  const defaultProvider = process.env.CUSTOM_API_KEY ? 'custom'
+    : process.env.OPENAI_API_KEY ? 'openai'
+    : process.env.DEEPSEEK_API_KEY ? 'deepseek'
+    : process.env.DASHSCOPE_API_KEY ? 'qwen'
+    : 'openai';
+  const defaultModel = process.env.CUSTOM_MODEL || 'gpt-4o-mini';
   return {
-    provider: getConfig('active_provider', 'openai'),
-    model: getConfig('active_model', 'gpt-4o-mini'),
+    provider: getConfig('active_provider', defaultProvider),
+    model: getConfig('active_model', defaultModel),
     temperature: parseFloat(getConfig('temperature', '0.8')),
     maxTokens: parseInt(getConfig('max_tokens', '2000')),
   };

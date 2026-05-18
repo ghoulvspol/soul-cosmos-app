@@ -1,31 +1,15 @@
 /**
- * Soul Cosmos - LLM 调用兼容层
- * 保留 callMify 签名，内部委托给 providers.js
- * 现有调用方零改动
+ * @deprecated Use ./llm.js instead
+ * 保留向后兼容，内部委托给 llm.js
  */
-const { callLLM } = require('./providers');
-const configStore = require('./config-store');
+const { callAI, getActiveModel } = require('./llm');
 
-/**
- * 调用 LLM（兼容旧接口）
- * @param {Array} messages - [{role, content}]
- * @param {number} maxTokens
- * @returns {Promise<string>}
- */
 function callMify(messages, maxTokens = 2000) {
-  const active = configStore.getActiveModel();
-  return callLLM(messages, maxTokens, {
-    provider: active.provider,
-    model: active.model,
-    temperature: active.temperature,
-  });
+  return callAI(messages, maxTokens);
 }
 
-/**
- * 获取当前模型名（动态读取）
- */
 function getMifyModel() {
-  return configStore.getActiveModel().model;
+  return getActiveModel();
 }
 
 module.exports = { callMify, getMifyModel };

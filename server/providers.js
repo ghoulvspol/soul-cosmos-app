@@ -55,10 +55,31 @@ const PROVIDERS = {
     defaultTemp: 0.8,
     rejectUnauthorized: true,
   },
+  // 自定义 OpenAI 兼容端点（支持任意模型：本地 Ollama、vLLM、Together、Groq 等）
+  ...(process.env.CUSTOM_API_KEY ? {
+    custom: {
+      name: process.env.CUSTOM_PROVIDER_NAME || 'Custom',
+      host: process.env.CUSTOM_HOST || 'api.openai.com',
+      port: parseInt(process.env.CUSTOM_PORT || '443'),
+      useHttps: process.env.CUSTOM_USE_HTTPS !== 'false',
+      apiKey: process.env.CUSTOM_API_KEY,
+      path: process.env.CUSTOM_PATH || '/v1/chat/completions',
+      models: [
+        { id: process.env.CUSTOM_MODEL || 'gpt-4o-mini', name: process.env.CUSTOM_MODEL || 'Custom Model', desc: '自定义模型', badge: '自定义' },
+      ],
+      defaultModel: process.env.CUSTOM_MODEL || 'gpt-4o-mini',
+      defaultTemp: parseFloat(process.env.CUSTOM_TEMPERATURE || '0.8'),
+      rejectUnauthorized: process.env.CUSTOM_REJECT_UNAUTHORIZED !== 'false',
+    },
+  } : {}),
 };
 
-// 默认 provider
-const DEFAULT_PROVIDER = 'openai';
+// 默认 provider：有哪个 key 就用哪个
+const DEFAULT_PROVIDER = process.env.CUSTOM_API_KEY ? 'custom'
+  : process.env.OPENAI_API_KEY ? 'openai'
+  : process.env.DEEPSEEK_API_KEY ? 'deepseek'
+  : process.env.DASHSCOPE_API_KEY ? 'qwen'
+  : 'openai';
 
 /**
  * 获取可用 provider 列表（有 API key 的才算可用）

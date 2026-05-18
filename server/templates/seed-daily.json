@@ -1,0 +1,74 @@
+[
+  {
+    "id": "daily_moon_11th_social",
+    "tags": ["moon-in-11th", "social"],
+    "zh": "今天适合社交——你的话比平时更有感染力，适合跟老朋友联系。",
+    "en": "Your words carry extra weight today. Reach out to someone you've been thinking about."
+  },
+  {
+    "id": "daily_moon_4th_reflective",
+    "tags": ["moon-in-4th", "reflective"],
+    "zh": "今天适合独处。给自己一个安静的空间，让思绪沉淀。",
+    "en": "Today calls for solitude. Give yourself a quiet space and let your thoughts settle."
+  },
+  {
+    "id": "daily_moon_10th_career",
+    "tags": ["moon-in-10th", "career"],
+    "zh": "事业运上升。今天适合谈合作、提方案，或者做那个你一直在犹豫的决定。",
+    "en": "Career energy rises. Pitch that idea, propose that collaboration, or make the decision you've been postponing."
+  },
+  {
+    "id": "daily_moon_5th_creative",
+    "tags": ["moon-in-5th", "creative"],
+    "zh": "创造力爆棚的一天。动手做点什么——画画、写作、做饭，什么都行。",
+    "en": "Creativity peaks today. Make something — draw, write, cook, anything. Your hands know what your mind hasn't figured out."
+  },
+  {
+    "id": "daily_moon_7th_relationship",
+    "tags": ["moon-in-7th", "relationship"],
+    "zh": "关系是今天的关键词。不管是爱人、朋友还是同事，花时间经营一段对你重要的连接。",
+    "en": "Relationships are today's theme. Whether it's a lover, friend, or colleague — invest time in a connection that matters."
+  },
+  {
+    "id": "daily_moon_2nd_finance",
+    "tags": ["moon-in-2nd", "finance"],
+    "zh": "财务方面有好消息的可能。今天适合审视收支，或者处理拖延的财务事项。",
+    "en": "Good financial vibes today. Review your spending, or tackle that money matter you've been putting off."
+  },
+  {
+    "id": "daily_moon_8th_transformation",
+    "tags": ["moon-in-8th", "transformation"],
+    "zh": "深层情绪可能浮现。不要逃避，允许自己感受。这是疗愈的一天。",
+    "en": "Deep emotions may surface today. Don't run from them. Allow yourself to feel. This is a day for healing."
+  },
+  {
+    "id": "daily_moon_3rd_communication",
+    "tags": ["moon-in-3rd", "communication"],
+    "zh": "表达欲增强。写点什么，或者找个人好好聊聊。今天说的话会被记住。",
+    "en": "Your voice matters today. Write something down, or have that real conversation. What you say today will be remembered."
+  },
+  {
+    "id": "daily_moon_6th_health",
+    "tags": ["moon-in-6th", "health"],
+    "zh": "身体在发出信号。注意休息，调整作息。健康是所有野心的地基。",
+    "en": "Your body is sending signals today. Rest, adjust your routine. Health is the foundation of every ambition."
+  },
+  {
+    "id": "daily_moon_9th_adventure",
+    "tags": ["moon-in-9th", "adventure"],
+    "zh": "探索欲增强。学一门新东西，计划一次旅行，或者读一本让你眼界大开的书。",
+    "en": "Adventure calls. Learn something new, plan a trip, or read a book that blows your mind wide open."
+  },
+  {
+    "id": "daily_moon_12th_rest",
+    "tags": ["moon-in-12th", "rest"],
+    "zh": "今天适合慢下来。不需要完成任何事，只是存在就好。",
+    "en": "Today is for slowing down. You don't need to accomplish anything. Just exist."
+  },
+  {
+    "id": "daily_moon_1st_identity",
+    "tags": ["moon-in-1st", "identity"],
+    "zh": "自我意识增强。今天特别清楚自己想要什么。跟着这个直觉走。",
+    "en": "Self-awareness peaks today. You know exactly what you want. Follow that instinct."
+  }
+]
