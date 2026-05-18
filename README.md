@@ -48,7 +48,7 @@ AI 驱动的多维人格分析平台。融合西方占星、东方八字、紫�
 │             Express.js API Server                │
 │   JWT Auth · CORS · Static Serving · Port 8066  │
 ├──────────┬──────────┬──────────┬────────────────┤
-│ AI LLM   │ SQLite   │ Stripe   │ Python (BaZi)  │
+│ AI LLM   │ SQLite   │          │ Python (BaZi)  │
 │ Provider │ Database │ Payments │ lunar-python    │
 └──────────┴──────────┴──────────┴────────────────┘
 ```
@@ -59,7 +59,7 @@ AI 驱动的多维人格分析平台。融合西方占星、东方八字、紫�
 | 后端 | Node.js + Express | REST API，JWT 认证 |
 | 数据库 | SQLite (better-sqlite3) | WAL 模式，9 张表 |
 | AI | OpenAI 兼容协议 | 多 Provider 可切换 |
-| 支付 | Stripe | 订阅制 |
+| 支付 | 无 | 完全免费 |
 | 八字引擎 | Python + lunar-python | 四柱排盘计算 |
 
 ---
@@ -180,7 +180,6 @@ soul-cosmos/
 │   └── routes/
 │       ├── auth.js           # 注册、登录
 │       ├── user.js           # 用户数据
-│       ├── stripe.js         # 订阅支付
 │       ├── reading.js        # 周期测算 API（画像/日运/周运/月运）
 │       ├── daily.js          # 每日运势 API
 │       ├── analytics.js      # 页面访问监控
@@ -216,7 +215,7 @@ soul-cosmos/
 | analyses | 分析历史 |
 | feedback_memory | 反馈记忆（KEPA） |
 | circle_members | 关系圈 |
-| subscriptions | Stripe 订阅 |
+| subscriptions | 预留（未使用） |
 | agent_weights | KEPA 引擎权重 |
 | kepa_reviews | 自动审查日志 |
 | page_views | 页面访问监控 |
@@ -274,7 +273,7 @@ soul-cosmos/
 | `DASHSCOPE_API_KEY` | 至少一个 | Qwen API Key |
 | `PORT` | 否 | 服务端口（默认 8066）|
 | `ALLOWED_ORIGINS` | 否 | CORS 白名单 |
-| `STRIPE_SECRET_KEY` | 否 | Stripe 支付 |
+| `STRIPE_SECRET_KEY` | 否 | 预留（未使用） |
 
 ---
 

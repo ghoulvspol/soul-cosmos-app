@@ -4,7 +4,7 @@
 
 // ========== 配置 ==========
 const CONFIG = {
-  isPremium: true,
+  isFree: true,
   apiBase: window.location.origin,
   isDemo: false,
 };
@@ -154,7 +154,7 @@ const I18N = {
     'try.step1': '✦ When and where were you born?', 'try.birth': 'Birth Date', 'try.time': 'Birth Time', 'try.city': 'Birth City', 'try.gender': 'Gender',
     'try.step2': '✦ What\'s your MBTI type?', 'try.mbti.desc': 'Select your type, or answer 5 quick questions below.',
     'try.generating': 'Fusing 7 dimensions of your soul...',
-    'try.unlock': 'Unlock Full Analysis — $9.99/mo', 'try.share': '✦ Share Soul Profile', 'try.premium': '✦ PREMIUM MEMBER — Full Access',
+    'try.share': '✦ Share Soul Profile',
     'try.feedback': 'How accurate is this?', 'try.accurate': '👍 Accurate', 'try.inaccurate': '👎 Not accurate', 'try.save': '⭐ Save',
     'try.thanks': '✦ Thanks! Your feedback helps us get better.',
     // Face/Palm
@@ -184,20 +184,6 @@ const I18N = {
     'fs.office.title': '🏢 Office / Desk Analysis', 'fs.desk.dir': 'Desk Faces', 'fs.desk.pos': 'Desk Position',
     'fs.floor': 'Office Floor', 'fs.career': 'Your Career Goal', 'fs.career.ph': 'e.g. promotion, new job, business growth...',
     'fs.analyze.office': '🔮 Analyze Office Feng Shui',
-    // Pricing
-    'price.title': 'Choose Your Depth', 'price.subtitle': 'Start free. Go deeper when you\'re ready.',
-    'price.free': 'Free', 'price.forever': 'forever',
-    'price.premium': 'Premium', 'price.month': '/month',
-    'price.annual': 'Annual', 'price.save': '/year (save 50%)',
-    'price.popular': 'Most Popular',
-    'price.free.f1': '✦ Basic Soul Profile (3 keywords)', 'price.free.f2': '✦ One-sentence portrait',
-    'price.free.f3': '✦ 1 daily insight', 'price.free.f4': '✦ Share with friends',
-    'price.prem.f1': '✦ Full 6-dimension analysis', 'price.prem.f2': '✦ Unlimited compatibility reports',
-    'price.prem.f3': '✦ Daily personalized insights', 'price.prem.f4': '✦ Deep natal chart reading',
-    'price.prem.f5': '✦ AI palm & face reading (v2)', 'price.prem.f6': '✦ Zi Wei Dou Shu analysis (v2)',
-    'price.prem.f7': '✦ Priority AI responses',
-    'price.ann.f1': '✦ Everything in Premium', 'price.ann.f2': '✦ Yearly soul evolution report',
-    'price.ann.f3': '✦ Exclusive content', 'price.ann.f4': '✦ Early access to new features',
     // Footer
     'footer.desc': 'The world\'s first East-meets-West personality AI.',
     'footer.copy': '© 2026 Soul Cosmos. Built with ❤️ and stardust.',
@@ -245,7 +231,7 @@ const I18N = {
     'try.step1': '✦ 你的出生日期和地点？', 'try.birth': '出生日期', 'try.time': '出生时间', 'try.city': '出生城市', 'try.gender': '性别',
     'try.step2': '✦ 你的 MBTI 类型？', 'try.mbti.desc': '选择你的类型，或回答5个快速问题。',
     'try.generating': '正在融合你灵魂的7个维度...',
-    'try.unlock': '解锁完整分析 — $9.99/月', 'try.share': '✦ 分享灵魂画像', 'try.premium': '✦ 尊享会员 — 完整权限',
+    'try.share': '✦ 分享灵魂画像',
     'try.feedback': '这个分析准确吗？', 'try.accurate': '👍 准', 'try.inaccurate': '👎 不准', 'try.save': '⭐ 收藏',
     'try.thanks': '✦ 感谢反馈！你的反馈帮我们变得更好。',
     // Face/Palm
@@ -275,20 +261,6 @@ const I18N = {
     'fs.office.title': '🏢 办公室分析', 'fs.desk.dir': '办公桌朝向', 'fs.desk.pos': '办公桌位置',
     'fs.floor': '楼层', 'fs.career': '职业目标', 'fs.career.ph': '如：升职、换工作、业务增长...',
     'fs.analyze.office': '🔮 分析办公室风水',
-    // Pricing
-    'price.title': '选择你的深度', 'price.subtitle': '免费开始。准备好了再深入。',
-    'price.free': '免费版', 'price.forever': '永久',
-    'price.premium': '高级版', 'price.month': '/月',
-    'price.annual': '年度版', 'price.save': '/年（省50%）',
-    'price.popular': '最受欢迎',
-    'price.free.f1': '✦ 基础灵魂画像（3个关键词）', 'price.free.f2': '✦ 一句话画像描述',
-    'price.free.f3': '✦ 每日1条洞察', 'price.free.f4': '✦ 分享给朋友',
-    'price.prem.f1': '✦ 完整6维度分析', 'price.prem.f2': '✦ 无限关系匹配报告',
-    'price.prem.f3': '✦ 每日个性化洞察', 'price.prem.f4': '✦ 深度星盘解读',
-    'price.prem.f5': '✦ AI面相手相分析', 'price.prem.f6': '✦ 紫微斗数分析',
-    'price.prem.f7': '✦ AI优先响应',
-    'price.ann.f1': '✦ 高级版全部功能', 'price.ann.f2': '✦ 年度灵魂进化报告',
-    'price.ann.f3': '✦ 独家内容', 'price.ann.f4': '✦ 新功能抢先体验',
     // Footer
     'footer.desc': '全球首个东西方命理融合AI。',
     'footer.copy': '© 2026 Soul Cosmos。用 ❤️ 和星尘打造。',
@@ -1062,16 +1034,6 @@ function renderResult(profile, natalChart, ziweiChart, model) {
             </div>
           </div>
         </div>`;
-    }
-
-    // 测试环境：展示付费模式
-    if (CONFIG.isPremium) {
-      const badge = document.getElementById('premiumBadge');
-      const unlockBtn = document.getElementById('unlockBtn');
-      const ctaSub = document.getElementById('ctaSub');
-      if (badge) badge.style.display = 'inline-block';
-      if (unlockBtn) unlockBtn.style.display = 'none';
-      if (ctaSub) ctaSub.textContent = 'Share your premium soul profile with friends';
     }
 
     // 滚动到结果

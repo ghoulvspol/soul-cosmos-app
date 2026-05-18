@@ -334,72 +334,17 @@ const Auth = (() => {
     if (el) { el.textContent = msg; el.style.display = 'block'; }
   }
 
-  // ============ 订阅管理 ============
-
-  let _subscription = null;
-
-  async function checkSubscription() {
-    if (!isLoggedIn()) { _subscription = null; return; }
-    try {
-      const res = await authFetch('/api/stripe/status');
-      const data = await res.json();
-      if (data.success) {
-        _subscription = data;
-        updatePremiumUI();
-      }
-    } catch { /* ignore */ }
-  }
-
-  function isPremium() {
-    return _subscription?.isPremium === true;
-  }
-
-  async function checkout(plan) {
-    if (!isLoggedIn()) { showAuthModal('login'); return; }
-    try {
-      const res = await authFetch('/api/stripe/checkout', { method: 'POST', body: { plan } });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else alert(data.error || 'Checkout failed');
-    } catch (err) { alert('Checkout error: ' + err.message); }
-  }
-
-  async function openPortal() {
-    try {
-      const res = await authFetch('/api/stripe/portal', { method: 'POST' });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch (err) { alert('Portal error: ' + err.message); }
-  }
-
-  function updatePremiumUI() {
-    const badge = document.getElementById('premiumBadge');
-    const unlockBtn = document.getElementById('unlockBtn');
-    const manageBtn = document.getElementById('manageSubBtn');
-
-    if (isPremium()) {
-      if (badge) badge.style.display = 'inline-block';
-      if (unlockBtn) unlockBtn.style.display = 'none';
-      if (manageBtn) manageBtn.style.display = '';
-    } else {
-      if (badge) badge.style.display = 'none';
-      if (unlockBtn) unlockBtn.style.display = '';
-      if (manageBtn) manageBtn.style.display = 'none';
-    }
-  }
-
   // 页面加载时初始化
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { init(); checkSubscription(); });
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    init(); checkSubscription();
+    init();
   }
 
   return {
     init, getToken, isLoggedIn, getUser, authFetch,
     register, login, logout, saveProfile, saveAnalysis, saveFeedback,
     showAuthModal, closeModal, submitAuth, viewProfile, renderProfileHistory,
-    loadUserData, updateUI,
-    isPremium, checkout, openPortal, checkSubscription
+    loadUserData, updateUI
   };
 })();

@@ -328,16 +328,6 @@
             <div id="resultNextSteps"></div>
 
             <div class="result-cta">
-              <div id="premiumBadge" style="display:none;padding:8px 16px;background:linear-gradient(135deg,#d4a574,#b8860b);border-radius:20px;font-size:12px;color:#0a0a1a;font-weight:600;margin-bottom:16px;display:inline-block">
-                ✦ PREMIUM MEMBER — Full Access
-              </div>
-              <button class="btn-primary" id="unlockBtn" onclick="Auth.checkout('monthly')">
-                Unlock Full Analysis — $3.99/mo
-              </button>
-              <button class="btn-ghost" id="manageSubBtn" onclick="Auth.openPortal()" style="display:none;margin-left:8px;font-size:12px">
-                Manage Subscription
-              </button>
-              <p class="cta-sub" id="ctaSub">Or share your free profile with friends</p>
               <button class="btn-ghost" onclick="shareProfile()">
                 ✦ Share Soul Profile
               </button>
@@ -364,57 +354,7 @@
     </div>
   </section>
 
-  <!-- Pricing -->
-  <section class="pricing reveal" id="pricing">
-    <div class="section-header">
-      <h2 data-i18n="price.title">Choose Your Depth</h2>
-      <p data-i18n="price.subtitle">Start free. Go deeper when you're ready.</p>
-    </div>
-    <div class="pricing-grid reveal-stagger">
-      <div class="price-card">
-        <div class="price-name">Free</div>
-        <div class="price-amount">$0</div>
-        <div class="price-period">forever</div>
-        <ul class="price-features">
-          <li data-i18n="price.free.f1">✦ Basic Soul Profile (3 keywords)</li>
-          <li data-i18n="price.free.f2">✦ One-sentence portrait</li>
-          <li data-i18n="price.free.f3">✦ 1 daily insight</li>
-          <li data-i18n="price.free.f4">✦ Share with friends</li>
-        </ul>
-        <button class="btn-outline" onclick="scrollToSection('try')">Get Started</button>
-      </div>
-      <div class="price-card price-card-featured">
-        <div class="price-badge">Most Popular</div>
-        <div class="price-name">Premium</div>
-        <div class="price-amount">$3.99</div>
-        <div class="price-period">/month</div>
-        <ul class="price-features">
-          <li data-i18n="price.prem.f1">✦ Full 6-dimension analysis</li>
-          <li data-i18n="price.prem.f2">✦ Unlimited compatibility reports</li>
-          <li data-i18n="price.prem.f3">✦ Daily personalized insights</li>
-          <li data-i18n="price.prem.f4">✦ Deep natal chart reading</li>
-          <li data-i18n="price.prem.f5">✦ AI palm & face reading</li>
-          <li data-i18n="price.prem.f6">✦ Zi Wei Dou Shu analysis</li>
-          <li data-i18n="price.prem.f7">✦ Priority AI responses</li>
-        </ul>
-        <button class="btn-primary" onclick="Auth.checkout('monthly')">Subscribe Now</button>
-      </div>
-      <div class="price-card">
-        <div class="price-name">Annual</div>
-        <div class="price-amount">$29.99</div>
-        <div class="price-period">/year (save 37%)</div>
-        <ul class="price-features">
-          <li data-i18n="price.ann.f1">✦ Everything in Premium</li>
-          <li data-i18n="price.ann.f2">✦ Yearly soul evolution report</li>
-          <li data-i18n="price.ann.f3">✦ Exclusive content</li>
-          <li data-i18n="price.ann.f4">✦ Early access to new features</li>
-        </ul>
-        <button class="btn-outline" onclick="Auth.checkout('yearly')">Subscribe Annual</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Phase 2: My Circle 关系圈分析 -->
+  <!-- My Circle 关系圈分析 -->
   <section class="circle-section reveal" id="circle">
     <div class="section-header">
       <h2 data-i18n="circle.title">🔮 My Circle — Relationship Intelligence</h2>

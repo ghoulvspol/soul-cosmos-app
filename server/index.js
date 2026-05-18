@@ -54,7 +54,6 @@ app.use(express.json());
 // 用户认证 & 数据路由
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
-app.use('/api/stripe', require('./routes/stripe'));
 app.use('/api/daily', require('./routes/daily'));
 app.use('/api/hardware', require('./routes/hardware'));
 app.use('/api/analytics', require('./routes/analytics'));
