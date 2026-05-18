@@ -105,7 +105,13 @@ struct ProfileResultView: View {
                     }
                     .buttonStyle(GhostButtonStyle())
                 }
-                .padding(.bottom, 40)
+                .padding(.bottom, 16)
+
+                // Disclaimer
+                Text("For entertainment and self-reflection purposes only.")
+                    .font(CosmosFont.body(12))
+                    .foregroundColor(.cosmosTextMuted)
+                    .padding(.bottom, 40)
             }
         }
         .navigationBarTitleDisplayMode(.inline)

@@ -46,8 +46,15 @@ struct DailyView: View {
                                 .padding()
                         }
                     }
-                    .padding(.horizontal, 24)
+
+                    // Disclaimer
+                    Text("For entertainment and self-reflection purposes only.")
+                        .font(CosmosFont.body(12))
+                        .foregroundColor(.cosmosTextMuted)
+                        .padding(.top, 8)
+                        .padding(.bottom, 24)
                 }
+                .padding(.horizontal, 24)
             }
         }
         .task {

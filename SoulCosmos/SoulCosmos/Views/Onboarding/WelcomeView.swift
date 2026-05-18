@@ -18,7 +18,7 @@ struct WelcomeView: View {
                         .foregroundColor(.cosmosGold)
                         .shadow(color: .cosmosGold.opacity(0.5), radius: 20)
 
-                    Text("Soul Cosmos")
+                    Text("Guide Your Life")
                         .font(CosmosFont.heading(42))
                         .foregroundColor(.cosmosTextPrimary)
 
@@ -46,6 +46,11 @@ struct WelcomeView: View {
                 .offset(y: showContent ? 0 : 20)
 
                 Spacer()
+
+                Text("For entertainment purposes only. Not professional advice.")
+                    .font(CosmosFont.body(11))
+                    .foregroundColor(.cosmosTextMuted)
+                    .padding(.bottom, 20)
             }
         }
         .onAppear {

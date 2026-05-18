@@ -1,11 +1,10 @@
 import SwiftUI
 
 @main
-struct SoulCosmosApp: App {
+struct GuideYourLifeApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .preferredColorScheme(.dark)
         }
     }
 }

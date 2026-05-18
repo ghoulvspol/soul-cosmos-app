@@ -3,6 +3,7 @@ import SwiftUI
 struct BirthInfoView: View {
     @EnvironmentObject var vm: ProfileViewModel
     @State private var showContent = false
+    @State private var showPrivacy = true
 
     var body: some View {
         ZStack {
@@ -109,6 +110,9 @@ struct BirthInfoView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .opacity(showContent ? 1 : 0)
+        .sheet(isPresented: $showPrivacy) {
+            PrivacyConsentView(showPrivacy: $showPrivacy)
+        }
         .onAppear {
             withAnimation(.easeOut(duration: 0.6)) { showContent = true }
         }

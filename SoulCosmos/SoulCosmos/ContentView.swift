@@ -25,7 +25,6 @@ struct ContentView: View {
             .animation(.easeInOut(duration: 0.5), value: profileVM.currentStep)
         }
         .environmentObject(profileVM)
-        .preferredColorScheme(.dark)
     }
 }
 

@@ -2,8 +2,17 @@ import Foundation
 
 class APIClient {
     static let shared = APIClient()
+
     var baseURL: String {
-        UserDefaults.standard.string(forKey: "api_base_url") ?? "http://localhost:8066"
+        if let url = UserDefaults.standard.string(forKey: "api_base_url"), !url.isEmpty {
+            return url
+        }
+        if let path = Bundle.main.path(forResource: "Config", ofType: "plist"),
+           let config = NSDictionary(contentsOfFile: path),
+           let url = config["API_BASE_URL"] as? String {
+            return url
+        }
+        return "http://localhost:8066"
     }
 
     private let session: URLSession = {
@@ -29,22 +38,14 @@ class APIClient {
     }
 
     func fetchProfile(_ info: BirthInfo, lang: String = "zh") async throws -> ProfileResponse {
-        let natalChart: [String: Any] = [
-            "sun": ["name": "Aries", "element": "Fire", "quality": "Cardinal"],
-            "moon": ["name": "Cancer", "element": "Water"],
-            "rising": ["name": "Capricorn", "element": "Earth"],
-            "dominantElement": "Fire"
-        ]
-        let ziwei: [String: Any] = ["mainStar": "紫微", "lifePalace": "命宫", "careerPalace": "官禄宫"]
         let body: [String: Any] = [
             "birth_date": info.birthDateStr,
             "birth_time": info.birthTimeStr,
             "longitude": info.longitude,
+            "latitude": info.latitude,
             "gender": info.gender.rawValue,
             "mbti_type": info.mbtiType,
-            "natalChart": natalChart,
-            "ziweiChart": ziwei,
-            "lang": lang
+            "lang": lang,
         ]
         return try await post("/api/reading/profile", body: body)
     }
@@ -54,7 +55,7 @@ class APIClient {
             "birth_date": info.birthDateStr,
             "gender": info.gender.rawValue,
             "mbti_type": info.mbtiType,
-            "lang": lang
+            "lang": lang,
         ]
         return try await post("/api/reading/daily", body: body)
     }
@@ -63,7 +64,7 @@ class APIClient {
         let body: [String: Any] = [
             "birth_date": info.birthDateStr,
             "gender": info.gender.rawValue,
-            "lang": lang
+            "lang": lang,
         ]
         return try await post("/api/reading/weekly", body: body)
     }
@@ -72,7 +73,7 @@ class APIClient {
         let body: [String: Any] = [
             "birth_date": info.birthDateStr,
             "gender": info.gender.rawValue,
-            "lang": lang
+            "lang": lang,
         ]
         return try await post("/api/reading/monthly", body: body)
     }
@@ -81,9 +82,9 @@ class APIClient {
         case invalidURL, serverError, decodingError
         var errorDescription: String? {
             switch self {
-            case .invalidURL: return "无效的 API 地址"
-            case .serverError: return "服务器错误"
-            case .decodingError: return "数据解析失败"
+            case .invalidURL: return "Invalid API URL"
+            case .serverError: return "Server error"
+            case .decodingError: return "Data decoding failed"
             }
         }
     }
